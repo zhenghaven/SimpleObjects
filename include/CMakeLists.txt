@@ -1,0 +1,11 @@
+option(SIMPLEOBJECTS_INSTALL_HEADERS "Install SimpleObjects headers." ON)
+
+if(SIMPLEOBJECTS_INSTALL_HEADERS)
+
+	file(GLOB headers "SimpleObjects/*.hpp")
+
+	install(FILES ${headers}
+		DESTINATION include/SimpleObjects
+		PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ)
+
+endif(SIMPLEOBJECTS_INSTALL_HEADERS)
