@@ -33,6 +33,7 @@ inline bool BaseObject::operator==(const BaseObject& rhs) const
 		case ObjCategory::String:
 			return this->AsString() == rhs.AsString();
 		case ObjCategory::List:
+			return this->AsList() == rhs.AsList();
 		case ObjCategory::Dict:
 		default:
 			throw UnsupportedOperation("==",

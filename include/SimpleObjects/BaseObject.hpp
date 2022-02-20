@@ -48,10 +48,14 @@ inline constexpr bool IsNumericCat(ObjCategory cat)
 }
 
 // Forward declarations
+class Null;
 class NumericBaseObject;
 template<typename _CharType>
 class StringBaseObject;
-class Null;
+template<typename _ValType>
+class ListBaseObject;
+
+class Object;
 
 class BaseObject
 {
@@ -62,6 +66,8 @@ public: // Static members:
 	using NumericBase = NumericBaseObject;
 
 	using StringBase = StringBaseObject<char>;
+
+	using ListBase = ListBaseObject<Object>;
 
 	static constexpr BaseObject* sk_null = nullptr;
 
@@ -109,6 +115,10 @@ public:
 	// +=
 	// +
 	// slice
+	// CppStr
+
+	// String(objs)
+	// String::CppStr
 
 	virtual bool IsNull() const
 	{
@@ -143,6 +153,16 @@ public:
 	virtual const StringBase& AsString() const
 	{
 		throw TypeError("String", this->GetCategoryName());
+	}
+
+	virtual ListBase& AsList()
+	{
+		throw TypeError("List", this->GetCategoryName());
+	}
+
+	virtual const ListBase& AsList() const
+	{
+		throw TypeError("List", this->GetCategoryName());
 	}
 
 	virtual std::unique_ptr<BaseObject> Copy(const BaseObject* /*unused*/) const = 0;

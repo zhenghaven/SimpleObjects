@@ -38,6 +38,25 @@ GTEST_TEST(TestString, Construction)
 	EXPECT_EQ(String("test string").GetVal(), std::string("test string"));
 }
 
+GTEST_TEST(TestString, Assignment)
+{
+	const String testStr("Test String");
+
+	String cpStr;
+	EXPECT_EQ(cpStr.Len(), 0);
+	cpStr = testStr;
+	EXPECT_EQ(cpStr, testStr);
+	cpStr = cpStr;
+	EXPECT_EQ(cpStr, testStr);
+
+	String mvStr;
+	EXPECT_EQ(mvStr.Len(), 0);
+	mvStr = std::move(cpStr);
+	EXPECT_EQ(mvStr, testStr);
+	mvStr = std::move(mvStr);
+	EXPECT_EQ(mvStr, testStr);
+}
+
 GTEST_TEST(TestString, Category)
 {
 	static_assert(String::sk_cat() == ObjCategory::String, "Category failed.");

@@ -32,7 +32,7 @@ public: // Static members
 	typedef RdIterator<value_type, false>       iterator;
 	typedef RdIterator<value_type, true>        const_iterator;
 
-	static constexpr StringBaseObject* sk_null = nullptr;
+	static constexpr Self* sk_null = nullptr;
 
 public:
 	StringBaseObject() = default;
@@ -59,13 +59,13 @@ public:
 	virtual std::unique_ptr<StringBaseObject> Move(const StringBaseObject* /*unused*/) = 0;
 
 	using Base::Copy;
-	virtual std::unique_ptr<HashableBaseObject> Copy(const HashableBaseObject* /*unused*/) const override
+	virtual std::unique_ptr<Base> Copy(const Base* /*unused*/) const override
 	{
 		return Copy(sk_null);
 	}
 
 	using Base::Move;
-	virtual std::unique_ptr<HashableBaseObject> Move(const HashableBaseObject* /*unused*/) override
+	virtual std::unique_ptr<Base> Move(const Base* /*unused*/) override
 	{
 		return Move(sk_null);
 	}

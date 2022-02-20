@@ -17,6 +17,7 @@ class ListBaseObject : public BaseObject
 public: // Static Objects
 
 	using Self = ListBaseObject<_ValType>;
+	using Base = BaseObject;
 
 	typedef _ValType                            value_type;
 	typedef value_type&                         reference;
@@ -25,6 +26,8 @@ public: // Static Objects
 	typedef const value_type*                   const_pointer;
 	typedef RdIterator<value_type, false>       iterator;
 	typedef RdIterator<value_type, true>        const_iterator;
+
+	static constexpr Self* sk_null = nullptr;
 
 public:
 	ListBaseObject() = default;
@@ -52,6 +55,12 @@ public:
 	{
 		return !(*this == rhs);
 	}
+	using Base::operator==;
+	using Base::operator!=;
+	using Base::operator<;
+	using Base::operator>;
+	using Base::operator<=;
+	using Base::operator>=;
 
 	virtual iterator begin() = 0;
 	virtual iterator end() = 0;
@@ -115,6 +124,20 @@ public:
 	virtual void Insert(size_t idx, const_reference other) = 0;
 
 	virtual void Remove(size_t idx) = 0;
+
+	virtual std::unique_ptr<Self> Copy(const Self* /*unused*/) const = 0;
+
+	virtual std::unique_ptr<Self> Move(const Self* /*unused*/) = 0;
+
+	virtual std::unique_ptr<Base> Copy(const Base* /*unused*/) const override
+	{
+		return Copy(sk_null);
+	}
+
+	virtual std::unique_ptr<Base> Move(const Base* /*unused*/) override
+	{
+		return Move(sk_null);
+	}
 
 }; // class ListBaseObject
 

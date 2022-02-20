@@ -4,6 +4,7 @@
 #include "Null.hpp"
 #include "Numeric.hpp"
 #include "String.hpp"
+#include "List.hpp"
 
 #include "BaseObjectImpl.hpp"
 

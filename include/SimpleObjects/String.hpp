@@ -65,20 +65,26 @@ public:
 	{}
 
 	StringCat(Self&& other) :
-		m_data(std::move(other.m_data))
+		m_data(std::forward<_InternalType>(other.m_data))
 	{}
 
 	virtual ~StringCat() = default;
 
 	Self& operator=(const Self& rhs)
 	{
-		m_data = rhs.m_data;
+		if (this != &rhs)
+		{
+			m_data = rhs.m_data;
+		}
 		return *this;
 	}
 
 	Self& operator=(Self&& rhs)
 	{
-		m_data = std::forward<_InternalType>(rhs.m_data);
+		if (this != &rhs)
+		{
+			m_data = std::forward<_InternalType>(rhs.m_data);
+		}
 		return *this;
 	}
 
