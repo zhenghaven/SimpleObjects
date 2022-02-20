@@ -84,29 +84,29 @@ public:
 		return this->cend();
 	}
 
-	virtual size_t Len() const = 0;
+	virtual size_t size() const = 0;
 
-	virtual reference At(size_t idx) = 0;
+	virtual reference at(size_t idx) = 0;
 
-	virtual const_reference At(size_t idx) const = 0;
+	virtual const_reference at(size_t idx) const = 0;
 
 	virtual reference operator[](size_t idx)
 	{
-		return this->At(idx);
+		return this->at(idx);
 	}
 
 	virtual const_reference operator[](size_t idx) const
 	{
-		return this->At(idx);
+		return this->at(idx);
 	}
 
 	virtual iterator Contains(const_reference other) = 0;
 
 	virtual const_iterator Contains(const_reference other) const = 0;
 
-	virtual void PushBack(const_reference ch) = 0;
+	virtual void push_back(const_reference ch) = 0;
 
-	virtual void PopBack() = 0;
+	virtual void pop_back() = 0;
 
 	virtual void Append(const_iterator begin, const_iterator end) = 0;
 
@@ -115,11 +115,11 @@ public:
 		return this->Append(other.cbegin(), other.cend());
 	}
 
-	virtual const_pointer Data() const = 0;
+	virtual const_pointer data() const = 0;
 
-	virtual void Resize(size_t len) = 0;
+	virtual void resize(size_t len) = 0;
 
-	virtual void Reserve(size_t len) = 0;
+	virtual void reserve(size_t len) = 0;
 
 	virtual void Insert(size_t idx, const_reference other) = 0;
 

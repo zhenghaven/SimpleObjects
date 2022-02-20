@@ -70,7 +70,7 @@ public:
 		return Move(sk_null);
 	}
 
-	virtual size_t Len() const = 0;
+	virtual size_t size() const = 0;
 
 	virtual iterator begin() = 0;
 	virtual iterator end() = 0;
@@ -94,18 +94,18 @@ public:
 		return this->cend();
 	}
 
-	virtual reference At(size_t idx) = 0;
+	virtual reference at(size_t idx) = 0;
 
-	virtual const_reference At(size_t idx) const = 0;
+	virtual const_reference at(size_t idx) const = 0;
 
 	virtual reference operator[](size_t idx)
 	{
-		return this->At(idx);
+		return this->at(idx);
 	}
 
 	virtual const_reference operator[](size_t idx) const
 	{
-		return this->At(idx);
+		return this->at(idx);
 	}
 
 	virtual bool StartsWith(const_iterator begin,
@@ -113,7 +113,7 @@ public:
 
 	virtual bool StartsWith(const Self& other) const
 	{
-		if (this->Len() < other.Len())
+		if (this->size() < other.size())
 		{
 			return false;
 		}
@@ -125,7 +125,7 @@ public:
 
 	virtual bool EndsWith(const Self& other) const
 	{
-		if (this->Len() < other.Len())
+		if (this->size() < other.size())
 		{
 			return false;
 		}
@@ -137,16 +137,16 @@ public:
 
 	virtual const_iterator Contains(const Self& other) const
 	{
-		if (this->Len() < other.Len())
+		if (this->size() < other.size())
 		{
 			return cend();
 		}
 		return this->Contains(other.cbegin(), other.end());
 	}
 
-	virtual void PushBack(const_reference ch) = 0;
+	virtual void push_back(const_reference ch) = 0;
 
-	virtual void PopBack() = 0;
+	virtual void pop_back() = 0;
 
 	virtual void Append(const_iterator begin,
 		const_iterator end) = 0;
@@ -156,11 +156,11 @@ public:
 		return this->Append(other.cbegin(), other.cend());
 	}
 
-	virtual const_pointer CStr() const = 0;
+	virtual const_pointer c_str() const = 0;
 
-	virtual void Resize(size_t len) = 0;
+	virtual void resize(size_t len) = 0;
 
-	virtual void Reserve(size_t len) = 0;
+	virtual void reserve(size_t len) = 0;
 
 	//virtual std::unique_ptr<Self> Copy() const = 0;
 

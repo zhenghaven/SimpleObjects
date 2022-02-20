@@ -96,21 +96,21 @@ public:
 	virtual bool operator==(const Base& rhs) const override
 	{
 		auto ptr = m_data.data();
-		return rhs.Equal(0, rhs.Len(), ptr, ptr + Len());
+		return rhs.Equal(0, rhs.size(), ptr, ptr + size());
 	}
 
 	virtual bool operator>(const Base& rhs) const override
 	{
 		auto ptr = m_data.data();
 		// rhs < this ==> this > rhs
-		return rhs.LessThan(0, rhs.Len(), ptr, ptr + Len());
+		return rhs.LessThan(0, rhs.size(), ptr, ptr + size());
 	}
 
 	virtual bool operator<(const Base& rhs) const override
 	{
 		auto ptr = m_data.data();
 		// rhs > this ==> this < rhs
-		return rhs.GreaterThan(0, rhs.Len(), ptr, ptr + Len());
+		return rhs.GreaterThan(0, rhs.size(), ptr, ptr + size());
 	}
 
 	virtual std::size_t Hash() const override
@@ -118,7 +118,7 @@ public:
 		return std::hash<_InternalType>()(m_data);
 	}
 
-	virtual size_t Len() const override
+	virtual size_t size() const override
 	{
 		return m_data.size();
 	}
@@ -166,12 +166,12 @@ public:
 		return ToRdIt<true>(m_data.crend());
 	}
 
-	virtual value_type& At(size_t idx) override
+	virtual value_type& at(size_t idx) override
 	{
 		return m_data[idx];
 	}
 
-	virtual const value_type& At(size_t idx) const override
+	virtual const value_type& at(size_t idx) const override
 	{
 		return m_data[idx];
 	}
@@ -207,12 +207,12 @@ public:
 		return res;
 	}
 
-	virtual void PushBack(const value_type& ch) override
+	virtual void push_back(const value_type& ch) override
 	{
 		m_data.push_back(ch);
 	}
 
-	virtual void PopBack() override
+	virtual void pop_back() override
 	{
 		m_data.pop_back();
 	}
@@ -223,17 +223,17 @@ public:
 		std::copy(begin, end, std::back_inserter(m_data));
 	}
 
-	virtual void Resize(size_t len) override
+	virtual void resize(size_t len) override
 	{
 		m_data.resize(len);
 	}
 
-	virtual void Reserve(size_t len) override
+	virtual void reserve(size_t len) override
 	{
 		m_data.reserve(len);
 	}
 
-	const_pointer CStr() const override
+	const_pointer c_str() const override
 	{
 		return m_data.c_str();
 	}
@@ -262,7 +262,7 @@ public:
 	virtual bool Equal(size_t pos1, size_t count1,
 		const_pointer begin, const_pointer end) const override
 	{
-		return ((end - begin) != Len()) ?
+		return ((end - begin) != size()) ?
 			false :
 			std::equal(&m_data[pos1], &m_data[pos1 + count1], begin);
 	}

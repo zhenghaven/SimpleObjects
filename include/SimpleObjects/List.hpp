@@ -86,7 +86,7 @@ public:
 
 	virtual bool operator==(const Base& rhs) const override
 	{
-		if (Len() != rhs.Len())
+		if (size() != rhs.size())
 		{
 			return false;
 		}
@@ -108,7 +108,7 @@ public:
 	using Base::operator<=;
 	using Base::operator>=;
 
-	virtual size_t Len() const override
+	virtual size_t size() const override
 	{
 		return m_data.size();
 	}
@@ -156,12 +156,12 @@ public:
 		return ToRdIt<true>(m_data.crend());
 	}
 
-	virtual value_type& At(size_t idx) override
+	virtual value_type& at(size_t idx) override
 	{
 		return m_data[idx];
 	}
 
-	virtual const value_type& At(size_t idx) const override
+	virtual const value_type& at(size_t idx) const override
 	{
 		return m_data[idx];
 	}
@@ -180,12 +180,12 @@ public:
 		return ToRdIt<true>(it);
 	}
 
-	virtual void PushBack(const value_type& ch) override
+	virtual void push_back(const value_type& ch) override
 	{
 		m_data.push_back(ch);
 	}
 
-	virtual void PopBack() override
+	virtual void pop_back() override
 	{
 		m_data.pop_back();
 	}
@@ -196,17 +196,17 @@ public:
 		std::copy(begin, end, std::back_inserter(m_data));
 	}
 
-	virtual void Resize(size_t len) override
+	virtual void resize(size_t len) override
 	{
 		m_data.resize(len);
 	}
 
-	virtual void Reserve(size_t len) override
+	virtual void reserve(size_t len) override
 	{
 		m_data.reserve(len);
 	}
 
-	const_pointer Data() const override
+	const_pointer data() const override
 	{
 		return m_data.data();
 	}

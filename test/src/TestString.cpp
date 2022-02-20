@@ -43,14 +43,14 @@ GTEST_TEST(TestString, Assignment)
 	const String testStr("Test String");
 
 	String cpStr;
-	EXPECT_EQ(cpStr.Len(), 0);
+	EXPECT_EQ(cpStr.size(), 0);
 	cpStr = testStr;
 	EXPECT_EQ(cpStr, testStr);
 	cpStr = cpStr;
 	EXPECT_EQ(cpStr, testStr);
 
 	String mvStr;
-	EXPECT_EQ(mvStr.Len(), 0);
+	EXPECT_EQ(mvStr.size(), 0);
 	mvStr = std::move(cpStr);
 	EXPECT_EQ(mvStr, testStr);
 	mvStr = std::move(mvStr);
@@ -110,21 +110,21 @@ GTEST_TEST(TestString, Miscs)
 		StringBaseObject<char>&>::value, "Failed to test Move virtual func");
 	mStr = String("Test");
 	EXPECT_EQ(*mStr.Move(String::Base::sk_null), String("Test"));
-	EXPECT_EQ(mStr.Len(), 0);
+	EXPECT_EQ(mStr.size(), 0);
 
 	static_assert(std::is_same<
 		decltype(*String().Move(String::Base::Base::sk_null)),
 		HashableBaseObject&>::value, "Failed to test Move virtual func");
 	mStr = String("Test");
 	EXPECT_EQ(*mStr.Move(String::Base::Base::sk_null), String("Test"));
-	EXPECT_EQ(mStr.Len(), 0);
+	EXPECT_EQ(mStr.size(), 0);
 
 	static_assert(std::is_same<
 		decltype(*String().Move(String::Base::Base::Base::sk_null)),
 		BaseObject&>::value, "Failed to test Move virtual func");
 	mStr = String("Test");
 	EXPECT_EQ(*mStr.Move(String::Base::Base::Base::sk_null), String("Test"));
-	EXPECT_EQ(mStr.Len(), 0);
+	EXPECT_EQ(mStr.size(), 0);
 }
 
 GTEST_TEST(TestString, Hash)
@@ -139,8 +139,8 @@ GTEST_TEST(TestString, Hash)
 
 GTEST_TEST(TestString, Len)
 {
-	EXPECT_EQ(String("abcdef").Len(), std::string("abcdef").size());
-	EXPECT_EQ(String("1234567890").Len(), std::string("1234567890").size());
+	EXPECT_EQ(String("abcdef").size(), std::string("abcdef").size());
+	EXPECT_EQ(String("1234567890").size(), std::string("1234567890").size());
 }
 
 GTEST_TEST(TestString, At)
@@ -204,10 +204,10 @@ GTEST_TEST(TestString, PushPopBack)
 	auto testStr = String("abcdef");
 	EXPECT_EQ(testStr, String("abcdef"));
 
-	testStr.PushBack('g');
+	testStr.push_back('g');
 	EXPECT_EQ(testStr, String("abcdefg"));
 
-	testStr.PopBack();
+	testStr.pop_back();
 	EXPECT_EQ(testStr, String("abcdef"));
 }
 
@@ -225,7 +225,7 @@ GTEST_TEST(TestString, Append)
 
 GTEST_TEST(TestString, CStr)
 {
-	EXPECT_EQ(std::strcmp(String("abcdef").CStr(), "abcdef"), 0);
+	EXPECT_EQ(std::strcmp(String("abcdef").c_str(), "abcdef"), 0);
 }
 
 GTEST_TEST(TestString, Capacity)
@@ -233,18 +233,18 @@ GTEST_TEST(TestString, Capacity)
 	auto testStr = String("abcdef");
 	EXPECT_EQ(testStr, String("abcdef"));
 
-	testStr.Reserve(20);
+	testStr.reserve(20);
 	EXPECT_EQ(testStr, String("abcdef"));
 
-	testStr.Resize(3);
+	testStr.resize(3);
 	EXPECT_EQ(testStr, String("abc"));
 
-	testStr.Resize(6);
+	testStr.resize(6);
 	auto tmp = String("abc");
-	tmp.PushBack('\0');tmp.PushBack('\0');tmp.PushBack('\0');
+	tmp.push_back('\0');tmp.push_back('\0');tmp.push_back('\0');
 	EXPECT_EQ(testStr, tmp);
 
-	testStr.Resize(0);
+	testStr.resize(0);
 	EXPECT_EQ(testStr, String(""));
 }
 

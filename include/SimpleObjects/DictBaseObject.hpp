@@ -69,20 +69,20 @@ public:
 		return this->cend();
 	}
 
-	virtual size_t Len() const = 0;
+	virtual size_t size() const = 0;
 
-	virtual reference At(const key_type& key) = 0;
+	virtual reference at(const key_type& key) = 0;
 
-	virtual const_reference At(const key_type& key) const = 0;
+	virtual const_reference at(const key_type& key) const = 0;
 
 	virtual reference operator[](const key_type& key)
 	{
-		return this->At(key);
+		return this->at(key);
 	}
 
 	virtual const_reference operator[](const key_type& key) const
 	{
-		return this->At(key);
+		return this->at(key);
 	}
 
 	virtual const_iterator HasKey(const key_type& key) const = 0;

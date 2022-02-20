@@ -47,14 +47,14 @@ GTEST_TEST(TestList, Assignment)
 	const List testLs = {String("Test String"), Bool(true), Int64(12345)};
 
 	List cpLs;
-	EXPECT_EQ(cpLs.Len(), 0);
+	EXPECT_EQ(cpLs.size(), 0);
 	cpLs = testLs;
 	EXPECT_EQ(cpLs, testLs);
 	cpLs = cpLs;
 	EXPECT_EQ(cpLs, testLs);
 
 	List mvLs;
-	EXPECT_EQ(mvLs.Len(), 0);
+	EXPECT_EQ(mvLs.size(), 0);
 	mvLs = std::move(cpLs);
 	EXPECT_EQ(mvLs, testLs);
 	mvLs = std::move(mvLs);
@@ -107,8 +107,8 @@ GTEST_TEST(TestList, Compare)
 
 GTEST_TEST(TestList, Len)
 {
-	EXPECT_EQ(List({String("Test String"), Bool(true), Int64(12345)}).Len(), 3);
-	EXPECT_EQ(List({String("Test String"), Bool(true)}).Len(), 2);
+	EXPECT_EQ(List({String("Test String"), Bool(true), Int64(12345)}).size(), 3);
+	EXPECT_EQ(List({String("Test String"), Bool(true)}).size(), 2);
 }
 
 GTEST_TEST(TestList, Iterator)
@@ -189,11 +189,11 @@ GTEST_TEST(TestList, PushPopBack)
 	//pushback
 	List nkLs{String("Test String"),};
 	EXPECT_EQ(nkLs, List({String("Test String"),}));
-	EXPECT_NO_THROW(nkLs.PushBack(Int64(12345)));
+	EXPECT_NO_THROW(nkLs.push_back(Int64(12345)));
 	EXPECT_EQ(nkLs, List({String("Test String"),Int64(12345)}));
 
 	//popback
-	EXPECT_NO_THROW(nkLs.PopBack());
+	EXPECT_NO_THROW(nkLs.pop_back());
 	EXPECT_EQ(nkLs, List({String("Test String"),}));
 }
 
@@ -213,13 +213,13 @@ GTEST_TEST(TestList, Append)
 GTEST_TEST(TestList, Capacity)
 {
 	List nkLs;
-	EXPECT_EQ(nkLs.Len(), 0);
+	EXPECT_EQ(nkLs.size(), 0);
 
 	//Reserve
-	EXPECT_NO_THROW(nkLs.Reserve(3));
+	EXPECT_NO_THROW(nkLs.reserve(3));
 
 	//Resize
-	EXPECT_NO_THROW(nkLs.Resize(3));
+	EXPECT_NO_THROW(nkLs.resize(3));
 	EXPECT_EQ(nkLs,
 		List({Null(), Null(), Null()}));
 }
@@ -228,7 +228,7 @@ GTEST_TEST(TestList, Data)
 {
 	//Data
 	List nkLs{String("Test String"),};
-	EXPECT_EQ(nkLs.Data(), &nkLs[0]);
+	EXPECT_EQ(nkLs.data(), &nkLs[0]);
 }
 
 GTEST_TEST(TestList, InsertRemove)
@@ -282,12 +282,12 @@ GTEST_TEST(TestList, Miscs)
 		ListBaseObject<Object>&>::value, "Failed to test Move virtual func");
 	mList = List({String("Test")});
 	EXPECT_EQ(*mList.Move(List::Base::sk_null), List({String("Test")}));
-	EXPECT_EQ(mList.Len(), 0);
+	EXPECT_EQ(mList.size(), 0);
 
 	static_assert(std::is_same<
 		decltype(*List().Move(List::Base::Base::sk_null)),
 		BaseObject&>::value, "Failed to test Move virtual func");
 	mList = List({String("Test")});
 	EXPECT_EQ(*mList.Move(List::Base::Base::sk_null), List({String("Test")}));
-	EXPECT_EQ(mList.Len(), 0);
+	EXPECT_EQ(mList.size(), 0);
 }
