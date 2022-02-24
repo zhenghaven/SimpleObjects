@@ -2,8 +2,6 @@
 
 #include "BaseObject.hpp"
 
-#include "HashableObject.hpp"
-
 #ifndef SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE
 namespace SimpleObjects
 #else
@@ -11,20 +9,23 @@ namespace SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE
 #endif
 {
 
-template<typename _ValType>
+template<typename _KeyType, typename _ValType>
 class DictBaseObject : public BaseObject
 {
 public: // Static members
 
-	using Self = DictBaseObject<_ValType>;
+	using Self = DictBaseObject<_KeyType, _ValType>;
+	using Base = BaseObject;
 
-	typedef HashableObject                            key_type;
+	typedef _KeyType                                  key_type;
 	typedef _ValType                                  mapped_type;
 	typedef std::pair<const key_type, mapped_type>    value_type;
 	typedef value_type&                               reference;
 	typedef const value_type&                         const_reference;
-	typedef RdIterator<value_type, false>             iterator;
-	typedef RdIterator<value_type, true>              const_iterator;
+	typedef FrIterator<value_type, false>             iterator;
+	typedef FrIterator<value_type, true>              const_iterator;
+
+	static constexpr Self* sk_null = nullptr;
 
 public:
 	DictBaseObject() = default;
@@ -53,6 +54,13 @@ public:
 		return !(*this == rhs);
 	}
 
+	using Base::operator==;
+	using Base::operator!=;
+	using Base::operator<;
+	using Base::operator>;
+	using Base::operator<=;
+	using Base::operator>=;
+
 	virtual iterator begin() = 0;
 	virtual iterator end() = 0;
 
@@ -71,27 +79,39 @@ public:
 
 	virtual size_t size() const = 0;
 
-	virtual reference at(const key_type& key) = 0;
+	virtual mapped_type& at(const key_type& key) = 0;
 
-	virtual const_reference at(const key_type& key) const = 0;
+	virtual const mapped_type& at(const key_type& key) const = 0;
 
-	virtual reference operator[](const key_type& key)
+	virtual mapped_type& operator[](const key_type& key) = 0;
+
+	virtual const_iterator find(const key_type& key) const = 0;
+
+	virtual iterator find(const key_type& key) = 0;
+
+	virtual bool HasKey(const key_type& key) const = 0;
+
+	virtual std::pair<iterator, bool> InsertOnly(
+		const key_type& key, const mapped_type& other) = 0;
+
+	virtual std::pair<iterator, bool> InsertOrAssign(
+		const key_type& key, const mapped_type& other) = 0;
+
+	virtual void Remove(const key_type& key) = 0;
+
+	virtual std::unique_ptr<Self> Copy(const Self* /*unused*/) const = 0;
+
+	virtual std::unique_ptr<Self> Move(const Self* /*unused*/) = 0;
+
+	virtual std::unique_ptr<Base> Copy(const Base* /*unused*/) const override
 	{
-		return this->at(key);
+		return Copy(sk_null);
 	}
 
-	virtual const_reference operator[](const key_type& key) const
+	virtual std::unique_ptr<Base> Move(const Base* /*unused*/) override
 	{
-		return this->at(key);
+		return Move(sk_null);
 	}
-
-	virtual const_iterator HasKey(const key_type& key) const = 0;
-
-	virtual iterator HasKey(const key_type& key) = 0;
-
-	virtual void InsertOrAssign(const key_type& key, const_reference other) = 0;
-
-	virtual void Remove(const_iterator it) = 0;
 
 }; // class DictBaseObject
 

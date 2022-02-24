@@ -358,6 +358,105 @@ private:
 //========================================
 
 /**
+ * @brief The wrapper of forward iterator interface, so we can support
+ *        different classes of iterator implementations
+ *
+ * @tparam _TargetType The target type; e.g., the target type for a
+ *         std::vector<uint8_t> vector will be uint8_t
+ * @tparam _IsConst Is this a const iterator
+ */
+template<typename _TargetType, bool _IsConst>
+class FrIterator
+{
+public: // Static members:
+	using WrappedIt = ForwardIteratorIf<_TargetType, _IsConst>;
+	using WrappedItPtr = typename WrappedIt::SelfPtr;
+
+	typedef typename WrappedIt::difference_type         difference_type;
+	typedef typename WrappedIt::value_type              value_type;
+	typedef typename WrappedIt::pointer                 pointer;
+	typedef typename WrappedIt::const_pointer           const_pointer;
+	typedef typename WrappedIt::reference               reference;
+	typedef typename WrappedIt::iterator_category       iterator_category;
+
+public:
+	FrIterator() = delete;
+
+	FrIterator(WrappedItPtr it) :
+		m_it(std::move(it))
+	{}
+
+	// TODO: non-const to const copy & move
+
+	FrIterator(const FrIterator& otherIt) :
+		m_it(otherIt.m_it->Copy(*m_it))
+	{}
+
+	FrIterator(FrIterator&& otherIt):
+		m_it(std::forward<WrappedItPtr>(otherIt.m_it))
+	{}
+
+	virtual ~FrIterator() = default;
+
+	FrIterator& operator=(const FrIterator& rhs)
+	{
+		if (this != &rhs)
+		{
+			m_it = rhs.m_it->Copy(*m_it);
+		}
+		return *this;
+	}
+
+	FrIterator& operator=(FrIterator&& rhs)
+	{
+		if (this != &rhs)
+		{
+			m_it = std::move(rhs.m_it);
+		}
+		return *this;
+	}
+
+	reference operator*() const
+	{
+		return m_it->GetRef();
+	}
+
+	pointer operator->() const
+	{
+		return m_it->GetPtr();
+	}
+
+	FrIterator& operator++()
+	{
+		m_it->Increment();
+		return *this;
+	}
+
+	FrIterator operator++(int)
+	{
+		FrIterator copy(*this);
+		m_it->Increment();
+		return copy;
+	}
+
+	template<bool _Rhs_IsConst>
+	bool operator==(const FrIterator<_TargetType, _Rhs_IsConst>& rhs) const
+	{
+		return m_it->GetPtr() == rhs.m_it->GetPtr();
+	}
+
+	template<bool _Rhs_IsConst>
+	bool operator!=(const FrIterator<_TargetType, _Rhs_IsConst>& rhs) const
+	{
+		return !(*this == rhs);
+	}
+
+private:
+	WrappedItPtr m_it;
+
+}; // class FrIterator
+
+/**
  * @brief The wrapper of bidirectional iterator interface, so we can support
  *        different classes of iterator implementations
  *
@@ -644,6 +743,15 @@ private:
 	WrappedItPtr m_it;
 
 }; // class RdIterator
+
+template<bool _IsConst,
+	typename _OriItType,
+	typename _ValType = typename _OriItType::value_type>
+inline FrIterator<_ValType, _IsConst> ToFrIt(_OriItType it)
+{
+	using ItWrap = CppStdFwIteratorWrap<_OriItType, _ValType, _IsConst>;
+	return FrIterator<_ValType, _IsConst>(ItWrap::Build(it));
+}
 
 template<bool _IsConst,
 	typename _OriItType,

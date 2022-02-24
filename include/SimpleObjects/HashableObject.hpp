@@ -115,6 +115,26 @@ public:
 		return m_ptr->AsString();
 	}
 
+	virtual ListBase& AsList() override
+	{
+		return m_ptr->AsList();
+	}
+
+	virtual const ListBase& AsList() const override
+	{
+		return m_ptr->AsList();
+	}
+
+	virtual DictBase& AsDict() override
+	{
+		return m_ptr->AsDict();
+	}
+
+	virtual const DictBase& AsDict() const override
+	{
+		return m_ptr->AsDict();
+	}
+
 	// HashableBaseObject virtual functions
 
 	virtual std::size_t Hash() const override

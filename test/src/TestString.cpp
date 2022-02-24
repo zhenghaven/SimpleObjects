@@ -81,10 +81,14 @@ GTEST_TEST(TestString, Miscs)
 	EXPECT_NO_THROW(kStr.AsString());
 	EXPECT_THROW(kStr.AsNull(), TypeError);
 	EXPECT_THROW(kStr.AsNumeric(), TypeError);
+	EXPECT_THROW(kStr.AsList(), TypeError);
+	EXPECT_THROW(kStr.AsDict(), TypeError);
 
 	EXPECT_NO_THROW(String().AsString());
 	EXPECT_THROW(String().AsNull(), TypeError);
 	EXPECT_THROW(String().AsNumeric(), TypeError);
+	EXPECT_THROW(String().AsList(), TypeError);
+	EXPECT_THROW(String().AsDict(), TypeError);
 
 	// Copy
 	static_assert(std::is_same<

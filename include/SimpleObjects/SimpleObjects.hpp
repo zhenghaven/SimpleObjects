@@ -5,6 +5,7 @@
 #include "Numeric.hpp"
 #include "String.hpp"
 #include "List.hpp"
+#include "Dict.hpp"
 
 #include "BaseObjectImpl.hpp"
 

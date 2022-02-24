@@ -505,10 +505,14 @@ GTEST_TEST(TestNumeric, Miscs)
 	EXPECT_NO_THROW(kNum.AsNumeric());
 	EXPECT_THROW(kNum.AsNull(), TypeError);
 	EXPECT_THROW(kNum.AsString(), TypeError);
+	EXPECT_THROW(kNum.AsList(), TypeError);
+	EXPECT_THROW(kNum.AsDict(), TypeError);
 
 	EXPECT_NO_THROW(Int16().AsNumeric());
 	EXPECT_THROW(Int32().AsNull(), TypeError);
 	EXPECT_THROW(Int64().AsString(), TypeError);
+	EXPECT_THROW(Int64().AsList(), TypeError);
+	EXPECT_THROW(Int64().AsDict(), TypeError);
 
 	// Copy
 	static_assert(std::is_same<

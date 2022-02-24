@@ -83,33 +83,45 @@ GTEST_TEST(TestHashableObj, Cast)
 	EXPECT_NO_THROW(obj.AsNull());
 	EXPECT_THROW(obj.AsNumeric(), TypeError);
 	EXPECT_THROW(obj.AsString(), TypeError);
+	EXPECT_THROW(obj.AsList(), TypeError);
+	EXPECT_THROW(obj.AsDict(), TypeError);
 	// test const version
 	[obj](){
 		EXPECT_NO_THROW(obj.AsNull());
 		EXPECT_THROW(obj.AsNumeric(), TypeError);
 		EXPECT_THROW(obj.AsString(), TypeError);
+		EXPECT_THROW(obj.AsList(), TypeError);
+		EXPECT_THROW(obj.AsDict(), TypeError);
 	}();
 
 	obj = Bool(true);
 	EXPECT_THROW(obj.AsNull(), TypeError);
 	EXPECT_NO_THROW(obj.AsNumeric());
 	EXPECT_THROW(obj.AsString(), TypeError);
+	EXPECT_THROW(obj.AsList(), TypeError);
+	EXPECT_THROW(obj.AsDict(), TypeError);
 	// test const version
 	[obj](){
 		EXPECT_THROW(obj.AsNull(), TypeError);
 		EXPECT_NO_THROW(obj.AsNumeric());
 		EXPECT_THROW(obj.AsString(), TypeError);
+		EXPECT_THROW(obj.AsList(), TypeError);
+		EXPECT_THROW(obj.AsDict(), TypeError);
 	}();
 
 	obj = String("Test");
 	EXPECT_THROW(obj.AsNull(), TypeError);
 	EXPECT_THROW(obj.AsNumeric(), TypeError);
 	EXPECT_NO_THROW(obj.AsString());
+	EXPECT_THROW(obj.AsList(), TypeError);
+	EXPECT_THROW(obj.AsDict(), TypeError);
 	// test const version
 	[obj](){
 		EXPECT_THROW(obj.AsNull(), TypeError);
 		EXPECT_THROW(obj.AsNumeric(), TypeError);
 		EXPECT_NO_THROW(obj.AsString());
+		EXPECT_THROW(obj.AsList(), TypeError);
+		EXPECT_THROW(obj.AsDict(), TypeError);
 	}();
 }
 

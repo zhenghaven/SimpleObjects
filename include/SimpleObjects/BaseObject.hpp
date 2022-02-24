@@ -54,7 +54,10 @@ template<typename _CharType>
 class StringBaseObject;
 template<typename _ValType>
 class ListBaseObject;
+template<typename _KeyType, typename _ValType>
+class DictBaseObject;
 
+class HashableObject;
 class Object;
 
 class BaseObject
@@ -68,6 +71,8 @@ public: // Static members:
 	using StringBase = StringBaseObject<char>;
 
 	using ListBase = ListBaseObject<Object>;
+
+	using DictBase = DictBaseObject<HashableObject, Object>;
 
 	static constexpr BaseObject* sk_null = nullptr;
 
@@ -163,6 +168,16 @@ public:
 	virtual const ListBase& AsList() const
 	{
 		throw TypeError("List", this->GetCategoryName());
+	}
+
+	virtual DictBase& AsDict()
+	{
+		throw TypeError("Dict", this->GetCategoryName());
+	}
+
+	virtual const DictBase& AsDict() const
+	{
+		throw TypeError("Dict", this->GetCategoryName());
 	}
 
 	virtual std::unique_ptr<BaseObject> Copy(const BaseObject* /*unused*/) const = 0;
