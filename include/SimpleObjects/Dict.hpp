@@ -3,10 +3,6 @@
 #include "DictBaseObject.hpp"
 
 #include <memory>
-#include <unordered_map>
-
-#include "HashableObject.hpp"
-#include "Object.hpp"
 
 #ifndef SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE
 namespace SimpleObjects
@@ -240,7 +236,5 @@ private:
 	ContainerType m_data;
 
 }; // class DictCat
-
-using Dict = DictCat<std::unordered_map<HashableObject, Object> >;
 
 }//namespace SimpleObjects

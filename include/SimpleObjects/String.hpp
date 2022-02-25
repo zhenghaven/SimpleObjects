@@ -3,7 +3,6 @@
 #include "StringBaseObject.hpp"
 
 #include <algorithm>
-#include <string>
 
 #include "Utils.hpp"
 
@@ -296,8 +295,6 @@ private:
 	_InternalType m_data;
 
 }; // class StringCat
-
-using String = StringCat<std::string>;
 
 }//namespace SimpleObjects
 

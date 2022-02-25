@@ -2,7 +2,6 @@
 
 #include "NumericBaseObject.hpp"
 
-#include <functional>
 #include <tuple>
 #include <type_traits>
 
@@ -532,23 +531,6 @@ operator%(const Numeric<_LhsInternalType>& lhs, const Numeric<_RhsInternalType>&
 	return RetType(static_cast<RetInternalType>(lhs.GetVal() % rhs.GetVal()));
 }
 
-// ========== Convenient types of Numeric ==========
-
-using Bool  = Numeric<bool >;
-
-using Int8  = Numeric<int8_t >;
-using Int16 = Numeric<int16_t>;
-using Int32 = Numeric<int32_t>;
-using Int64 = Numeric<int64_t>;
-
-using UInt8  = Numeric<uint8_t >;
-using UInt16 = Numeric<uint16_t>;
-using UInt32 = Numeric<uint32_t>;
-using UInt64 = Numeric<uint64_t>;
-
-using Float = Numeric<float>;
-using Double = Numeric<double>;
-
 // ========== Generic operations ==========
 
 template<typename _InternalType>
@@ -560,27 +542,27 @@ inline std::tuple<bool, _RetType> Numeric<_InternalType>::GenericBinaryOp(const 
 	switch (rhsType)
 	{
 	case NumericType::Bool:
-		return std::make_tuple(true, op((*this) /*RHS*/, DownCast<Bool  >(rhs) /*LHS*/));
+		return std::make_tuple(true, op((*this) /*RHS*/, DownCast<Numeric<bool    > >(rhs) /*LHS*/));
 	case NumericType::Int8:
-		return std::make_tuple(true, op((*this) /*RHS*/, DownCast<Int8  >(rhs) /*LHS*/));
+		return std::make_tuple(true, op((*this) /*RHS*/, DownCast<Numeric<int8_t  > >(rhs) /*LHS*/));
 	case NumericType::Int16:
-		return std::make_tuple(true, op((*this) /*RHS*/, DownCast<Int16 >(rhs) /*LHS*/));
+		return std::make_tuple(true, op((*this) /*RHS*/, DownCast<Numeric<int16_t > >(rhs) /*LHS*/));
 	case NumericType::Int32:
-		return std::make_tuple(true, op((*this) /*RHS*/, DownCast<Int32 >(rhs) /*LHS*/));
+		return std::make_tuple(true, op((*this) /*RHS*/, DownCast<Numeric<int32_t > >(rhs) /*LHS*/));
 	case NumericType::Int64:
-		return std::make_tuple(true, op((*this) /*RHS*/, DownCast<Int64 >(rhs) /*LHS*/));
+		return std::make_tuple(true, op((*this) /*RHS*/, DownCast<Numeric<int64_t > >(rhs) /*LHS*/));
 	case NumericType::UInt8:
-		return std::make_tuple(true, op((*this) /*RHS*/, DownCast<UInt8 >(rhs) /*LHS*/));
+		return std::make_tuple(true, op((*this) /*RHS*/, DownCast<Numeric<uint8_t > >(rhs) /*LHS*/));
 	case NumericType::UInt16:
-		return std::make_tuple(true, op((*this) /*RHS*/, DownCast<UInt16>(rhs) /*LHS*/));
+		return std::make_tuple(true, op((*this) /*RHS*/, DownCast<Numeric<uint16_t> >(rhs) /*LHS*/));
 	case NumericType::UInt32:
-		return std::make_tuple(true, op((*this) /*RHS*/, DownCast<UInt32>(rhs) /*LHS*/));
+		return std::make_tuple(true, op((*this) /*RHS*/, DownCast<Numeric<uint32_t> >(rhs) /*LHS*/));
 	case NumericType::UInt64:
-		return std::make_tuple(true, op((*this) /*RHS*/, DownCast<UInt64>(rhs) /*LHS*/));
+		return std::make_tuple(true, op((*this) /*RHS*/, DownCast<Numeric<uint64_t> >(rhs) /*LHS*/));
 	case NumericType::Float:
-		return std::make_tuple(true, op((*this) /*RHS*/, DownCast<Float >(rhs) /*LHS*/));
+		return std::make_tuple(true, op((*this) /*RHS*/, DownCast<Numeric<float   > >(rhs) /*LHS*/));
 	case NumericType::Double:
-		return std::make_tuple(true, op((*this) /*RHS*/, DownCast<Double>(rhs) /*LHS*/));
+		return std::make_tuple(true, op((*this) /*RHS*/, DownCast<Numeric<double  > >(rhs) /*LHS*/));
 	default:
 		return std::make_tuple(false, _RetType());
 	}
@@ -591,7 +573,7 @@ namespace Internal
 
 struct NumCompareEq {
 	template <typename _LhsType, typename _RhsType>
-	Bool operator()(const _LhsType& lhs, const _RhsType& rhs) const
+	Numeric<bool > operator()(const _LhsType& lhs, const _RhsType& rhs) const
 	{
 		return lhs == rhs;
 	}
@@ -599,7 +581,7 @@ struct NumCompareEq {
 
 struct NumCompareLt {
 	template <typename _LhsType, typename _RhsType>
-	Bool operator()(const _LhsType& lhs, const _RhsType& rhs) const
+	Numeric<bool > operator()(const _LhsType& lhs, const _RhsType& rhs) const
 	{
 		return lhs < rhs;
 	}
@@ -607,7 +589,7 @@ struct NumCompareLt {
 
 struct NumCompareGt {
 	template <typename _LhsType, typename _RhsType>
-	Bool operator()(const _LhsType& lhs, const _RhsType& rhs) const
+	Numeric<bool > operator()(const _LhsType& lhs, const _RhsType& rhs) const
 	{
 		return lhs > rhs;
 	}
@@ -618,19 +600,19 @@ struct NumCompareGt {
 template<typename _InternalType>
 inline bool Numeric<_InternalType>::operator==(const NumericBaseObject& rhs) const
 {
-	return GenericBinaryOpThrow<Bool>("=", rhs, Internal::NumCompareEq()).GetVal();
+	return GenericBinaryOpThrow<Numeric<bool > >("=", rhs, Internal::NumCompareEq()).GetVal();
 }
 
 template<typename _InternalType>
 inline bool Numeric<_InternalType>::operator<(const NumericBaseObject& rhs) const
 {
-	return GenericBinaryOpThrow<Bool>("<", rhs, Internal::NumCompareLt()).GetVal();
+	return GenericBinaryOpThrow<Numeric<bool > >("<", rhs, Internal::NumCompareLt()).GetVal();
 }
 
 template<typename _InternalType>
 inline bool Numeric<_InternalType>::operator>(const NumericBaseObject& rhs) const
 {
-	return GenericBinaryOpThrow<Bool>(">", rhs, Internal::NumCompareGt()).GetVal();
+	return GenericBinaryOpThrow<Numeric<bool > >(">", rhs, Internal::NumCompareGt()).GetVal();
 }
 
 }// namespace SimpleObjects

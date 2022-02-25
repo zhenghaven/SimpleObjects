@@ -4,6 +4,8 @@
 
 #include "NumericBaseObject.hpp"
 #include "StringBaseObject.hpp"
+#include "ListBaseObject.hpp"
+#include "DictBaseObject.hpp"
 
 #ifndef SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE
 namespace SimpleObjects

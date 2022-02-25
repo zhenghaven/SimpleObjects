@@ -3,9 +3,6 @@
 #include "ListBaseObject.hpp"
 
 #include <memory>
-#include <vector>
-
-#include "Object.hpp"
 
 #ifndef SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE
 namespace SimpleObjects
@@ -255,7 +252,5 @@ private:
 	ContainerType m_data;
 
 }; // class ListCat
-
-using List = ListCat<std::vector<Object> >;
 
 }//namespace SimpleObjects

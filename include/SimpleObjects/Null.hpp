@@ -81,10 +81,4 @@ private:
 
 }; //class Null
 
-inline const Null& None()
-{
-	static Null n;
-	return n;
-}
-
 }//namespace SimpleObjects

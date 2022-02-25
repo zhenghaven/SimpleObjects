@@ -23,7 +23,7 @@ public: // Static members
 
 public:
 	HashableObject() :
-		HashableObject(None())
+		HashableObject(Null())
 	{}
 
 	HashableObject(const HashableObject& other) :

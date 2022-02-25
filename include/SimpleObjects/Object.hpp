@@ -23,7 +23,7 @@ public: // Static members
 
 public:
 	Object() :
-		Object(None())
+		Object(Null())
 	{}
 
 	Object(const Object& other) :
