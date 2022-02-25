@@ -13,37 +13,42 @@ namespace SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE
 #endif
 {
 
-template<typename _StringCtnType>
-class StringCat : public StringBaseObject<typename _StringCtnType::value_type>
+template<typename _CtnType, typename _ToStringType>
+class StringCat :
+	public StringBaseObject<
+		typename _CtnType::value_type,
+		_ToStringType>
 {
 public: // Static member:
 
-	using _InternalType = _StringCtnType;
-	using Base = StringBaseObject<typename _StringCtnType::value_type>;
-	using Self = StringCat<_InternalType>;
+	using ContainerType = _CtnType;
+	using ToStringType = _ToStringType;
+	using Self = StringCat<ContainerType, ToStringType>;
+	using Base = StringBaseObject<
+		typename ContainerType::value_type, ToStringType>;
 
-	typedef typename _InternalType::traits_type          traits_type;
-	typedef typename _InternalType::allocator_type       allocator_type;
-	typedef typename _InternalType::value_type           value_type;
-	typedef typename _InternalType::size_type            size_type;
-	typedef typename _InternalType::difference_type      difference_type;
-	typedef typename _InternalType::reference            reference;
-	typedef typename _InternalType::const_reference      const_reference;
-	typedef typename _InternalType::pointer              pointer;
-	typedef typename _InternalType::const_pointer        const_pointer;
+	typedef typename ContainerType::traits_type          traits_type;
+	typedef typename ContainerType::allocator_type       allocator_type;
+	typedef typename ContainerType::value_type           value_type;
+	typedef typename ContainerType::size_type            size_type;
+	typedef typename ContainerType::difference_type      difference_type;
+	typedef typename ContainerType::reference            reference;
+	typedef typename ContainerType::const_reference      const_reference;
+	typedef typename ContainerType::pointer              pointer;
+	typedef typename ContainerType::const_pointer        const_pointer;
 	typedef typename Base::iterator                      iterator;
 	typedef typename Base::const_iterator                const_iterator;
 	typedef typename Base::iterator                      reverse_iterator;
 	typedef typename Base::const_iterator                const_reverse_iterator;
 
-	static constexpr size_type npos = _InternalType::npos;
+	static constexpr size_type npos = ContainerType::npos;
 
 	static constexpr ObjCategory sk_cat()
 	{
 		return ObjCategory::String;
 	}
 
-	// static_assert(std::is_same<Base::value_type, _InternalType::value_type>::value,
+	// static_assert(std::is_same<Base::value_type, ContainerType::value_type>::value,
 	// 	"value_type of base class does not match the internal type.");
 
 	static_assert(std::is_same<value_type, char>::value,
@@ -64,7 +69,7 @@ public:
 	{}
 
 	StringCat(Self&& other) :
-		m_data(std::forward<_InternalType>(other.m_data))
+		m_data(std::forward<ContainerType>(other.m_data))
 	{}
 
 	virtual ~StringCat() = default;
@@ -82,7 +87,7 @@ public:
 	{
 		if (this != &rhs)
 		{
-			m_data = std::forward<_InternalType>(rhs.m_data);
+			m_data = std::forward<ContainerType>(rhs.m_data);
 		}
 		return *this;
 	}
@@ -114,7 +119,7 @@ public:
 
 	virtual std::size_t Hash() const override
 	{
-		return std::hash<_InternalType>()(m_data);
+		return std::hash<ContainerType>()(m_data);
 	}
 
 	virtual size_t size() const override
@@ -237,7 +242,7 @@ public:
 		return m_data.c_str();
 	}
 
-	const _InternalType& GetVal() const
+	const ContainerType& GetVal() const
 	{
 		return m_data;
 	}
@@ -292,7 +297,7 @@ private:
 		return std::unique_ptr<Self>(new Self(std::move(*this)));
 	}
 
-	_InternalType m_data;
+	ContainerType m_data;
 
 }; // class StringCat
 
@@ -301,18 +306,18 @@ private:
 // ========== Hash ==========
 namespace std
 {
-	template<typename _InternalType>
+	template<typename _CtnType, typename _ToStringType>
 #ifndef SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE
-	struct hash<SimpleObjects::StringCat<_InternalType> > : hash<_InternalType>
+	struct hash<SimpleObjects::StringCat<_CtnType, _ToStringType> > : hash<_CtnType>
 	{
-		using _ObjType = SimpleObjects::StringCat<_InternalType>;
+		using _ObjType = SimpleObjects::StringCat<_CtnType, _ToStringType>;
 #else
-	struct hash<SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE::StringCat<_InternalType> > : hash<_InternalType>
+	struct hash<SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE::StringCat<_CtnType, _ToStringType> > : hash<_CtnType>
 	{
-		using _ObjType = SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE::StringCat<_InternalType>;
+		using _ObjType = SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE::StringCat<_CtnType, _ToStringType>;
 #endif
 	public:
-		using Base = std::hash<_InternalType>;
+		using Base = std::hash<_CtnType>;
 
 #if __cplusplus < 201703L
 		typedef typename Base::result_type       result_type;

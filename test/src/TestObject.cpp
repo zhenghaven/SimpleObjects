@@ -28,7 +28,7 @@ GTEST_TEST(TestObject, Construction)
 	Object val2 = String("Test");
 
 	EXPECT_NO_THROW({
-		std::unique_ptr<BaseObject> base;
+		std::unique_ptr<BaseObj> base;
 		base.reset(new Object(String("Test")));
 		base.reset();
 	});

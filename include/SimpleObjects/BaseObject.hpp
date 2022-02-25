@@ -48,33 +48,44 @@ inline constexpr bool IsNumericCat(ObjCategory cat)
 }
 
 // Forward declarations
-class Null;
+template<typename _ToStringType>
+class NullImpl;
+template<typename _ToStringType>
 class NumericBaseObject;
-template<typename _CharType>
+template<typename _CharType, typename _ToStringType>
 class StringBaseObject;
-template<typename _ValType>
+template<typename _ValType,  typename _ToStringType>
 class ListBaseObject;
-template<typename _KeyType, typename _ValType>
+template<typename _KeyType,  typename _ValType,     typename _ToStringType>
 class DictBaseObject;
 
-class HashableObject;
-class Object;
+template<typename _ToStringType>
+class HashableObjectImpl;
+template<typename _ToStringType>
+class ObjectImpl;
 
+template<typename _ToStringType>
 class BaseObject
 {
 public: // Static members:
 
-	using NullBase = Null;
+	using Self = BaseObject<_ToStringType>;
+	using ToStringType = _ToStringType;
 
-	using NumericBase = NumericBaseObject;
 
-	using StringBase = StringBaseObject<char>;
+	using NullBase    = NullImpl<ToStringType>;
 
-	using ListBase = ListBaseObject<Object>;
+	using NumericBase = NumericBaseObject<ToStringType>;
 
-	using DictBase = DictBaseObject<HashableObject, Object>;
+	using StringBase  = StringBaseObject<char, ToStringType>;
 
-	static constexpr BaseObject* sk_null = nullptr;
+	using ListBase    = ListBaseObject<ObjectImpl<ToStringType>, ToStringType>;
+
+	using DictBase    = DictBaseObject<HashableObjectImpl<ToStringType>,
+		                               ObjectImpl<ToStringType>,
+		                               ToStringType>;
+
+	static constexpr Self* sk_null = nullptr;
 
 public:
 
@@ -95,23 +106,23 @@ public:
 	 * @param rhs The other object to test with
 	 * @return whether two objects are equal
 	 */
-	virtual bool operator==(const BaseObject& rhs) const;
+	virtual bool operator==(const Self& rhs) const;
 
-	virtual bool operator!=(const BaseObject& rhs) const
+	virtual bool operator!=(const Self& rhs) const
 	{
 		return !((*this) == rhs);
 	}
 
-	virtual bool operator<(const BaseObject& rhs) const;
+	virtual bool operator<(const Self& rhs) const;
 
-	virtual bool operator>=(const BaseObject& rhs) const
+	virtual bool operator>=(const Self& rhs) const
 	{
 		return !((*this) < rhs);
 	}
 
-	virtual bool operator>(const BaseObject& rhs) const;
+	virtual bool operator>(const Self& rhs) const;
 
-	virtual bool operator<=(const BaseObject& rhs) const
+	virtual bool operator<=(const Self& rhs) const
 	{
 		return !((*this) > rhs);
 	}
@@ -180,9 +191,9 @@ public:
 		throw TypeError("Dict", this->GetCategoryName());
 	}
 
-	virtual std::unique_ptr<BaseObject> Copy(const BaseObject* /*unused*/) const = 0;
+	virtual std::unique_ptr<Self> Copy(const Self* /*unused*/) const = 0;
 
-	virtual std::unique_ptr<BaseObject> Move(const BaseObject* /*unused*/) = 0;
+	virtual std::unique_ptr<Self> Move(const Self* /*unused*/) = 0;
 
 }; // class BaseObject
 

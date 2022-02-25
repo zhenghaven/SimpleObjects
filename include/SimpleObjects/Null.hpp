@@ -9,22 +9,27 @@ namespace SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE
 #endif
 {
 
-class Null : public HashableBaseObject
+template<typename _ToStringType>
+class NullImpl : public HashableBaseObject<_ToStringType>
 {
 public: // Static member:
 
-	using Base = HashableBaseObject;
+	using ToStringType = _ToStringType;
+	using Self = NullImpl<_ToStringType>;
+	using Base = HashableBaseObject<_ToStringType>;
 
 	static constexpr ObjCategory sk_cat()
 	{
 		return ObjCategory::Null;
 	}
 
+	static constexpr Self* sk_null = nullptr;
+
 public:
 
-	Null() = default;
+	NullImpl() = default;
 
-	virtual ~Null() = default;
+	virtual ~NullImpl() = default;
 
 	virtual ObjCategory GetCategory() const override
 	{
@@ -49,36 +54,36 @@ public:
 		return true;
 	}
 
-	virtual Null& AsNull() override
+	virtual Self& AsNull() override
 	{
 		return *this;
 	}
 
-	virtual const Null& AsNull() const override
+	virtual const Self& AsNull() const override
 	{
 		return *this;
 	}
 
 	using Base::Copy;
-	virtual std::unique_ptr<HashableBaseObject> Copy(const HashableBaseObject* /*unused*/) const override
+	virtual std::unique_ptr<Base> Copy(const Base* /*unused*/) const override
 	{
 		return CopyImpl();
 	}
 
 	using Base::Move;
-	virtual std::unique_ptr<HashableBaseObject> Move(const HashableBaseObject* /*unused*/) override
+	virtual std::unique_ptr<Base> Move(const Base* /*unused*/) override
 	{
 		return CopyImpl();
 	}
 
 private:
 
-	std::unique_ptr<Null> CopyImpl() const
+	std::unique_ptr<Self> CopyImpl() const
 	{
 		// TODO: make_unique
-		return std::unique_ptr<Null>(new Null());
+		return std::unique_ptr<Self>(new Self());
 	}
 
-}; //class Null
+}; //class NullImpl
 
 }//namespace SimpleObjects

@@ -11,13 +11,14 @@ namespace SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE
 #endif
 {
 
-template<typename _ValType>
-class ListBaseObject : public BaseObject
+template<typename _ValType, typename _ToStringType>
+class ListBaseObject : public BaseObject<_ToStringType>
 {
 public: // Static Objects
 
-	using Self = ListBaseObject<_ValType>;
-	using Base = BaseObject;
+	using ToStringType = _ToStringType;
+	using Self = ListBaseObject<_ValType, _ToStringType>;
+	using Base = BaseObject<_ToStringType>;
 
 	typedef _ValType                            value_type;
 	typedef value_type&                         reference;

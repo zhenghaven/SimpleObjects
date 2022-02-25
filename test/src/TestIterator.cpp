@@ -57,8 +57,10 @@ GTEST_TEST(TestIterator, ItTraits)
 
 GTEST_TEST(TestIterator, RdIterator)
 {
+	using _String = StringCat<std::string, std::string>;
+
 	std::string testCtn = "abcdef";
-	StringCat<std::string> testStr = "abcdef";
+	_String testStr = "abcdef";
 
 	// Copy/Move constructor
 	{
@@ -113,8 +115,8 @@ GTEST_TEST(TestIterator, RdIterator)
 		}
 
 		itc = testCtn.begin();
-		for(auto it = static_cast<const StringCat<std::string>&>(testStr).begin();
-			it != static_cast<const StringCat<std::string>&>(testStr).end();
+		for(auto it = static_cast<const _String&>(testStr).begin();
+			it != static_cast<const _String&>(testStr).end();
 			++it, ++itc)
 		{
 			EXPECT_EQ(*itc, *it);

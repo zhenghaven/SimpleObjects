@@ -27,7 +27,7 @@ GTEST_TEST(TestNumeric, Construction)
 		Bool().GetVal();
 	});
 	EXPECT_NO_THROW({
-		std::unique_ptr<BaseObject> base;
+		std::unique_ptr<BaseObj> base;
 		base.reset(new Bool());
 		base.reset();
 	});
@@ -35,7 +35,7 @@ GTEST_TEST(TestNumeric, Construction)
 		Int8().GetVal();
 	});
 	EXPECT_NO_THROW({
-		std::unique_ptr<BaseObject> base;
+		std::unique_ptr<BaseObj> base;
 		base.reset(new Int8());
 		base.reset();
 	});
@@ -43,7 +43,7 @@ GTEST_TEST(TestNumeric, Construction)
 		Int16().GetVal();
 	});
 	EXPECT_NO_THROW({
-		std::unique_ptr<BaseObject> base;
+		std::unique_ptr<BaseObj> base;
 		base.reset(new Int16());
 		base.reset();
 	});
@@ -51,7 +51,7 @@ GTEST_TEST(TestNumeric, Construction)
 		Int32().GetVal();
 	});
 	EXPECT_NO_THROW({
-		std::unique_ptr<BaseObject> base;
+		std::unique_ptr<BaseObj> base;
 		base.reset(new Int32());
 		base.reset();
 	});
@@ -59,7 +59,7 @@ GTEST_TEST(TestNumeric, Construction)
 		Int64().GetVal();
 	});
 	EXPECT_NO_THROW({
-		std::unique_ptr<BaseObject> base;
+		std::unique_ptr<BaseObj> base;
 		base.reset(new Int64());
 		base.reset();
 	});
@@ -67,7 +67,7 @@ GTEST_TEST(TestNumeric, Construction)
 		UInt8().GetVal();
 	});
 	EXPECT_NO_THROW({
-		std::unique_ptr<BaseObject> base;
+		std::unique_ptr<BaseObj> base;
 		base.reset(new UInt8());
 		base.reset();
 	});
@@ -75,7 +75,7 @@ GTEST_TEST(TestNumeric, Construction)
 		UInt16().GetVal();
 	});
 	EXPECT_NO_THROW({
-		std::unique_ptr<BaseObject> base;
+		std::unique_ptr<BaseObj> base;
 		base.reset(new UInt16());
 		base.reset();
 	});
@@ -83,7 +83,7 @@ GTEST_TEST(TestNumeric, Construction)
 		UInt32().GetVal();
 	});
 	EXPECT_NO_THROW({
-		std::unique_ptr<BaseObject> base;
+		std::unique_ptr<BaseObj> base;
 		base.reset(new UInt32());
 		base.reset();
 	});
@@ -91,7 +91,7 @@ GTEST_TEST(TestNumeric, Construction)
 		UInt64().GetVal();
 	});
 	EXPECT_NO_THROW({
-		std::unique_ptr<BaseObject> base;
+		std::unique_ptr<BaseObj> base;
 		base.reset(new UInt64());
 		base.reset();
 	});
@@ -99,7 +99,7 @@ GTEST_TEST(TestNumeric, Construction)
 		Float().GetVal();
 	});
 	EXPECT_NO_THROW({
-		std::unique_ptr<BaseObject> base;
+		std::unique_ptr<BaseObj> base;
 		base.reset(new Float());
 		base.reset();
 	});
@@ -107,7 +107,7 @@ GTEST_TEST(TestNumeric, Construction)
 		Double().GetVal();
 	});
 	EXPECT_NO_THROW({
-		std::unique_ptr<BaseObject> base;
+		std::unique_ptr<BaseObj> base;
 		base.reset(new Double());
 		base.reset();
 	});
@@ -374,7 +374,7 @@ GTEST_TEST(TestNumeric, Operation)
 {
 	// +
 	// bool, bool
-	auto resbnb = Numeric<bool>(true) + Numeric<bool>(false);
+	auto resbnb = Bool(true) + Bool(false);
 	EXPECT_EQ(resbnb.GetVal(), static_cast<bool>(true) + static_cast<bool>(false));
 	// int8_t, int8_t
 	auto res8n8 = Int8(23) + Int8(12);
@@ -517,7 +517,7 @@ GTEST_TEST(TestNumeric, Miscs)
 	// Copy
 	static_assert(std::is_same<
 		decltype(*Int8().Copy(Int8::Base::sk_null)),
-		NumericBaseObject&>::value, "Failed to test Copy virtual func");
+		NumericBaseObj&>::value, "Failed to test Copy virtual func");
 	EXPECT_EQ(*Bool(true).Copy(Bool::Base::sk_null), Bool(true));
 	EXPECT_EQ(*Int8(123).Copy(Int8::Base::sk_null), Int8(123));
 	EXPECT_EQ(*Int16(123).Copy(Int16::Base::sk_null), Int16(123));
@@ -532,18 +532,18 @@ GTEST_TEST(TestNumeric, Miscs)
 
 	static_assert(std::is_same<
 		decltype(*Int8().Copy(Int8::Base::Base::sk_null)),
-		HashableBaseObject&>::value, "Failed to test Copy virtual func");
+		HashableBaseObj&>::value, "Failed to test Copy virtual func");
 	EXPECT_EQ(*Int8(123).Copy(Int8::Base::Base::sk_null), Int8(123));
 
 	static_assert(std::is_same<
 		decltype(*Int8().Copy(Int8::Base::Base::Base::sk_null)),
-		BaseObject&>::value, "Failed to test Copy virtual func");
+		BaseObj&>::value, "Failed to test Copy virtual func");
 	EXPECT_EQ(*Int8(123).Copy(Int8::Base::Base::Base::sk_null), Int8(123));
 
 	// Move
 	static_assert(std::is_same<
 		decltype(*Int8().Move(Int8::Base::sk_null)),
-		NumericBaseObject&>::value, "Failed to test Move virtual func");
+		NumericBaseObj&>::value, "Failed to test Move virtual func");
 	EXPECT_EQ(*Bool(true).Move(Bool::Base::sk_null), Bool(true));
 	EXPECT_EQ(*Int8(123).Move(Int8::Base::sk_null), Int8(123));
 	EXPECT_EQ(*Int16(123).Move(Int16::Base::sk_null), Int16(123));
@@ -558,12 +558,12 @@ GTEST_TEST(TestNumeric, Miscs)
 
 	static_assert(std::is_same<
 		decltype(*Int8().Move(Int8::Base::Base::sk_null)),
-		HashableBaseObject&>::value, "Failed to test Move virtual func");
+		HashableBaseObj&>::value, "Failed to test Move virtual func");
 	EXPECT_EQ(*Int8(123).Move(Int8::Base::Base::sk_null), Int8(123));
 
 	static_assert(std::is_same<
 		decltype(*Int8().Move(Int8::Base::Base::Base::sk_null)),
-		BaseObject&>::value, "Failed to test Move virtual func");
+		BaseObj&>::value, "Failed to test Move virtual func");
 	EXPECT_EQ(*Int8(123).Move(Int8::Base::Base::Base::sk_null), Int8(123));
 }
 
@@ -641,7 +641,7 @@ namespace
 GTEST_TEST(TestNumeric, BaseIsEqual)
 {
 	// Base object
-	using ObjPtr = std::unique_ptr<BaseObject>;
+	using ObjPtr = std::unique_ptr<BaseObj>;
 
 	// Other types
 	EXPECT_TRUE(*ObjPtr(new Int8(1)) != *ObjPtr(new Null()));
@@ -917,7 +917,7 @@ GTEST_TEST(TestNumeric, BaseIsEqual)
 
 
 	// Numeric base object
-	using NumPtr = std::unique_ptr<NumericBaseObject>;
+	using NumPtr = std::unique_ptr<NumericBaseObj>;
 
 	EXPECT_EQ(*NumPtr(new Int8(1)) != *NumPtr(new Int8(1)), 1 != 1);
 	EXPECT_EQ(*NumPtr(new Int8(1)) != *NumPtr(new Int8(2)), 1 != 2);
@@ -925,7 +925,7 @@ GTEST_TEST(TestNumeric, BaseIsEqual)
 
 GTEST_TEST(TestNumeric, BaseIsLessThan)
 {
-	using NumPtr = std::unique_ptr<NumericBaseObject>;
+	using NumPtr = std::unique_ptr<NumericBaseObj>;
 
 	// <
 	EXPECT_FALSE(*NumPtr(new Bool(false)) >= *NumPtr(new Bool(true)));
@@ -1060,14 +1060,14 @@ GTEST_TEST(TestNumeric, BaseIsLessThan)
 	EXPECT_FALSE(*NumPtr(new Double(1.0)) >= *NumPtr(new Float(2.0)));
 	EXPECT_FALSE(*NumPtr(new Double(1.0)) >= *NumPtr(new Double(2.0)));
 
-	using ObjPtr = std::unique_ptr<BaseObject>;
+	using ObjPtr = std::unique_ptr<BaseObj>;
 
 	EXPECT_FALSE(*ObjPtr(new Bool(false)) >= *ObjPtr(new Int8(2)));
 }
 
 GTEST_TEST(TestNumeric, BaseIsGreaterThan)
 {
-	using NumPtr = std::unique_ptr<NumericBaseObject>;
+	using NumPtr = std::unique_ptr<NumericBaseObj>;
 
 	// >
 	EXPECT_FALSE(*NumPtr(new Bool(true)) <= *NumPtr(new Bool(false)));
@@ -1202,7 +1202,7 @@ GTEST_TEST(TestNumeric, BaseIsGreaterThan)
 	EXPECT_FALSE(*NumPtr(new Double(5.0)) <= *NumPtr(new Float(2.0)));
 	EXPECT_FALSE(*NumPtr(new Double(5.0)) <= *NumPtr(new Double(2.0)));
 
-	using ObjPtr = std::unique_ptr<BaseObject>;
+	using ObjPtr = std::unique_ptr<BaseObj>;
 
 	EXPECT_FALSE(*ObjPtr(new Bool(true)) <= *ObjPtr(new Int8(0)));
 }

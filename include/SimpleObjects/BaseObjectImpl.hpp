@@ -14,7 +14,8 @@ namespace SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE
 #endif
 {
 
-inline bool BaseObject::operator==(const BaseObject& rhs) const
+template<typename _ToStringType>
+inline bool BaseObject<_ToStringType>::operator==(const BaseObject<_ToStringType>& rhs) const
 {
 	auto lhsCat = GetCategory();
 	auto rhsCat = rhs.GetCategory();
@@ -50,7 +51,8 @@ inline bool BaseObject::operator==(const BaseObject& rhs) const
 	}
 }
 
-inline bool BaseObject::operator<(const BaseObject& rhs) const
+template<typename _ToStringType>
+inline bool BaseObject<_ToStringType>::operator<(const BaseObject<_ToStringType>& rhs) const
 {
 	auto lhsCat = GetCategory();
 	auto rhsCat = rhs.GetCategory();
@@ -83,7 +85,8 @@ inline bool BaseObject::operator<(const BaseObject& rhs) const
 		rhs.GetCategoryName());
 }
 
-inline bool BaseObject::operator>(const BaseObject& rhs) const
+template<typename _ToStringType>
+inline bool BaseObject<_ToStringType>::operator>(const BaseObject<_ToStringType>& rhs) const
 {
 	auto lhsCat = GetCategory();
 	auto rhsCat = rhs.GetCategory();

@@ -13,13 +13,16 @@ namespace SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE
  * @brief Defining a interface class for numeric objects
  *
  */
-class NumericBaseObject : public HashableBaseObject
+template<typename _ToStringType>
+class NumericBaseObject : public HashableBaseObject<_ToStringType>
 {
 public: // Static Member
 
-	using Base = HashableBaseObject;
+	using ToStringType = _ToStringType;
+	using Self = NumericBaseObject<_ToStringType>;
+	using Base = HashableBaseObject<_ToStringType>;
 
-	static constexpr NumericBaseObject* sk_null = nullptr;
+	static constexpr Self* sk_null = nullptr;
 
 public:
 	NumericBaseObject() = default;
@@ -30,49 +33,49 @@ public:
 
 	virtual const char* GetNumTypeName() const = 0;
 
-	virtual NumericBaseObject& AsNumeric() override
+	virtual Self& AsNumeric() override
 	{
 		return *this;
 	}
 
-	virtual const NumericBaseObject& AsNumeric() const override
+	virtual const Self& AsNumeric() const override
 	{
 		return *this;
 	}
 
-	virtual bool operator==(const NumericBaseObject& rhs) const = 0;
+	virtual bool operator==(const Self& rhs) const = 0;
 
-	virtual bool operator!=(const NumericBaseObject& rhs) const
+	virtual bool operator!=(const Self& rhs) const
 	{
 		return !(*this == rhs);
 	}
 
-	virtual bool operator<(const NumericBaseObject& rhs) const = 0;
+	virtual bool operator<(const Self& rhs) const = 0;
 
-	virtual bool operator>=(const NumericBaseObject& rhs) const
+	virtual bool operator>=(const Self& rhs) const
 	{
 		return !(*this < rhs);
 	}
 
-	virtual bool operator>(const NumericBaseObject& rhs) const = 0;
+	virtual bool operator>(const Self& rhs) const = 0;
 
-	virtual bool operator<=(const NumericBaseObject& rhs) const
+	virtual bool operator<=(const Self& rhs) const
 	{
 		return !(*this > rhs);
 	}
 
-	virtual std::unique_ptr<NumericBaseObject> Copy(const NumericBaseObject* /*unused*/) const = 0;
+	virtual std::unique_ptr<Self> Copy(const Self* /*unused*/) const = 0;
 
-	virtual std::unique_ptr<NumericBaseObject> Move(const NumericBaseObject* /*unused*/) = 0;
+	virtual std::unique_ptr<Self> Move(const Self* /*unused*/) = 0;
 
 	using Base::Copy;
-	virtual std::unique_ptr<HashableBaseObject> Copy(const HashableBaseObject* /*unused*/) const override
+	virtual std::unique_ptr<Base> Copy(const Base* /*unused*/) const override
 	{
 		return Copy(sk_null);
 	}
 
 	using Base::Move;
-	virtual std::unique_ptr<HashableBaseObject> Move(const HashableBaseObject* /*unused*/) override
+	virtual std::unique_ptr<Base> Move(const Base* /*unused*/) override
 	{
 		return Move(sk_null);
 	}

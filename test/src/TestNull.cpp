@@ -25,7 +25,7 @@ GTEST_TEST(TestNull, Construction)
 	Null val1;
 	Null val2 = Null();
 	EXPECT_NO_THROW({
-		std::unique_ptr<BaseObject> base;
+		std::unique_ptr<BaseObj> base;
 		base.reset(new Null());
 		base.reset();
 	});
@@ -69,29 +69,29 @@ GTEST_TEST(TestNull, Miscs)
 	// Copy
 	static_assert(std::is_same<
 		decltype(*Null().Copy(Null::Base::sk_null)),
-		HashableBaseObject&>::value, "Failed to test Copy virtual func");
+		HashableBaseObj&>::value, "Failed to test Copy virtual func");
 	EXPECT_EQ(*Null().Copy(Null::Base::sk_null), Null());
 
 	static_assert(std::is_same<
 		decltype(*Null().Copy(Null::Base::Base::sk_null)),
-		BaseObject&>::value, "Failed to test Copy virtual func");
+		BaseObj&>::value, "Failed to test Copy virtual func");
 	EXPECT_EQ(*Null().Copy(Null::Base::Base::sk_null), Null());
 
 	// Move
 	static_assert(std::is_same<
 		decltype(*Null().Move(Null::Base::sk_null)),
-		HashableBaseObject&>::value, "Failed to test Move virtual func");
+		HashableBaseObj&>::value, "Failed to test Move virtual func");
 	EXPECT_EQ(*Null().Move(Null::Base::sk_null), Null());
 
 	static_assert(std::is_same<
 		decltype(*Null().Move(Null::Base::Base::sk_null)),
-		BaseObject&>::value, "Failed to test Move virtual func");
+		BaseObj&>::value, "Failed to test Move virtual func");
 	EXPECT_EQ(*Null().Move(Null::Base::Base::sk_null), Null());
 }
 
 GTEST_TEST(TestNull, BaseCompare)
 {
-	using ObjPtr = std::unique_ptr<BaseObject>;
+	using ObjPtr = std::unique_ptr<BaseObj>;
 
 	EXPECT_EQ(*ObjPtr(new Null()) != *ObjPtr(new Null()), nullptr != nullptr);
 

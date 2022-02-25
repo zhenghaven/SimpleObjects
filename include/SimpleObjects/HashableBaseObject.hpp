@@ -13,13 +13,22 @@ namespace SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE
  * @brief Defining a interface class for objects that are hashable
  *
  */
-class HashableBaseObject : public BaseObject
+template<typename _ToStringType>
+class HashableBaseObject : public BaseObject<_ToStringType>
 {
 public: // Static Member
 
-	using Base = BaseObject;
+	using Self = HashableBaseObject<_ToStringType>;
+	using Base = BaseObject<_ToStringType>;
+	using ToStringType = _ToStringType;
 
-	static constexpr HashableBaseObject* sk_null = nullptr;
+	using NullBase    = typename Base::NullBase;
+	using NumericBase = typename Base::NumericBase;
+	using StringBase  = typename Base::StringBase;
+	using ListBase    = typename Base::ListBase;
+	using DictBase    = typename Base::DictBase;
+
+	static constexpr Self* sk_null = nullptr;
 
 public:
 	HashableBaseObject() = default;
@@ -28,16 +37,16 @@ public:
 
 	virtual std::size_t Hash() const = 0;
 
-	virtual std::unique_ptr<HashableBaseObject> Copy(const HashableBaseObject* /*unused*/) const = 0;
+	virtual std::unique_ptr<Self> Copy(const Self* /*unused*/) const = 0;
 
-	virtual std::unique_ptr<HashableBaseObject> Move(const HashableBaseObject* /*unused*/) = 0;
+	virtual std::unique_ptr<Self> Move(const Self* /*unused*/) = 0;
 
-	virtual std::unique_ptr<BaseObject> Copy(const BaseObject* /*unused*/) const override
+	virtual std::unique_ptr<Base> Copy(const Base* /*unused*/) const override
 	{
 		return Copy(sk_null);
 	}
 
-	virtual std::unique_ptr<BaseObject> Move(const BaseObject* /*unused*/) override
+	virtual std::unique_ptr<Base> Move(const Base* /*unused*/) override
 	{
 		return Move(sk_null);
 	}
@@ -49,15 +58,15 @@ public:
 // ========== Hash ==========
 namespace std
 {
-	template<>
+	template<typename _ToStringType>
 #ifndef SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE
-	struct hash<SimpleObjects::HashableBaseObject>
+	struct hash<SimpleObjects::HashableBaseObject<_ToStringType> >
 	{
-		using _ObjType = SimpleObjects::HashableBaseObject;
+		using _ObjType = SimpleObjects::HashableBaseObject<_ToStringType>;
 #else
-	struct hash<SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE::HashableBaseObject>
+	struct hash<SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE::HashableBaseObject<_ToStringType> >
 	{
-		using _ObjType = SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE::HashableBaseObject;
+		using _ObjType = SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE::HashableBaseObject<_ToStringType>;
 #endif
 	public:
 

@@ -13,56 +13,65 @@ namespace SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE
 #endif
 {
 
-class HashableObject : public HashableBaseObject
+template<typename _ToStringType>
+class HashableObjectImpl : public HashableBaseObject<_ToStringType>
 {
 public: // Static members
 
-	using Base = HashableBaseObject;
+	using ToStringType = _ToStringType;
+	using Self = HashableObjectImpl<_ToStringType>;
+	using Base = HashableBaseObject<_ToStringType>;
 
-	using Ptr = std::unique_ptr<HashableBaseObject>;
+	using BasePtr = std::unique_ptr<Base>;
+
+	using NullBase    = typename Base::NullBase;
+	using NumericBase = typename Base::NumericBase;
+	using StringBase  = typename Base::StringBase;
+	using ListBase    = typename Base::ListBase;
+	using DictBase    = typename Base::DictBase;
 
 public:
-	HashableObject() :
-		HashableObject(Null())
+	HashableObjectImpl() :
+		HashableObjectImpl(NullImpl<ToStringType>())
 	{}
 
-	HashableObject(const HashableObject& other) :
-		HashableObject(*other.m_ptr)
+	HashableObjectImpl(const Self& other) :
+		HashableObjectImpl(*other.m_ptr)
 	{}
 
-	HashableObject(HashableObject&& other) :
-		m_ptr(std::forward<Ptr>(other.m_ptr))
+	HashableObjectImpl(Self&& other) :
+		m_ptr(std::forward<BasePtr>(other.m_ptr))
 	{}
 
-	HashableObject(const Base& other) :
+	HashableObjectImpl(const Base& other) :
 		m_ptr(other.Copy(Base::sk_null))
 	{}
 
-	HashableObject(Base&& other) :
+	HashableObjectImpl(Base&& other) :
 		m_ptr(other.Move(Base::sk_null))
 	{}
 
-	virtual ~HashableObject() = default;
+	virtual ~HashableObjectImpl() = default;
 
-	HashableObject& operator=(const HashableObject& rhs)
+	Self& operator=(const Self& rhs)
 	{
 		*this = *rhs.m_ptr;
 		return *this;
 	}
 
-	HashableObject& operator=(HashableObject&& rhs)
+	Self& operator=(Self&& rhs)
 	{
-		m_ptr = std::forward<Ptr>(rhs.m_ptr);
+		m_ptr = std::forward<BasePtr>(rhs.m_ptr);
 		return *this;
 	}
 
-	HashableObject& operator=(const Base& rhs)
+	Self& operator=(const Base& rhs)
 	{
 		m_ptr = rhs.Copy(Base::sk_null);
 		return *this;
 	}
 
-	HashableObject& operator=(Base&& rhs)
+	Self& operator=(Base&& rhs)
 	{
 		m_ptr = rhs.Move(Base::sk_null);
 		return *this;
@@ -156,26 +165,26 @@ public:
 
 private:
 
-	Ptr m_ptr;
+	BasePtr m_ptr;
 
-}; // class HashableObject
+}; // class HashableObjectImpl
 
 }//namespace SimpleObjects
 
 // ========== Hash ==========
 namespace std
 {
-	template<>
+	template<typename _ToStringType>
 #ifndef SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE
-	struct hash<SimpleObjects::HashableObject> :
-		public hash<SimpleObjects::HashableBaseObject>
+	struct hash<SimpleObjects::HashableObjectImpl<_ToStringType> > :
+		public hash<SimpleObjects::HashableBaseObject<_ToStringType> >
 	{
-		using _ObjType = SimpleObjects::HashableObject;
+		using _ObjType = SimpleObjects::HashableObjectImpl<_ToStringType>;
 #else
-	struct hash<SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE::HashableObject> :
-		public hash<SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE::HashableBaseObject>
+	struct hash<SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE::HashableObjectImpl<_ToStringType> > :
+		public hash<SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE::HashableBaseObject<_ToStringType> >
 	{
-		using _ObjType = SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE::HashableObject;
+		using _ObjType = SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE::HashableObjectImpl<_ToStringType>;
 #endif
 	}; // struct hash
 }

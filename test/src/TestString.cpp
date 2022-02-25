@@ -29,7 +29,7 @@ GTEST_TEST(TestString, Construction)
 		String().GetVal();
 	});
 	EXPECT_NO_THROW({
-		std::unique_ptr<BaseObject> base;
+		std::unique_ptr<BaseObj> base;
 		base.reset(new String());
 		base.reset();
 	});
@@ -93,17 +93,17 @@ GTEST_TEST(TestString, Miscs)
 	// Copy
 	static_assert(std::is_same<
 		decltype(*String().Copy(String::Base::sk_null)),
-		StringBaseObject<char>&>::value, "Failed to test Copy virtual func");
+		StringBaseObj&>::value, "Failed to test Copy virtual func");
 	EXPECT_EQ(*String("Test").Copy(String::Base::sk_null), String("Test"));
 
 	static_assert(std::is_same<
 		decltype(*String().Copy(String::Base::Base::sk_null)),
-		HashableBaseObject&>::value, "Failed to test Copy virtual func");
+		HashableBaseObj&>::value, "Failed to test Copy virtual func");
 	EXPECT_EQ(*String("Test").Copy(String::Base::Base::sk_null), String("Test"));
 
 	static_assert(std::is_same<
 		decltype(*String().Copy(String::Base::Base::Base::sk_null)),
-		BaseObject&>::value, "Failed to test Copy virtual func");
+		BaseObj&>::value, "Failed to test Copy virtual func");
 	EXPECT_EQ(*String("Test").Copy(String::Base::Base::Base::sk_null), String("Test"));
 
 	// Move
@@ -111,21 +111,21 @@ GTEST_TEST(TestString, Miscs)
 
 	static_assert(std::is_same<
 		decltype(*String().Move(String::Base::sk_null)),
-		StringBaseObject<char>&>::value, "Failed to test Move virtual func");
+		StringBaseObj&>::value, "Failed to test Move virtual func");
 	mStr = String("Test");
 	EXPECT_EQ(*mStr.Move(String::Base::sk_null), String("Test"));
 	EXPECT_EQ(mStr.size(), 0);
 
 	static_assert(std::is_same<
 		decltype(*String().Move(String::Base::Base::sk_null)),
-		HashableBaseObject&>::value, "Failed to test Move virtual func");
+		HashableBaseObj&>::value, "Failed to test Move virtual func");
 	mStr = String("Test");
 	EXPECT_EQ(*mStr.Move(String::Base::Base::sk_null), String("Test"));
 	EXPECT_EQ(mStr.size(), 0);
 
 	static_assert(std::is_same<
 		decltype(*String().Move(String::Base::Base::Base::sk_null)),
-		BaseObject&>::value, "Failed to test Move virtual func");
+		BaseObj&>::value, "Failed to test Move virtual func");
 	mStr = String("Test");
 	EXPECT_EQ(*mStr.Move(String::Base::Base::Base::sk_null), String("Test"));
 	EXPECT_EQ(mStr.size(), 0);
@@ -255,7 +255,7 @@ GTEST_TEST(TestString, Capacity)
 GTEST_TEST(TestString, BaseIsEqual)
 {
 	// Base object
-	using ObjPtr = std::unique_ptr<BaseObject>;
+	using ObjPtr = std::unique_ptr<BaseObj>;
 
 	EXPECT_TRUE(*ObjPtr(new Bool(true)) != *ObjPtr(new String()));
 	EXPECT_TRUE(*ObjPtr(new Null()) != *ObjPtr(new String()));
@@ -264,7 +264,7 @@ GTEST_TEST(TestString, BaseIsEqual)
 	EXPECT_FALSE(*ObjPtr(new String("test string")) != *ObjPtr(new String("test string")));
 
 	// String base object
-	using StrPtr = std::unique_ptr<StringBaseObject<char> >;
+	using StrPtr = std::unique_ptr<StringBaseObj>;
 
 	EXPECT_TRUE(*StrPtr(new String("test string1")) != *StrPtr(new String("test string2")));
 	EXPECT_FALSE(*StrPtr(new String("test string")) != *StrPtr(new String("test string")));
@@ -272,7 +272,7 @@ GTEST_TEST(TestString, BaseIsEqual)
 
 GTEST_TEST(TestString, BaseCompare)
 {
-	using StrPtr = std::unique_ptr<StringBaseObject<char> >;
+	using StrPtr = std::unique_ptr<StringBaseObj>;
 
 	// greater than, true
 	EXPECT_TRUE (*StrPtr(new String("123466")) >  *StrPtr(new String("123456")));
@@ -304,7 +304,7 @@ GTEST_TEST(TestString, BaseCompare)
 
 
 
-	using ObjPtr = std::unique_ptr<BaseObject>;
+	using ObjPtr = std::unique_ptr<BaseObj>;
 
 	EXPECT_FALSE(*ObjPtr(new String("123466")) <= *ObjPtr(new String("123456")));
 	EXPECT_FALSE(*ObjPtr(new String("123456")) >= *ObjPtr(new String("123466")));

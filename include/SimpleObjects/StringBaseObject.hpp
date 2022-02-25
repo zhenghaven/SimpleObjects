@@ -16,13 +16,14 @@ namespace SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE
  *
  * @tparam _CharType type of each charactor value.
  */
-template<typename _CharType>
-class StringBaseObject : public HashableBaseObject
+template<typename _CharType, typename _ToStringType>
+class StringBaseObject : public HashableBaseObject<_ToStringType>
 {
 public: // Static members
 
-	using Self = StringBaseObject<_CharType>;
-	using Base = HashableBaseObject;
+	using ToStringType = _ToStringType;
+	using Self = StringBaseObject<_CharType, _ToStringType>;
+	using Base = HashableBaseObject<_ToStringType>;
 
 	typedef _CharType                           value_type;
 	typedef value_type&                         reference;
@@ -44,19 +45,19 @@ public:
 		return "String";
 	}
 
-	virtual StringBase& AsString() override
+	virtual Self& AsString() override
 	{
 		return *this;
 	}
 
-	virtual const StringBase& AsString() const override
+	virtual const Self& AsString() const override
 	{
 		return *this;
 	}
 
-	virtual std::unique_ptr<StringBaseObject> Copy(const StringBaseObject* /*unused*/) const = 0;
+	virtual std::unique_ptr<Self> Copy(const Self* /*unused*/) const = 0;
 
-	virtual std::unique_ptr<StringBaseObject> Move(const StringBaseObject* /*unused*/) = 0;
+	virtual std::unique_ptr<Self> Move(const Self* /*unused*/) = 0;
 
 	using Base::Copy;
 	virtual std::unique_ptr<Base> Copy(const Base* /*unused*/) const override

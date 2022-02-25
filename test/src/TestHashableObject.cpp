@@ -28,7 +28,7 @@ GTEST_TEST(TestHashableObj, Construction)
 	HashableObject val2 = String("Test");
 
 	EXPECT_NO_THROW({
-		std::unique_ptr<BaseObject> base;
+		std::unique_ptr<BaseObj> base;
 		base.reset(new HashableObject(String("Test")));
 		base.reset();
 	});

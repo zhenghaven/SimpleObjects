@@ -11,14 +11,18 @@ namespace SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE
 #endif
 {
 
-template<typename _CtnType>
-class ListCat : public ListBaseObject<typename _CtnType::value_type>
+template<typename _CtnType, typename _ToStringType>
+class ListCat :
+	public ListBaseObject<
+		typename _CtnType::value_type,
+		_ToStringType>
 {
 public: // Static member:
 
 	using ContainerType = _CtnType;
-	using Base = ListBaseObject<typename _CtnType::value_type>;
-	using Self = ListCat<ContainerType>;
+	using ToStringType  = _ToStringType;
+	using Base = ListBaseObject<typename _CtnType::value_type, _ToStringType>;
+	using Self = ListCat<_CtnType, _ToStringType>;
 
 	typedef typename ContainerType::allocator_type       allocator_type;
 	typedef typename ContainerType::value_type           value_type;

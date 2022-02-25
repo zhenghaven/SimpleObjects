@@ -9,13 +9,14 @@ namespace SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE
 #endif
 {
 
-template<typename _KeyType, typename _ValType>
-class DictBaseObject : public BaseObject
+template<typename _KeyType, typename _ValType, typename _ToStringType>
+class DictBaseObject : public BaseObject<_ToStringType>
 {
 public: // Static members
 
-	using Self = DictBaseObject<_KeyType, _ValType>;
-	using Base = BaseObject;
+	using Self = DictBaseObject<_KeyType, _ValType, _ToStringType>;
+	using Base = BaseObject<_ToStringType>;
+	using ToStringType = _ToStringType;
 
 	typedef _KeyType                                  key_type;
 	typedef _ValType                                  mapped_type;

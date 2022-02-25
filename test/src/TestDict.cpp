@@ -29,7 +29,7 @@ GTEST_TEST(TestDict, Construction)
 		Dict().GetVal();
 	});
 	EXPECT_NO_THROW({
-		std::unique_ptr<BaseObject> base;
+		std::unique_ptr<BaseObj> base;
 		base.reset(new Dict());
 		base.reset();
 	});
@@ -305,14 +305,14 @@ GTEST_TEST(TestDict, Miscs)
 	// Copy
 	static_assert(std::is_same<
 		decltype(*Dict().Copy(Dict::Base::sk_null)),
-		DictBaseObject<HashableObject, Object>&>::value, "Failed to test Copy virtual func");
+		DictBaseObj&>::value, "Failed to test Copy virtual func");
 	EXPECT_EQ(
 		*Dict({{ Null(), String("test val 0") }}).Copy(Dict::Base::sk_null),
 		Dict({{ Null(), String("test val 0") }}));
 
 	static_assert(std::is_same<
 		decltype(*Dict().Copy(Dict::Base::Base::sk_null)),
-		BaseObject&>::value, "Failed to test Copy virtual func");
+		BaseObj&>::value, "Failed to test Copy virtual func");
 	EXPECT_EQ(
 		*Dict({{ Null(), String("test val 0") }}).Copy(Dict::Base::Base::sk_null),
 		Dict({{ Null(), String("test val 0") }}));
@@ -322,7 +322,7 @@ GTEST_TEST(TestDict, Miscs)
 
 	static_assert(std::is_same<
 		decltype(*Dict().Move(Dict::Base::sk_null)),
-		DictBaseObject<HashableObject, Object>&>::value, "Failed to test Move virtual func");
+		DictBaseObj&>::value, "Failed to test Move virtual func");
 	mDict = Dict({{ Null(), String("test val 0") }});
 	EXPECT_EQ(
 		*mDict.Move(Dict::Base::sk_null),
@@ -331,7 +331,7 @@ GTEST_TEST(TestDict, Miscs)
 
 	static_assert(std::is_same<
 		decltype(*Dict().Move(Dict::Base::Base::sk_null)),
-		BaseObject&>::value, "Failed to test Move virtual func");
+		BaseObj&>::value, "Failed to test Move virtual func");
 	mDict = Dict({{ Null(), String("test val 0") }});
 	EXPECT_EQ(
 		*mDict.Move(Dict::Base::Base::sk_null),

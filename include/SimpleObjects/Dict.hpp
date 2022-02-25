@@ -11,19 +11,22 @@ namespace SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE
 #endif
 {
 
-template<typename _CtnType>
+template<typename _CtnType, typename _ToStringType>
 class DictCat :
 	public DictBaseObject<
 		typename _CtnType::key_type,
-		typename _CtnType::mapped_type>
+		typename _CtnType::mapped_type,
+		_ToStringType>
 {
 public: // Static member:
 
 	using ContainerType = _CtnType;
+	using ToStringType = _ToStringType;
 	using Base = DictBaseObject<
 		typename _CtnType::key_type,
-		typename _CtnType::mapped_type>;
-	using Self = DictCat<ContainerType>;
+		typename _CtnType::mapped_type,
+		_ToStringType>;
+	using Self = DictCat<_CtnType, _ToStringType>;
 
 	typedef typename ContainerType::key_type             key_type;
 	typedef typename ContainerType::mapped_type          mapped_type;

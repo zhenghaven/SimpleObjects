@@ -13,56 +13,65 @@ namespace SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE
 #endif
 {
 
-class Object : public BaseObject
+template<typename _ToStringType>
+class ObjectImpl : public BaseObject<_ToStringType>
 {
 public: // Static members
 
-	using Base = BaseObject;
+	using ToStringType = _ToStringType;
+	using Self = ObjectImpl<_ToStringType>;
+	using Base = BaseObject<_ToStringType>;
 
-	using Ptr = std::unique_ptr<BaseObject>;
+	using NullBase    = typename Base::NullBase;
+	using NumericBase = typename Base::NumericBase;
+	using StringBase  = typename Base::StringBase;
+	using ListBase    = typename Base::ListBase;
+	using DictBase    = typename Base::DictBase;
+
+	using BasePtr = std::unique_ptr<Base>;
 
 public:
-	Object() :
-		Object(Null())
+	ObjectImpl() :
+		ObjectImpl(NullImpl<ToStringType>())
 	{}
 
-	Object(const Object& other) :
-		Object(*other.m_ptr)
+	ObjectImpl(const Self& other) :
+		ObjectImpl(*other.m_ptr)
 	{}
 
-	Object(Object&& other) :
-		m_ptr(std::forward<Ptr>(other.m_ptr))
+	ObjectImpl(Self&& other) :
+		m_ptr(std::forward<BasePtr>(other.m_ptr))
 	{}
 
-	Object(const Base& other) :
+	ObjectImpl(const Base& other) :
 		m_ptr(other.Copy(Base::sk_null))
 	{}
 
-	Object(Base&& other) :
+	ObjectImpl(Base&& other) :
 		m_ptr(other.Move(Base::sk_null))
 	{}
 
-	virtual ~Object() = default;
+	virtual ~ObjectImpl() = default;
 
-	Object& operator=(const Object& rhs)
+	Self& operator=(const Self& rhs)
 	{
 		*this = *rhs.m_ptr;
 		return *this;
 	}
 
-	Object& operator=(Object&& rhs)
+	Self& operator=(Self&& rhs)
 	{
-		m_ptr = std::forward<Ptr>(rhs.m_ptr);
+		m_ptr = std::forward<BasePtr>(rhs.m_ptr);
 		return *this;
 	}
 
-	Object& operator=(const Base& rhs)
+	Self& operator=(const Base& rhs)
 	{
 		m_ptr = rhs.Copy(Base::sk_null);
 		return *this;
 	}
 
-	Object& operator=(Base&& rhs)
+	Self& operator=(Base&& rhs)
 	{
 		m_ptr = rhs.Move(Base::sk_null);
 		return *this;
@@ -147,8 +156,8 @@ public:
 
 private:
 
-	Ptr m_ptr;
+	BasePtr m_ptr;
 
-}; // class Object
+}; // class ObjectImpl
 
 } //namespace SimpleObjects
