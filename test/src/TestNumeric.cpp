@@ -127,13 +127,71 @@ GTEST_TEST(TestNumeric, Construction)
 
 GTEST_TEST(TestNumeric, Cast)
 {
+	EXPECT_EQ(static_cast<bool>(Bool(true)),
+		static_cast<bool>(true));
+	EXPECT_EQ(static_cast<bool>(Bool(false)),
+		static_cast<bool>(false));
+
 	// Integer -> bool
+	EXPECT_EQ(static_cast<bool>(Int8(2)),
+		static_cast<bool>(static_cast<int8_t>(2)));
+	EXPECT_EQ(static_cast<bool>(Int8(1)),
+		static_cast<bool>(static_cast<int8_t>(1)));
+	EXPECT_EQ(static_cast<bool>(Int8(0)),
+		static_cast<bool>(static_cast<int8_t>(0)));
+	EXPECT_EQ(static_cast<bool>(Int16(2)),
+		static_cast<bool>(static_cast<int16_t>(2)));
+	EXPECT_EQ(static_cast<bool>(Int16(1)),
+		static_cast<bool>(static_cast<int16_t>(1)));
+	EXPECT_EQ(static_cast<bool>(Int16(0)),
+		static_cast<bool>(static_cast<int16_t>(0)));
 	EXPECT_EQ(static_cast<bool>(Int32(2)),
 		static_cast<bool>(static_cast<int32_t>(2)));
 	EXPECT_EQ(static_cast<bool>(Int32(1)),
 		static_cast<bool>(static_cast<int32_t>(1)));
 	EXPECT_EQ(static_cast<bool>(Int32(0)),
 		static_cast<bool>(static_cast<int32_t>(0)));
+	EXPECT_EQ(static_cast<bool>(Int64(2)),
+		static_cast<bool>(static_cast<int64_t>(2)));
+	EXPECT_EQ(static_cast<bool>(Int64(1)),
+		static_cast<bool>(static_cast<int64_t>(1)));
+	EXPECT_EQ(static_cast<bool>(Int64(0)),
+		static_cast<bool>(static_cast<int64_t>(0)));
+
+	EXPECT_EQ(static_cast<bool>(UInt8(2)),
+		static_cast<bool>(static_cast<uint8_t>(2)));
+	EXPECT_EQ(static_cast<bool>(UInt8(1)),
+		static_cast<bool>(static_cast<uint8_t>(1)));
+	EXPECT_EQ(static_cast<bool>(UInt8(0)),
+		static_cast<bool>(static_cast<uint8_t>(0)));
+	EXPECT_EQ(static_cast<bool>(UInt16(2)),
+		static_cast<bool>(static_cast<uint16_t>(2)));
+	EXPECT_EQ(static_cast<bool>(UInt16(1)),
+		static_cast<bool>(static_cast<uint16_t>(1)));
+	EXPECT_EQ(static_cast<bool>(UInt16(0)),
+		static_cast<bool>(static_cast<uint16_t>(0)));
+	EXPECT_EQ(static_cast<bool>(UInt32(2)),
+		static_cast<bool>(static_cast<uint32_t>(2)));
+	EXPECT_EQ(static_cast<bool>(UInt32(1)),
+		static_cast<bool>(static_cast<uint32_t>(1)));
+	EXPECT_EQ(static_cast<bool>(UInt32(0)),
+		static_cast<bool>(static_cast<uint32_t>(0)));
+	EXPECT_EQ(static_cast<bool>(UInt64(2)),
+		static_cast<bool>(static_cast<uint64_t>(2)));
+	EXPECT_EQ(static_cast<bool>(UInt64(1)),
+		static_cast<bool>(static_cast<uint64_t>(1)));
+	EXPECT_EQ(static_cast<bool>(UInt64(0)),
+		static_cast<bool>(static_cast<uint64_t>(0)));
+
+	// Float -> bool
+	EXPECT_EQ(static_cast<bool>(Float(0.001)),
+		static_cast<bool>(static_cast<float>(0.001)));
+	EXPECT_EQ(static_cast<bool>(Float(-0.001)),
+		static_cast<bool>(static_cast<float>(-0.001)));
+	EXPECT_EQ(static_cast<bool>(Float(0.0)),
+		static_cast<bool>(static_cast<float>(0.0)));
+	EXPECT_EQ(static_cast<bool>(Float(-0.0)),
+		static_cast<bool>(static_cast<float>(-0.0)));
 
 	// Double -> bool
 	EXPECT_EQ(static_cast<bool>(Double(0.001)),
