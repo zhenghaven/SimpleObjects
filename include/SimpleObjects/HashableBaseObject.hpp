@@ -33,7 +33,13 @@ public: // Static Member
 public:
 	HashableBaseObject() = default;
 
+	// LCOV_EXCL_START
+	/**
+	 * @brief Destroy the Hashable Base Object
+	 *
+	 */
 	virtual ~HashableBaseObject() = default;
+	// LCOV_EXCL_STOP
 
 	virtual std::size_t Hash() const = 0;
 

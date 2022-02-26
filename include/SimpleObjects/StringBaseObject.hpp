@@ -38,7 +38,13 @@ public: // Static members
 public:
 	StringBaseObject() = default;
 
+	// LCOV_EXCL_START
+	/**
+	 * @brief Destroy the String Base Object
+	 *
+	 */
 	virtual ~StringBaseObject() = default;
+	// LCOV_EXCL_STOP
 
 	virtual const char* GetCategoryName() const override
 	{

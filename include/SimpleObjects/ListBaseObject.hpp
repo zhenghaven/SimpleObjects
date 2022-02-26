@@ -33,7 +33,13 @@ public: // Static Objects
 public:
 	ListBaseObject() = default;
 
+	// LCOV_EXCL_START
+	/**
+	 * @brief Destroy the List Base Object
+	 *
+	 */
 	virtual ~ListBaseObject() = default;
+	// LCOV_EXCL_STOP
 
 	virtual const char* GetCategoryName() const override
 	{

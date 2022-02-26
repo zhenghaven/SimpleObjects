@@ -91,7 +91,13 @@ public:
 
 	BaseObject() = default;
 
+	// LCOV_EXCL_START
+	/**
+	 * @brief Destroy the Base Object
+	 *
+	 */
 	virtual ~BaseObject() = default;
+	// LCOV_EXCL_STOP
 
 	virtual ObjCategory GetCategory() const = 0;
 

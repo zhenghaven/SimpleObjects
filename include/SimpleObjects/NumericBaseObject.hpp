@@ -27,7 +27,13 @@ public: // Static Member
 public:
 	NumericBaseObject() = default;
 
+	// LCOV_EXCL_START
+	/**
+	 * @brief Destroy the Numeric Base Object
+	 *
+	 */
 	virtual ~NumericBaseObject() = default;
+	// LCOV_EXCL_STOP
 
 	virtual NumericType GetNumType() const = 0;
 

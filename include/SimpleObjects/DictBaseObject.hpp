@@ -31,7 +31,13 @@ public: // Static members
 public:
 	DictBaseObject() = default;
 
+	// LCOV_EXCL_START
+	/**
+	 * @brief Destroy the Dict Base Object
+	 *
+	 */
 	virtual ~DictBaseObject() = default;
+	// LCOV_EXCL_STOP
 
 	virtual const char* GetCategoryName() const override
 	{
