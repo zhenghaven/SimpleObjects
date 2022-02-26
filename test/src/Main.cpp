@@ -7,7 +7,7 @@ namespace SimpleObjects_Test
 
 int main(int argc, char** argv)
 {
-	constexpr size_t EXPECTED_NUM_OF_TEST_FILE = 11;
+	constexpr size_t EXPECTED_NUM_OF_TEST_FILE = 12;
 
 	std::cout << "===== SimpleObjects test program =====" << std::endl;
 	std::cout << std::endl;
