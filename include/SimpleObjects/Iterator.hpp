@@ -24,6 +24,54 @@ namespace SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE
  *
  * @tparam _TargetType The target type; e.g., the target type for a
  *         std::vector<uint8_t> vector will be uint8_t
+ */
+template<typename _TargetType>
+class OutputIteratorIf
+{
+public: // Static members:
+
+	/**
+	 * @brief The target type but with const, volatile, and reference specifiers
+	 *        removed.
+	 *
+	 */
+	using RawTargetType = typename std::remove_cv<
+		typename std::remove_reference<_TargetType>::type>::type;
+
+	using Self = OutputIteratorIf<_TargetType>;
+
+	using SelfPtr = std::unique_ptr<Self>;
+
+	// some standard typedefs
+
+	typedef std::ptrdiff_t                                            difference_type;
+	typedef RawTargetType                                             value_type;
+	typedef typename std::add_pointer<RawTargetType>::type            pointer;
+	typedef typename std::add_pointer<
+		typename std::add_const<RawTargetType>::type>::type           const_pointer;
+	typedef typename std::add_lvalue_reference<RawTargetType>::type   reference;
+	typedef std::output_iterator_tag                                  iterator_category;
+
+public:
+	OutputIteratorIf() = default;
+
+	virtual ~OutputIteratorIf() = default;
+
+	virtual void Increment() = 0;
+
+	virtual void Put(const value_type&) = 0;
+
+	virtual void Put(value_type&&) = 0;
+
+	virtual SelfPtr Copy(const Self& /*unused*/) const = 0;
+
+}; // class OutputIteratorIf
+
+/**
+ * @brief The interface of a basic iterator
+ *
+ * @tparam _TargetType The target type; e.g., the target type for a
+ *         std::vector<uint8_t> vector will be uint8_t
  * @tparam _IsConst Is this a const iterator
  */
 template<typename _TargetType, bool _IsConst>
@@ -146,6 +194,75 @@ public:
 //||
 //========================================
 
+template<typename _OriItType, typename _TargetType>
+class CppStdOutIteratorWrap : public OutputIteratorIf<_TargetType>
+{
+public: // Static members:
+	using _BaseIf = OutputIteratorIf<_TargetType>;
+	using _BaseIfPtr = std::unique_ptr<_BaseIf>;
+
+	typedef typename _BaseIf::difference_type         difference_type;
+	typedef typename _BaseIf::value_type              value_type;
+	typedef typename _BaseIf::pointer                 pointer;
+	typedef typename _BaseIf::const_pointer           const_pointer;
+	typedef typename _BaseIf::reference               reference;
+	typedef typename _BaseIf::iterator_category       iterator_category;
+
+	static _BaseIfPtr Build(_OriItType oriIt)
+	{
+		// TODO: make_unique
+		return _BaseIfPtr(new CppStdOutIteratorWrap(oriIt));
+	}
+
+	static_assert(
+		std::is_base_of<iterator_category, typename _OriItType::iterator_category>::value,
+		"The given C++ standard iterator must be a category based on output iterator");
+
+public:
+
+	CppStdOutIteratorWrap(_OriItType oriIt) :
+		_BaseIf::OutputIteratorIf(),
+		m_it(oriIt)
+	{}
+
+	CppStdOutIteratorWrap(const CppStdOutIteratorWrap& other) :
+		_BaseIf::OutputIteratorIf(other),
+		m_it(other.m_it)
+	{}
+
+	CppStdOutIteratorWrap(CppStdOutIteratorWrap&& other) :
+		_BaseIf::OutputIteratorIf(std::forward<_BaseIf>(other)),
+		m_it(std::forward<_OriItType>(other.m_it))
+	{}
+
+	virtual ~CppStdOutIteratorWrap() = default;
+
+	virtual void Increment() override
+	{
+		++m_it;
+	}
+
+	virtual void Put(const value_type& val) override
+	{
+		*m_it = val;
+	}
+
+	virtual void Put(value_type&& val) override
+	{
+		*m_it = std::forward<value_type>(val);
+	}
+
+	virtual _BaseIfPtr Copy(const _BaseIf&) const override
+	{
+		// TODO: make_unique
+		return _BaseIfPtr(new CppStdOutIteratorWrap(*this));
+	}
+
+public:
+
+	_OriItType m_it;
+}; // class CppStdOutIteratorWrap
+
 template<typename _OriItType, typename _TargetType, bool _IsConst>
 class CppStdFwIteratorWrap : public ForwardIteratorIf<_TargetType, _IsConst>
 {
@@ -178,10 +295,12 @@ public:
 	{}
 
 	CppStdFwIteratorWrap(const CppStdFwIteratorWrap& other) :
+		_BaseIf::ForwardIteratorIf(other),
 		m_it(other.m_it)
 	{}
 
 	CppStdFwIteratorWrap(CppStdFwIteratorWrap&& other) :
+		_BaseIf::ForwardIteratorIf(std::forward<_BaseIf>(other)),
 		m_it(std::forward<_OriItType>(other.m_it))
 	{}
 
@@ -358,6 +477,97 @@ private:
 //========================================
 
 /**
+ * @brief The wrapper of output iterator interface, so we can support
+ *        different classes of iterator implementations
+ *
+ * @tparam _TargetType The target type; e.g., the target type for a
+ *         std::vector<uint8_t> vector will be uint8_t
+ */
+template<typename _TargetType>
+class OutIterator
+{
+public: // Static members:
+	using WrappedIt = OutputIteratorIf<_TargetType>;
+	using WrappedItPtr = typename WrappedIt::SelfPtr;
+
+	typedef typename WrappedIt::difference_type         difference_type;
+	typedef typename WrappedIt::value_type              value_type;
+	typedef typename WrappedIt::pointer                 pointer;
+	typedef typename WrappedIt::const_pointer           const_pointer;
+	typedef typename WrappedIt::reference               reference;
+	typedef typename WrappedIt::iterator_category       iterator_category;
+
+public:
+	OutIterator() = delete;
+
+	OutIterator(WrappedItPtr it) :
+		m_it(std::move(it))
+	{}
+
+	OutIterator(const OutIterator& otherIt) :
+		m_it(otherIt.m_it->Copy(*(otherIt.m_it)))
+	{}
+
+	OutIterator(OutIterator&& otherIt):
+		m_it(std::forward<WrappedItPtr>(otherIt.m_it))
+	{}
+
+	virtual ~OutIterator() = default;
+
+	OutIterator& operator=(const OutIterator& rhs)
+	{
+		if (this != &rhs)
+		{
+			m_it = rhs.m_it->Copy(*(rhs.m_it));
+		}
+		return *this;
+	}
+
+	OutIterator& operator=(OutIterator&& rhs)
+	{
+		if (this != &rhs)
+		{
+			m_it = std::move(rhs.m_it);
+		}
+		return *this;
+	}
+
+	OutIterator& operator=(const value_type& rhs)
+	{
+		m_it->Put(rhs);
+		return *this;
+	}
+
+	OutIterator& operator=(value_type&& rhs)
+	{
+		m_it->Put(std::forward<value_type>(rhs));
+		return *this;
+	}
+
+	OutIterator& operator*()
+	{
+		return *this;
+	}
+
+	OutIterator& operator++()
+	{
+		m_it->Increment();
+		return *this;
+	}
+
+	OutIterator operator++(int)
+	{
+		OutIterator copy(*this);
+		m_it->Increment();
+		return copy;
+	}
+
+private:
+	WrappedItPtr m_it;
+
+}; // class OutIterator
+
+/**
  * @brief The wrapper of forward iterator interface, so we can support
  *        different classes of iterator implementations
  *
@@ -389,7 +599,7 @@ public:
 	// TODO: non-const to const copy & move
 
 	FrIterator(const FrIterator& otherIt) :
-		m_it(otherIt.m_it->Copy(*m_it))
+		m_it(otherIt.m_it->Copy(*(otherIt.m_it)))
 	{}
 
 	FrIterator(FrIterator&& otherIt):
@@ -402,7 +612,7 @@ public:
 	{
 		if (this != &rhs)
 		{
-			m_it = rhs.m_it->Copy(*m_it);
+			m_it = rhs.m_it->Copy(*(rhs.m_it));
 		}
 		return *this;
 	}
@@ -488,7 +698,7 @@ public:
 	// TODO: non-const to const copy & move
 
 	BiIterator(const BiIterator& otherIt) :
-		m_it(otherIt.m_it->Copy(*m_it))
+		m_it(otherIt.m_it->Copy(*(otherIt.m_it)))
 	{}
 
 	BiIterator(BiIterator&& otherIt):
@@ -501,7 +711,7 @@ public:
 	{
 		if (this != &rhs)
 		{
-			m_it = rhs.m_it->Copy(*m_it);
+			m_it = rhs.m_it->Copy(*(rhs.m_it));
 		}
 		return *this;
 	}
@@ -602,7 +812,7 @@ public:
 	{}
 
 	RdIterator(const RdIterator& otherIt) :
-		m_it(otherIt.m_it->Copy(*m_it))
+		m_it(otherIt.m_it->Copy(*(otherIt.m_it)))
 	{}
 
 	RdIterator(RdIterator&& otherIt):
@@ -615,7 +825,7 @@ public:
 	{
 		if (this != &rhs)
 		{
-			m_it = rhs.m_it->Copy(*m_it);
+			m_it = rhs.m_it->Copy(*(rhs.m_it));
 		}
 		return *this;
 	}
@@ -743,6 +953,14 @@ private:
 	WrappedItPtr m_it;
 
 }; // class RdIterator
+
+template<typename _ValType,
+	typename _OriItType>
+inline OutIterator<_ValType> ToOutIt(_OriItType it)
+{
+	using ItWrap = CppStdOutIteratorWrap<_OriItType, _ValType>;
+	return OutIterator<_ValType>(ItWrap::Build(it));
+}
 
 template<bool _IsConst,
 	typename _OriItType,

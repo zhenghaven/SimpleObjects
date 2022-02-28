@@ -224,3 +224,39 @@ GTEST_TEST(TestIterator, RdIterator)
 		EXPECT_TRUE(testStr.cbegin() + 3 != testStr.begin() + 2);
 	}
 }
+
+GTEST_TEST(TestIterator, OutIterator)
+{
+	// Assignment
+	{
+		std::string testStr;
+		auto it = ToOutIt<char>(std::back_inserter(testStr));
+		*it++ = 't';
+		*it++ = 'e';
+		*it++ = 's';
+		*it++ = 't';
+		*it++ = '1';
+		*it++ = '2';
+		*it++ = '3';
+		EXPECT_EQ(testStr, "test123");
+	}
+
+	// Copy
+	{
+		std::string testStr;
+		char srcStr[] = "test456";
+		auto it = ToOutIt<char>(std::back_inserter(testStr));
+		std::copy(std::begin(srcStr), std::end(srcStr) - 1, it);
+		EXPECT_EQ(testStr, "test456");
+	}
+
+	// Insert
+	{
+		std::string testStr = "t9";
+		char srcStr[] = "est78";
+		auto it = ToOutIt<char>(std::insert_iterator<std::string>(
+			testStr, testStr.begin() + 1));
+		std::copy(std::begin(srcStr), std::end(srcStr) - 1, it);
+		EXPECT_EQ(testStr, "test789");
+	}
+}
