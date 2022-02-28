@@ -13,6 +13,8 @@
 #include "Object.hpp"
 #include "HashableObject.hpp"
 
+#include "ToStringImpl.hpp"
+
 #ifndef SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE
 namespace SimpleObjects
 #else

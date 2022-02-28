@@ -98,3 +98,27 @@ GTEST_TEST(TestNull, BaseCompare)
 	EXPECT_THROW(*ObjPtr(new Null()) >= *ObjPtr(new Null()), UnsupportedOperation);
 	EXPECT_THROW(*ObjPtr(new Null()) <= *ObjPtr(new Null()), UnsupportedOperation);
 }
+
+GTEST_TEST(TestNull, ToString)
+{
+	const std::string expRes = "null";
+	// DebugString
+	{
+		EXPECT_EQ(Null().DebugString(), expRes);
+		EXPECT_EQ(Null().ShortDebugString(), expRes);
+		EXPECT_EQ(testing::PrintToString(Null()), "<" + expRes + ">");
+	}
+
+	// ToString
+	{
+		EXPECT_EQ(Null().ToString(), expRes);
+	}
+
+	// DumpString
+	{
+		std::string res;
+		EXPECT_NO_THROW(
+			Null().DumpString(ToOutIt<char>(std::back_inserter(res))));
+		EXPECT_EQ(res, expRes);
+	}
+}

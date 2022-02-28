@@ -52,6 +52,29 @@ public:
 		// TODO: make_unique
 		return std::unique_ptr<Self>(new Self(std::move(*this)));
 	}
+
+	virtual std::string DebugString() const override
+	{
+		return "UnkownType";
+	}
+
+	virtual std::string ShortDebugString() const override
+	{
+		return DebugString();
+	}
+
+	virtual ToStringType ToString() const override
+	{
+		return Internal::ToString<ToStringType>("UnkownType");
+	}
+
+	virtual void DumpString(OutIterator<typename ToStringType::value_type> outIt) const override
+	{
+		using StrValType = typename ToStringType::value_type;
+		static constexpr StrValType str[] = "UnkownType";
+		std::copy(std::begin(str), std::end(str) - 1, outIt);
+	}
+
 }; // class UnkownType
 
 } // namespace

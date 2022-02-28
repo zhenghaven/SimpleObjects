@@ -1264,3 +1264,211 @@ GTEST_TEST(TestNumeric, BaseIsGreaterThan)
 
 	EXPECT_FALSE(*ObjPtr(new Bool(true)) <= *ObjPtr(new Int8(0)));
 }
+
+GTEST_TEST(TestNumeric, ToString)
+{
+	{
+		const std::string expRes = "true";
+		// DebugString
+		{
+			EXPECT_EQ(Bool(true).DebugString(), expRes);
+			EXPECT_EQ(Bool(true).ShortDebugString(), expRes);
+		}
+		// ToString & DumpString
+		{
+			EXPECT_EQ(Bool(true).ToString(), expRes);
+
+			std::string res;
+			EXPECT_NO_THROW(
+				Bool(true).DumpString(ToOutIt<char>(std::back_inserter(res))));
+			EXPECT_EQ(res, expRes);
+		}
+	}
+	{
+		const std::string expRes = "false";
+		// DebugString
+		{
+			EXPECT_EQ(Bool(false).DebugString(), expRes);
+			EXPECT_EQ(Bool(false).ShortDebugString(), expRes);
+		}
+		// ToString & DumpString
+		{
+			EXPECT_EQ(Bool(false).ToString(), expRes);
+
+			std::string res;
+			EXPECT_NO_THROW(
+				Bool(false).DumpString(ToOutIt<char>(std::back_inserter(res))));
+			EXPECT_EQ(res, expRes);
+		}
+	}
+	{
+		const std::string expRes = "123";
+		// DebugString
+		{
+			EXPECT_EQ(Int8(123).DebugString(), expRes);
+			EXPECT_EQ(Int8(123).ShortDebugString(), expRes);
+		}
+		// ToString & DumpString
+		{
+			EXPECT_EQ(Int8(123).ToString(), expRes);
+
+			std::string res;
+			EXPECT_NO_THROW(
+				Int8(123).DumpString(ToOutIt<char>(std::back_inserter(res))));
+			EXPECT_EQ(res, expRes);
+		}
+	}
+	{
+		const std::string expRes = "123";
+		// DebugString
+		{
+			EXPECT_EQ(Int16(123).DebugString(), expRes);
+			EXPECT_EQ(Int16(123).ShortDebugString(), expRes);
+		}
+		// ToString & DumpString
+		{
+			EXPECT_EQ(Int16(123).ToString(), expRes);
+
+			std::string res;
+			EXPECT_NO_THROW(
+				Int16(123).DumpString(ToOutIt<char>(std::back_inserter(res))));
+			EXPECT_EQ(res, expRes);
+		}
+	}
+	{
+		const std::string expRes = "123";
+		// DebugString
+		{
+			EXPECT_EQ(Int32(123).DebugString(), expRes);
+			EXPECT_EQ(Int32(123).ShortDebugString(), expRes);
+		}
+		// ToString & DumpString
+		{
+			EXPECT_EQ(Int32(123).ToString(), expRes);
+
+			std::string res;
+			EXPECT_NO_THROW(
+				Int32(123).DumpString(ToOutIt<char>(std::back_inserter(res))));
+			EXPECT_EQ(res, expRes);
+		}
+	}
+	{
+		const std::string expRes = "123";
+		// DebugString
+		{
+			EXPECT_EQ(Int64(123).DebugString(), expRes);
+			EXPECT_EQ(Int64(123).ShortDebugString(), expRes);
+		}
+		// ToString & DumpString
+		{
+			EXPECT_EQ(Int64(123).ToString(), expRes);
+
+			std::string res;
+			EXPECT_NO_THROW(
+				Int64(123).DumpString(ToOutIt<char>(std::back_inserter(res))));
+			EXPECT_EQ(res, expRes);
+		}
+	}
+	{
+		const std::string expRes = "123";
+		// DebugString
+		{
+			EXPECT_EQ(UInt8(123).DebugString(), expRes);
+			EXPECT_EQ(UInt8(123).ShortDebugString(), expRes);
+		}
+		// ToString & DumpString
+		{
+			EXPECT_EQ(UInt8(123).ToString(), expRes);
+
+			std::string res;
+			EXPECT_NO_THROW(
+				UInt8(123).DumpString(ToOutIt<char>(std::back_inserter(res))));
+			EXPECT_EQ(res, expRes);
+		}
+	}
+	{
+		const std::string expRes = "123";
+		// DebugString
+		{
+			EXPECT_EQ(UInt16(123).DebugString(), expRes);
+			EXPECT_EQ(UInt16(123).ShortDebugString(), expRes);
+		}
+		// ToString & DumpString
+		{
+			EXPECT_EQ(UInt16(123).ToString(), expRes);
+
+			std::string res;
+			EXPECT_NO_THROW(
+				UInt16(123).DumpString(ToOutIt<char>(std::back_inserter(res))));
+			EXPECT_EQ(res, expRes);
+		}
+	}
+	{
+		const std::string expRes = "123";
+		// DebugString
+		{
+			EXPECT_EQ(UInt32(123).DebugString(), expRes);
+			EXPECT_EQ(UInt32(123).ShortDebugString(), expRes);
+		}
+		// ToString & DumpString
+		{
+			EXPECT_EQ(UInt32(123).ToString(), expRes);
+
+			std::string res;
+			EXPECT_NO_THROW(
+				UInt32(123).DumpString(ToOutIt<char>(std::back_inserter(res))));
+			EXPECT_EQ(res, expRes);
+		}
+	}
+	{
+		const std::string expRes = "123";
+		// DebugString
+		{
+			EXPECT_EQ(UInt64(123).DebugString(), expRes);
+			EXPECT_EQ(UInt64(123).ShortDebugString(), expRes);
+		}
+		// ToString & DumpString
+		{
+			EXPECT_EQ(UInt64(123).ToString(), expRes);
+
+			std::string res;
+			EXPECT_NO_THROW(
+				UInt64(123).DumpString(ToOutIt<char>(std::back_inserter(res))));
+			EXPECT_EQ(res, expRes);
+		}
+	}
+	{
+		const std::string expRes = "0.0";
+		// DebugString
+		{
+			EXPECT_EQ(Float(0.0).DebugString(), expRes);
+			EXPECT_EQ(Float(0.0).ShortDebugString(), expRes);
+		}
+		// ToString & DumpString
+		{
+			EXPECT_EQ(Float(0.0).ToString(), expRes);
+
+			std::string res;
+			EXPECT_NO_THROW(
+				Float(0.0).DumpString(ToOutIt<char>(std::back_inserter(res))));
+			EXPECT_EQ(res, expRes);
+		}
+	}
+	{
+		const std::string expRes = "0.0";
+		// DebugString
+		{
+			EXPECT_EQ(Double(0.0).DebugString(), expRes);
+			EXPECT_EQ(Double(0.0).ShortDebugString(), expRes);
+		}
+		// ToString & DumpString
+		{
+			EXPECT_EQ(Double(0.0).ToString(), expRes);
+
+			std::string res;
+			EXPECT_NO_THROW(
+				Double(0.0).DumpString(ToOutIt<char>(std::back_inserter(res))));
+			EXPECT_EQ(res, expRes);
+		}
+	}
+}

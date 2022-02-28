@@ -4,6 +4,7 @@
 
 #include <algorithm>
 
+#include "ToString.hpp"
 #include "Utils.hpp"
 
 #ifndef SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE
@@ -281,6 +282,32 @@ public:
 	virtual std::unique_ptr<Base> Move(const Base* /*unused*/) override
 	{
 		return MoveImpl();
+	}
+
+	virtual std::string DebugString() const override
+	{
+		return "\"" +
+			Internal::ToString<std::string>(m_data.begin(), m_data.end()) +
+			"\"";
+	}
+
+	virtual std::string ShortDebugString() const override
+	{
+		return DebugString();
+	}
+
+	virtual ToStringType ToString() const override
+	{
+		return Internal::ToString<ToStringType>("\"") +
+			Internal::ToString<ToStringType>(m_data.begin(), m_data.end()) +
+			Internal::ToString<ToStringType>("\"");
+	}
+
+	virtual void DumpString(OutIterator<typename ToStringType::value_type> outIt) const override
+	{
+		*outIt++='\"';
+		std::copy(m_data.begin(), m_data.end(), outIt);
+		*outIt++='\"';
 	}
 
 private:

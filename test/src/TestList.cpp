@@ -293,3 +293,32 @@ GTEST_TEST(TestList, Miscs)
 	EXPECT_EQ(*mList.Move(List::Base::Base::sk_null), List({String("Test")}));
 	EXPECT_EQ(mList.size(), 0);
 }
+
+GTEST_TEST(TestList, ToString)
+{
+	std::string expRes = "[ null, 123, \"test\", { null : null } ]";
+	std::string expSRes = "[null,123,\"test\",{null:null}]";
+
+	auto testLs = List({
+		Null(), Int64(123), String("test"), Dict({
+			{Null(), Null()},}),});
+
+	// DebugString
+	{
+		EXPECT_EQ(testLs.DebugString(), expRes);
+		EXPECT_EQ(testLs.ShortDebugString(), expSRes);
+	}
+
+	// ToString
+	{
+		EXPECT_EQ(testLs.ToString(), expRes);
+	}
+
+	// DumpString
+	{
+		std::string res;
+		EXPECT_NO_THROW(
+			testLs.DumpString(ToOutIt<char>(std::back_inserter(res))));
+		EXPECT_EQ(res, expRes);
+	}
+}

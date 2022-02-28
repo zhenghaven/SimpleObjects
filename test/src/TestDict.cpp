@@ -338,3 +338,43 @@ GTEST_TEST(TestDict, Miscs)
 		Dict({{ Null(), String("test val 0") }}));
 	EXPECT_EQ(mDict.size(), 0);
 }
+
+GTEST_TEST(TestDict, ToString)
+{
+	std::string expRes1 = "{ null : \"val1\", 123 : [ \"val2\" ] }";
+	std::string expRes2 = "{ 123 : [ \"val2\" ], null : \"val1\" }";
+	std::string expSRes1 = "{null:\"val1\",123:[\"val2\"]}";
+	std::string expSRes2 = "{123:[\"val2\"],null:\"val1\"}";
+
+	auto testDc = Dict({
+		{ Null(), String("val1") },
+		{ Int64(123), List({String("val2")}) },
+	});
+
+	// DebugString
+	{
+		EXPECT_TRUE(
+			testDc.DebugString() == expRes1 ||
+			testDc.DebugString() == expRes2);
+		EXPECT_TRUE(
+			testDc.ShortDebugString() == expSRes1 ||
+			testDc.ShortDebugString() == expSRes2);
+	}
+
+	// ToString
+	{
+		EXPECT_TRUE(
+			testDc.ToString() == expRes1 ||
+			testDc.ToString() == expRes2);
+	}
+
+	// DumpString
+	{
+		std::string res;
+		EXPECT_NO_THROW(
+			testDc.DumpString(ToOutIt<char>(std::back_inserter(res))));
+		EXPECT_TRUE(
+			res == expRes1 ||
+			res == expRes2);
+	}
+}

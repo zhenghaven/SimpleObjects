@@ -1,6 +1,7 @@
 #pragma once
 
 #include "HashableBaseObject.hpp"
+#include "ToString.hpp"
 
 #ifndef SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE
 namespace SimpleObjects
@@ -74,6 +75,28 @@ public:
 	virtual std::unique_ptr<Base> Move(const Base* /*unused*/) override
 	{
 		return CopyImpl();
+	}
+
+	virtual std::string DebugString() const override
+	{
+		return "null";
+	}
+
+	virtual std::string ShortDebugString() const override
+	{
+		return DebugString();
+	}
+
+	virtual ToStringType ToString() const override
+	{
+		return Internal::ToString<ToStringType>("null");
+	}
+
+	virtual void DumpString(OutIterator<typename ToStringType::value_type> outIt) const override
+	{
+		using StrValType = typename ToStringType::value_type;
+		static constexpr StrValType str[] = "null";
+		std::copy(std::begin(str), std::end(str) - 1, outIt);
 	}
 
 private:

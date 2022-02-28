@@ -314,3 +314,32 @@ GTEST_TEST(TestString, BaseCompare)
 	EXPECT_THROW(*ObjPtr(new String("123456")) >= *ObjPtr(new Int32(123456)), UnsupportedOperation);
 	EXPECT_THROW(*ObjPtr(new String("123456")) <= *ObjPtr(new Int32(123456)), UnsupportedOperation);
 }
+
+GTEST_TEST(TestString, ToString)
+{
+	std::string expRes = "\"test string";
+	expRes.push_back('\0');
+	expRes.push_back('\"');
+
+	auto testStr = String("test string");
+	testStr.push_back('\0');
+
+	// DebugString
+	{
+		EXPECT_EQ(testStr.DebugString(), expRes);
+		EXPECT_EQ(testStr.ShortDebugString(), expRes);
+	}
+
+	// ToString
+	{
+		EXPECT_EQ(testStr.ToString(), expRes);
+	}
+
+	// DumpString
+	{
+		std::string res;
+		EXPECT_NO_THROW(
+			testStr.DumpString(ToOutIt<char>(std::back_inserter(res))));
+		EXPECT_EQ(res, expRes);
+	}
+}

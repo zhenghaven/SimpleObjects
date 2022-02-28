@@ -7,6 +7,7 @@
 
 #include "Exception.hpp"
 #include "NumericTypeInfer.hpp"
+#include "ToString.hpp"
 #include "Utils.hpp"
 
 #ifndef SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE
@@ -417,6 +418,27 @@ public:
 	virtual std::unique_ptr<Base> Move(const Base* /*unused*/) override
 	{
 		return MoveImpl();
+	}
+
+	virtual std::string DebugString() const override
+	{
+		return Internal::ToString<std::string>(m_data);
+	}
+
+	virtual std::string ShortDebugString() const override
+	{
+		return DebugString();
+	}
+
+	virtual ToStringType ToString() const override
+	{
+		return Internal::ToString<ToStringType>(m_data);
+	}
+
+	virtual void DumpString(OutIterator<typename ToStringType::value_type> outIt) const override
+	{
+		const auto str = Internal::ToString<ToStringType>(m_data);
+		std::copy(str.begin(), str.end(), outIt);
 	}
 
 protected:

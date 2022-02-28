@@ -4,6 +4,8 @@
 
 #include <memory>
 
+#include "ToString.hpp"
+
 #ifndef SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE
 namespace SimpleObjects
 #else
@@ -237,6 +239,81 @@ public:
 	const ContainerType& GetVal() const
 	{
 		return m_data;
+	}
+
+	virtual std::string DebugString() const override
+	{
+		std::string res;
+		res += '[';
+		res += ' ';
+		size_t i = 0;
+		for (const auto& item : m_data)
+		{
+			res += item.DebugString();
+			if (i < m_data.size() - 1)
+			{
+				res += ',';
+				res += ' ';
+			}
+			++i;
+		}
+		res += ' ';
+		res += ']';
+		return res;
+	}
+
+	virtual std::string ShortDebugString() const override
+	{
+		std::string res;
+		res += '[';
+		size_t i = 0;
+		for (const auto& item : m_data)
+		{
+			res += item.ShortDebugString();
+			if (i < m_data.size() - 1)
+			{
+				res += ',';
+			}
+			++i;
+		}
+		res += ']';
+		return res;
+	}
+
+	virtual ToStringType ToString() const override
+	{
+		auto res = Internal::ToString<ToStringType>("[ ");
+		size_t i = 0;
+		for (const auto& item : m_data)
+		{
+			res += item.ToString();
+			if (i < m_data.size() - 1)
+			{
+				res += Internal::ToString<ToStringType>(", ");
+			}
+			++i;
+		}
+		res += Internal::ToString<ToStringType>(" ]");
+		return res;
+	}
+
+	virtual void DumpString(OutIterator<typename ToStringType::value_type> outIt) const override
+	{
+		*outIt++ = '[';
+		*outIt++ = ' ';
+		size_t i = 0;
+		for (const auto& item : m_data)
+		{
+			item.DumpString(outIt);
+			if (i < m_data.size() - 1)
+			{
+				*outIt++ = ',';
+				*outIt++ = ' ';
+			}
+			++i;
+		}
+		*outIt++ = ' ';
+		*outIt++ = ']';
 	}
 
 private:

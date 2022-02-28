@@ -163,6 +163,26 @@ public:
 		return m_ptr->Move(unused);
 	}
 
+	virtual std::string DebugString() const override
+	{
+		return m_ptr->DebugString();
+	}
+
+	virtual std::string ShortDebugString() const override
+	{
+		return m_ptr->ShortDebugString();
+	}
+
+	virtual ToStringType ToString() const override
+	{
+		return m_ptr->ToString();
+	}
+
+	virtual void DumpString(OutIterator<typename ToStringType::value_type> outIt) const override
+	{
+		return m_ptr->DumpString(outIt);
+	}
+
 private:
 
 	BasePtr m_ptr;

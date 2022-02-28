@@ -3,6 +3,7 @@
 #include <string>
 
 #include "Exception.hpp"
+#include "Iterator.hpp"
 
 #ifndef SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE
 namespace SimpleObjects
@@ -200,6 +201,14 @@ public:
 	virtual std::unique_ptr<Self> Copy(const Self* /*unused*/) const = 0;
 
 	virtual std::unique_ptr<Self> Move(const Self* /*unused*/) = 0;
+
+	virtual std::string DebugString() const = 0;
+
+	virtual std::string ShortDebugString() const = 0;
+
+	virtual ToStringType ToString() const = 0;
+
+	virtual void DumpString(OutIterator<typename ToStringType::value_type> outIt) const = 0;
 
 }; // class BaseObject
 
