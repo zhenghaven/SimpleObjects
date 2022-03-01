@@ -124,16 +124,16 @@ GTEST_TEST(TestDict, Compare)
 	EXPECT_TRUE(Dict() != String());
 
 	// <
-	EXPECT_THROW(Dict() < Dict(), UnsupportedOperation);
+	EXPECT_THROW((void)(Dict() < Dict()), UnsupportedOperation);
 
 	// < diff obj
-	EXPECT_THROW(Dict() < String(), UnsupportedOperation);
+	EXPECT_THROW((void)(Dict() < String()), UnsupportedOperation);
 
 	// >
-	EXPECT_THROW(Dict() > Dict(), UnsupportedOperation);
+	EXPECT_THROW((void)(Dict() > Dict()), UnsupportedOperation);
 
 	// > diff obj
-	EXPECT_THROW(Dict() < String(), UnsupportedOperation);
+	EXPECT_THROW((void)(Dict() < String()), UnsupportedOperation);
 }
 
 GTEST_TEST(TestDict, Len)

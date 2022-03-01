@@ -81,7 +81,7 @@ public:
 
 GTEST_TEST(TestBaseObjects, CompareOnUnkownCat)
 {
-	EXPECT_THROW(UnkownType() != UnkownType(), UnsupportedOperation);
-	EXPECT_THROW(UnkownType() >= UnkownType(), UnsupportedOperation);
-	EXPECT_THROW(UnkownType() <= UnkownType(), UnsupportedOperation);
+	EXPECT_THROW((void)(UnkownType() != UnkownType()), UnsupportedOperation);
+	EXPECT_THROW((void)(UnkownType() >= UnkownType()), UnsupportedOperation);
+	EXPECT_THROW((void)(UnkownType() <= UnkownType()), UnsupportedOperation);
 }

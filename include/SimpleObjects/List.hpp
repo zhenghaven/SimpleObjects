@@ -169,14 +169,14 @@ public:
 		return m_data[idx];
 	}
 
-	virtual iterator Contains(const_reference other)
+	virtual iterator Contains(const_reference other) override
 	{
 		auto it = m_data.begin();
 		for (; it != m_data.end() && *it != other; ++it) {}
 		return ToRdIt<false>(it);
 	}
 
-	virtual const_iterator Contains(const_reference other) const
+	virtual const_iterator Contains(const_reference other) const override
 	{
 		auto it = m_data.begin();
 		for (; it != m_data.end() && *it != other; ++it) {}
@@ -214,12 +214,12 @@ public:
 		return m_data.data();
 	}
 
-	virtual void Insert(size_t idx, const_reference other)
+	virtual void Insert(size_t idx, const_reference other) override
 	{
 		m_data.insert(m_data.begin() + idx, other);
 	}
 
-	virtual void Remove(size_t idx)
+	virtual void Remove(size_t idx) override
 	{
 		m_data.erase(m_data.begin() + idx);
 	}
