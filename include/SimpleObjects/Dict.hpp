@@ -91,15 +91,18 @@ public:
 
 	virtual bool operator==(const Base& rhs) const override
 	{
+		// reference: https://github.com/llvm/llvm-project/blob/main/libcxx/include/unordered_map#L1877
 		if (size() != rhs.size())
 		{
 			return false;
 		}
-		auto ita = cbegin();
-		auto itb = rhs.cbegin();
-		for (; ita != cend() && itb != rhs.cend(); ++ita, ++itb)
+		auto xi = m_data.begin();
+		auto xe = m_data.end();
+		auto ye = rhs.end();
+		for (; xi != xe; ++xi)
 		{
-			if (*ita != *itb)
+			auto yj = rhs.find(xi->first);
+			if (yj == ye || !(*xi == *yj))
 			{
 				return false;
 			}
@@ -113,7 +116,7 @@ public:
 	}
 	virtual bool operator!=(const Self& rhs) const
 	{
-		return m_data != rhs.m_data;
+		return !(m_data == rhs.m_data);
 	}
 	virtual bool operator<(const Self& rhs) const
 	{

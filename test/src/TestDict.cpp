@@ -152,6 +152,11 @@ GTEST_TEST(TestDict, Iterator)
 		{ Int64(1), String("test val 1") },
 		{ String("2"), String("test val 2") },
 	};
+	std::unordered_map<HashableObject, size_t> testCount = {
+		{ Null(), 0 },
+		{ Int64(1), 0 },
+		{ String("2"), 0 },
+	};
 	Dict cpDc = {
 		{ Null(), String("test val 0") },
 		{ Int64(1), String("test val 1") },
@@ -160,27 +165,43 @@ GTEST_TEST(TestDict, Iterator)
 	const Dict kCpDc = cpDc;
 
 	// const it
-	auto itac = testDc.cbegin();
-	auto itbc = cpDc.cbegin();
-	for(; itac != testDc.cend() && itbc != cpDc.cend(); ++itac, itbc++)
+	for(auto it = cpDc.cbegin(); it != cpDc.cend(); it++)
 	{
-		EXPECT_EQ(*itac, *itbc);
+		EXPECT_TRUE((testDc.find(it->first) != testDc.end()) &&
+			(testDc.find(it->first)->second == it->second));
+		++testCount[it->first];
 	}
+	for(auto& count: testCount)
+	{
+		EXPECT_EQ(count.second, 1);
+		count.second = 0;
+	}
+	testCount == testCount;
 
 	// const obj begin & end
-	itac = testDc.cbegin();
-	itbc = kCpDc.begin();
-	for(; itac != testDc.cend() && itbc != kCpDc.end(); ++itac, itbc++)
+	for(auto it = kCpDc.begin(); it != kCpDc.end(); ++it)
 	{
-		EXPECT_EQ(*itac, *itbc);
+		EXPECT_TRUE((testDc.find(it->first) != testDc.end()) &&
+			(testDc.find(it->first)->second == it->second));
+		++testCount[it->first];
+	}
+	for(auto& count: testCount)
+	{
+		EXPECT_EQ(count.second, 1);
+		count.second = 0;
 	}
 
 	// it
-	itac = testDc.cbegin();
-	auto itb = cpDc.begin();
-	for(; itac != testDc.cend() && itb != cpDc.end(); ++itac, itb++)
+	for(auto it = cpDc.begin(); it != cpDc.end(); it++)
 	{
-		EXPECT_EQ(*itac, *itb);
+		EXPECT_TRUE((testDc.find(it->first) != testDc.end()) &&
+			(testDc.find(it->first)->second == it->second));
+		++testCount[it->first];
+	}
+	for(auto& count: testCount)
+	{
+		EXPECT_EQ(count.second, 1);
+		count.second = 0;
 	}
 }
 
