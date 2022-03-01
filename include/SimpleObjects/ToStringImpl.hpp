@@ -81,10 +81,4 @@ inline std::string Internal::ToString(const double& val)
 	return Internal::dtoa<std::string>(val);
 }
 
-template<>
-inline std::string Internal::ToString(const char* val)
-{
-	return val;
-}
-
 } // namespace SimpleObjects

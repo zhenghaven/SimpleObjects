@@ -22,10 +22,13 @@ template<typename _OutputType, typename _InputType>
 _OutputType ToString(const _InputType& val);
 
 template<typename _OutputType>
-_OutputType ToString(const char* val);
+inline _OutputType ToString(const typename _OutputType::value_type* val)
+{
+	return val;
+}
 
 template<typename _OutputType, typename _ItType>
-_OutputType ToString(_ItType begin, _ItType end)
+inline _OutputType ToString(_ItType begin, _ItType end)
 {
 	return _OutputType(begin, end);
 }
