@@ -191,14 +191,12 @@ public:
 		return copy;
 	}
 
-	template<bool _Rhs_IsConst>
-	bool operator==(const FrIterator<_TargetType, _Rhs_IsConst>& rhs) const
+	bool operator==(const FrIterator& rhs) const
 	{
-		return m_it->GetPtr() == rhs.m_it->GetPtr();
+		return m_it->IsEqual(*rhs.m_it);
 	}
 
-	template<bool _Rhs_IsConst>
-	bool operator!=(const FrIterator<_TargetType, _Rhs_IsConst>& rhs) const
+	bool operator!=(const FrIterator& rhs) const
 	{
 		return !(*this == rhs);
 	}
@@ -303,14 +301,12 @@ public:
 		return copy;
 	}
 
-	template<bool _Rhs_IsConst>
-	bool operator==(const BiIterator<_TargetType, _Rhs_IsConst>& rhs) const
+	bool operator==(const BiIterator& rhs) const
 	{
-		return m_it->GetPtr() == rhs.m_it->GetPtr();
+		return m_it->IsEqual(*rhs.m_it);
 	}
 
-	template<bool _Rhs_IsConst>
-	bool operator!=(const BiIterator<_TargetType, _Rhs_IsConst>& rhs) const
+	bool operator!=(const BiIterator& rhs) const
 	{
 		return !(*this == rhs);
 	}
@@ -448,14 +444,12 @@ public:
 		return copy;
 	}
 
-	template<bool _Rhs_IsConst>
-	bool operator==(const RdIterator<_TargetType, _Rhs_IsConst>& rhs) const
+	bool operator==(const RdIterator& rhs) const
 	{
-		return m_it->GetPtr() == rhs.m_it->GetPtr();
+		return m_it->IsEqual(*rhs.m_it);
 	}
 
-	template<bool _Rhs_IsConst>
-	bool operator!=(const RdIterator<_TargetType, _Rhs_IsConst>& rhs) const
+	bool operator!=(const RdIterator& rhs) const
 	{
 		return !(*this == rhs);
 	}

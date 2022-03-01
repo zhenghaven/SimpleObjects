@@ -219,9 +219,8 @@ GTEST_TEST(TestIterator, RdIterator)
 		EXPECT_TRUE(testStr.begin() + 3 >= testStr.begin() + 2);
 		EXPECT_TRUE(testStr.begin() + 1 <= testStr.begin() + 2);
 
-		EXPECT_TRUE(testStr.begin() + 3 != testStr.cbegin() + 2);
-
-		EXPECT_TRUE(testStr.cbegin() + 3 != testStr.begin() + 2);
+		//EXPECT_TRUE(testStr.begin() + 3 != testStr.cbegin() + 2);
+		//EXPECT_TRUE(testStr.cbegin() + 3 != testStr.begin() + 2);
 	}
 }
 

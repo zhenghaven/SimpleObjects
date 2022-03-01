@@ -93,6 +93,7 @@ class CppStdFwIteratorWrap : public ForwardIteratorIf<_TargetType, _IsConst>
 public: // Static members:
 	using _BaseIf = ForwardIteratorIf<_TargetType, _IsConst>;
 	using _BaseIfPtr = std::unique_ptr<_BaseIf>;
+	using Self = CppStdFwIteratorWrap<_OriItType, _TargetType, _IsConst>;
 
 	typedef typename _BaseIf::difference_type         difference_type;
 	typedef typename _BaseIf::value_type              value_type;
@@ -140,9 +141,14 @@ public:
 		return *m_it;
 	}
 
-	virtual pointer GetPtr() override
+	virtual pointer GetPtr() const override
 	{
-		return &(this->GetRef());
+		return m_it.operator->();
+	}
+
+	virtual bool IsEqual(const _BaseIf& rhs) const override
+	{
+		return (this->GetPtr() == rhs.GetPtr());
 	}
 
 	virtual _BaseIfPtr Copy(const _BaseIf&) const override
@@ -209,7 +215,8 @@ public:
 
 	virtual void Increment() override { return _Base::Increment(); }
 	virtual reference GetRef() override { return _Base::GetRef(); }
-	virtual pointer GetPtr() override { return _Base::GetPtr(); }
+	virtual pointer GetPtr() const override { return _Base::GetPtr(); }
+	virtual bool IsEqual(const _BaseFwIf& rhs) const override { return _Base::IsEqual(rhs); }
 
 	virtual _BaseIfPtr Copy(const _BaseIf&) const override { return CopyImpl(); }
 	virtual _BaseFwIfPtr Copy(const _BaseFwIf&) const override { return CopyImpl(); }
@@ -287,7 +294,8 @@ public:
 	virtual void Increment() override { return _Base::Increment(); }
 	virtual void Decrement() override { return _Base::Decrement(); }
 	virtual reference GetRef() override { return _Base::GetRef(); }
-	virtual pointer GetPtr() override { return _Base::GetPtr(); }
+	virtual pointer GetPtr() const override { return _Base::GetPtr(); }
+	virtual bool IsEqual(const _BaseFwIf& rhs) const override { return _Base::IsEqual(rhs); }
 
 	virtual _BaseIfPtr Copy(const _BaseIf&) const override { return CopyImpl(); }
 	virtual _BaseFwIfPtr Copy(const _BaseFwIf&) const override { return CopyImpl(); }

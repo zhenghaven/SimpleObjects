@@ -119,7 +119,9 @@ public:
 
 	virtual reference GetRef() = 0;
 
-	virtual pointer GetPtr() = 0;
+	virtual pointer GetPtr() const = 0;
+
+	virtual bool IsEqual(const Self& rhs) const = 0;
 
 	virtual SelfPtr Copy(const Self& /*unused*/) const = 0;
 
