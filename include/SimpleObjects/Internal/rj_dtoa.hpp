@@ -194,13 +194,13 @@ inline void WriteExponent(ContainerType& buf, int K) {
 }
 
 template<typename ContainerType>
-inline void Prettify(ContainerType& buf, int k, size_t maxDecimal) {
+inline void Prettify(ContainerType& buf, int k, int16_t maxDecimal) {
 	static constexpr size_t maxSigWidth = 21;
 
-	int signAdjust = (buf.size() > 0 && buf[0] == '-') ? -1 : 0;
+	const int signAdjust = (buf.size() > 0 && buf[0] == '-') ? -1 : 0;
 	const size_t sigLen = buf.size() + signAdjust;
-	const int kk = buf.size() + signAdjust + k;  // 10^(kk-1) <= v < 10^kk
-	const int64_t maxDecimalPlaces = static_cast<int64_t>(maxDecimal);
+	const int kk = static_cast<int>(buf.size()) + signAdjust + k;  // 10^(kk-1) <= v < 10^kk
+	const int maxDecimalPlaces = maxDecimal;
 
 	if (0 <= k && kk <= maxSigWidth) {
 		// 1234e7 -> 12340000000
@@ -291,7 +291,7 @@ inline void Prettify(ContainerType& buf, int k, size_t maxDecimal) {
  * @return ContainerType The resulting string.
  */
 template<typename ContainerType>
-inline ContainerType dtoa(double value, size_t maxDecimalPlaces = 324) {
+inline ContainerType dtoa(double value, int16_t maxDecimalPlaces = 324) {
 	Double d(value);
 
 	if (d.IsZero()) {
@@ -329,7 +329,7 @@ inline ContainerType dtoa(double value, size_t maxDecimalPlaces = 324) {
  *                         A input of 0 should have the same effect as 1.
  */
 template<typename BackInserterType>
-inline void dtoa(BackInserterType it, double value, size_t maxDecimalPlaces = 324) {
+inline void dtoa(BackInserterType it, double value, int16_t maxDecimalPlaces = 324) {
 	using ContainerType = typename BackInserterType::container_type;
 
 	ContainerType str = dtoa<ContainerType>(value, maxDecimalPlaces);

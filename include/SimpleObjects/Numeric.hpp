@@ -7,6 +7,7 @@
 
 #include "Exception.hpp"
 #include "NumericTypeInfer.hpp"
+#include "PrimitiveCmp.hpp"
 #include "ToString.hpp"
 #include "Utils.hpp"
 
@@ -185,21 +186,21 @@ public:
 	template<typename _RhsValType, typename _RhsStringType>
 	SelfBool operator<(const Numeric<_RhsValType, _RhsStringType>& rhs) const
 	{
+		using namespace Internal;
 		return SelfBool(
-			Internal::
-				BoolToInt<InternalType, _RhsValType>::Convert(m_data) <
-			Internal::
-				BoolToInt<_RhsValType, InternalType>::Convert(rhs.m_data));
+			PrimitiveCmpLt(
+				BoolToInt<InternalType, _RhsValType>::Convert(m_data),
+				BoolToInt<_RhsValType, InternalType>::Convert(rhs.m_data)));
 	}
 
 	template<typename _RhsValType, typename _RhsStringType>
 	SelfBool operator>(const Numeric<_RhsValType, _RhsStringType>& rhs) const
 	{
+		using namespace Internal;
 		return SelfBool(
-			Internal::
-				BoolToInt<InternalType, _RhsValType>::Convert(m_data) >
-			Internal::
-				BoolToInt<_RhsValType, InternalType>::Convert(rhs.m_data));
+			PrimitiveCmpGt(
+				BoolToInt<InternalType, _RhsValType>::Convert(m_data),
+				BoolToInt<_RhsValType, InternalType>::Convert(rhs.m_data)));
 	}
 
 	template<typename _RhsValType, typename _RhsStringType>

@@ -120,4 +120,4 @@ inline const _ToType& DownCast(const _FromType& from)
 
 } // namespace Internal
 
-}//namespace SimpleObjects
+} // namespace SimpleObjects

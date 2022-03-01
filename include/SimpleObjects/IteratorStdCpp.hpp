@@ -158,8 +158,9 @@ public:
 
 
 template<typename _OriItType, typename _TargetType, bool _IsConst>
-class CppStdBiIteratorWrap : public CppStdFwIteratorWrap<_OriItType, _TargetType, _IsConst>,
-	public BidirectionalIteratorIf<_TargetType, _IsConst>
+class CppStdBiIteratorWrap :
+	public BidirectionalIteratorIf<_TargetType, _IsConst>,
+	public CppStdFwIteratorWrap<_OriItType, _TargetType, _IsConst>
 {
 public: // Static members:
 	using _BaseFwIf = ForwardIteratorIf<_TargetType, _IsConst>;
@@ -189,7 +190,20 @@ public: // Static members:
 
 public:
 
-	using _Base::CppStdFwIteratorWrap;
+	CppStdBiIteratorWrap(_OriItType oriIt) :
+		_BaseIf::BidirectionalIteratorIf(),
+		_Base::CppStdFwIteratorWrap(oriIt)
+	{}
+
+	CppStdBiIteratorWrap(const CppStdBiIteratorWrap& other) :
+		_BaseIf::BidirectionalIteratorIf(),
+		_Base::CppStdFwIteratorWrap(other)
+	{}
+
+	CppStdBiIteratorWrap(CppStdBiIteratorWrap&& other) :
+		_BaseIf::BidirectionalIteratorIf(),
+		_Base::CppStdFwIteratorWrap(std::forward<_BaseIf>(other))
+	{}
 
 	virtual ~CppStdBiIteratorWrap() = default;
 
@@ -216,8 +230,9 @@ private:
 }; // class CppStdBiIteratorWrap
 
 template<typename _OriItType, typename _TargetType, bool _IsConst>
-class CppStdRdIteratorWrap : public CppStdBiIteratorWrap<_OriItType, _TargetType, _IsConst>,
-	public RandomAccessIteratorIf<_TargetType, _IsConst>
+class CppStdRdIteratorWrap :
+	public RandomAccessIteratorIf<_TargetType, _IsConst>,
+	public CppStdBiIteratorWrap<_OriItType, _TargetType, _IsConst>
 {
 public: // Static members:
 	using Self = CppStdRdIteratorWrap<_OriItType, _TargetType, _IsConst>;
@@ -252,7 +267,20 @@ public: // Static members:
 
 public:
 
-	using _Base::CppStdBiIteratorWrap;
+	CppStdRdIteratorWrap(_OriItType oriIt) :
+		_BaseIf::RandomAccessIteratorIf(),
+		_Base::CppStdBiIteratorWrap(oriIt)
+	{}
+
+	CppStdRdIteratorWrap(const CppStdRdIteratorWrap& other) :
+		_BaseIf::RandomAccessIteratorIf(),
+		_Base::CppStdBiIteratorWrap(other)
+	{}
+
+	CppStdRdIteratorWrap(CppStdRdIteratorWrap&& other) :
+		_BaseIf::RandomAccessIteratorIf(),
+		_Base::CppStdBiIteratorWrap(std::forward<_BaseIf>(other))
+	{}
 
 	virtual ~CppStdRdIteratorWrap() = default;
 

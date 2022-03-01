@@ -184,14 +184,14 @@ GTEST_TEST(TestNumeric, Cast)
 		static_cast<bool>(static_cast<uint64_t>(0)));
 
 	// Float -> bool
-	EXPECT_EQ(static_cast<bool>(Float(0.001)),
-		static_cast<bool>(static_cast<float>(0.001)));
-	EXPECT_EQ(static_cast<bool>(Float(-0.001)),
-		static_cast<bool>(static_cast<float>(-0.001)));
-	EXPECT_EQ(static_cast<bool>(Float(0.0)),
-		static_cast<bool>(static_cast<float>(0.0)));
-	EXPECT_EQ(static_cast<bool>(Float(-0.0)),
-		static_cast<bool>(static_cast<float>(-0.0)));
+	EXPECT_EQ(static_cast<bool>(Float(0.001F)),
+		static_cast<bool>(static_cast<float>(0.001F)));
+	EXPECT_EQ(static_cast<bool>(Float(-0.001F)),
+		static_cast<bool>(static_cast<float>(-0.001F)));
+	EXPECT_EQ(static_cast<bool>(Float(0.0F)),
+		static_cast<bool>(static_cast<float>(0.0F)));
+	EXPECT_EQ(static_cast<bool>(Float(-0.0F)),
+		static_cast<bool>(static_cast<float>(-0.0F)));
 
 	// Double -> bool
 	EXPECT_EQ(static_cast<bool>(Double(0.001)),
