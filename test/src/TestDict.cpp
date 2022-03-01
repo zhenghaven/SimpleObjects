@@ -85,46 +85,45 @@ GTEST_TEST(TestDict, CategoryName)
 
 GTEST_TEST(TestDict, Compare)
 {
+	const Dict testDc_001122 = Dict({
+		{ Null(), String("test val 0") },
+		{ Int64(1), String("test val 1") },
+		{ String("2"), String("test val 2") },
+	});
+	const Dict testDc_001122_cp = Dict({
+		{ Null(), String("test val 0") },
+		{ Int64(1), String("test val 1") },
+		{ String("2"), String("test val 2") },
+	});
+	const Dict testDc_0011 = Dict({
+		{ Null(), String("test val 0") },
+		{ Int64(1), String("test val 1") },
+	});
+	const Dict testDc_001121 = Dict({
+		{ Null(), String("test val 0") },
+		{ Int64(1), String("test val 1") },
+		{ String("2"), String("test val 1") },
+	});
 	// ==
-	EXPECT_TRUE(
-		Dict({
-			{ Null(), String("test val 0") },
-			{ Int64(1), String("test val 1") },
-			{ String("2"), String("test val 2") },
-		}) !=
-		Dict({
-			{ Null(), String("test val 0") },
-			{ Int64(1), String("test val 1") },
-		}));
-	EXPECT_TRUE(
-		Dict({
-			{ Null(), String("test val 0") },
-			{ Int64(1), String("test val 1") },
-			{ String("2"), String("test val 2") },
-		}) !=
-		Dict({
-			{ Null(), String("test val 0") },
-			{ Int64(1), String("test val 1") },
-			{ String("2"), String("test val 1") },
-		}));
-	EXPECT_FALSE(
-		Dict({
-			{ Null(), String("test val 0") },
-			{ Int64(1), String("test val 1") },
-			{ String("2"), String("test val 2") },
-		}) !=
-		Dict({
-			{ Null(), String("test val 0") },
-			{ Int64(1), String("test val 1") },
-			{ String("2"), String("test val 2") },
-		}));
+	EXPECT_TRUE(testDc_001122 != testDc_0011);
+	EXPECT_TRUE(testDc_001122 != testDc_001121);
+	EXPECT_FALSE(testDc_001122 != testDc_001122_cp);
+	EXPECT_TRUE(testDc_001122 !=
+		static_cast<const DictBaseObj&>(testDc_0011));
+	EXPECT_TRUE(testDc_001122 !=
+		static_cast<const DictBaseObj&>(testDc_001121));
+	EXPECT_FALSE(testDc_001122 !=
+		static_cast<const DictBaseObj&>(testDc_001122_cp));
 
 	// == diff obj
 	EXPECT_TRUE(Dict() != Null());
 	EXPECT_TRUE(Dict() != String());
 
 	// <
-	EXPECT_THROW((void)(Dict() < Dict()), UnsupportedOperation);
+	EXPECT_THROW((void)(Dict() <  Dict()), UnsupportedOperation);
+	EXPECT_THROW((void)(Dict() >  Dict()), UnsupportedOperation);
+	EXPECT_THROW((void)(Dict() <= Dict()), UnsupportedOperation);
+	EXPECT_THROW((void)(Dict() >= Dict()), UnsupportedOperation);
 
 	// < diff obj
 	EXPECT_THROW((void)(Dict() < String()), UnsupportedOperation);
