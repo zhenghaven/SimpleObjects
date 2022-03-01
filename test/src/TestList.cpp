@@ -77,32 +77,37 @@ GTEST_TEST(TestList, CategoryName)
 
 GTEST_TEST(TestList, Compare)
 {
+	const List testLs_12345 =
+		List({String("Test String"), Bool(true), Int64(12345)});
+	const List testLs_12345_2 =
+		List({String("Test String"), Bool(true), Int64(12345)});
+	const List testLs_true =
+		List({String("Test String"), Bool(true)});
+	const List testLs_12000 =
+		List({String("Test String"), Bool(true), Int64(12000)});
 	// ==
-	EXPECT_TRUE(
-		List({String("Test String"), Bool(true), Int64(12345)}) !=
-		List({String("Test String"), Bool(true)}));
-	EXPECT_TRUE(
-		List({String("Test String"), Bool(true), Int64(12345)}) !=
-		List({String("Test String"), Bool(true), Int64(12000)}));
-	EXPECT_FALSE(
-		List({String("Test String"), Bool(true), Int64(12345)}) !=
-		List({String("Test String"), Bool(true), Int64(12345)}));
+	EXPECT_TRUE(testLs_12345 != testLs_true);
+	EXPECT_TRUE(testLs_12345 != testLs_12000);
+	EXPECT_FALSE(testLs_12345 != testLs_12345_2);
+	EXPECT_TRUE(testLs_12345 != static_cast<const ListBaseObj&>(testLs_true));
+	EXPECT_TRUE(testLs_12345 != static_cast<const ListBaseObj&>(testLs_12000));
+	EXPECT_FALSE(testLs_12345 != static_cast<const ListBaseObj&>(testLs_12345_2));
 
 	// == diff obj
 	EXPECT_TRUE(List() != Null());
 	EXPECT_TRUE(List() != String());
 
-	// <
-	EXPECT_THROW(List() < List(), UnsupportedOperation);
+	// List vs List
+	EXPECT_THROW((void)(List() <  List()), UnsupportedOperation);
+	EXPECT_THROW((void)(List() >  List()), UnsupportedOperation);
+	EXPECT_THROW((void)(List() <= List()), UnsupportedOperation);
+	EXPECT_THROW((void)(List() >= List()), UnsupportedOperation);
 
 	// < diff obj
-	EXPECT_THROW(List() < String(), UnsupportedOperation);
-
-	// >
-	EXPECT_THROW(List() > List(), UnsupportedOperation);
+	EXPECT_THROW((void)(List() < String()), UnsupportedOperation);
 
 	// > diff obj
-	EXPECT_THROW(List() < String(), UnsupportedOperation);
+	EXPECT_THROW((void)(List() < String()), UnsupportedOperation);
 }
 
 GTEST_TEST(TestList, Len)

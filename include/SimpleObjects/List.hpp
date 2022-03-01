@@ -104,6 +104,31 @@ public:
 		}
 		return true;
 	}
+
+	virtual bool operator==(const Self& rhs) const
+	{
+		return m_data == rhs.m_data;
+	}
+	virtual bool operator!=(const Self& rhs) const
+	{
+		return m_data != rhs.m_data;
+	}
+	virtual bool operator<(const Self& rhs) const
+	{
+		return Base::operator<(static_cast<const Base&>(rhs));
+	}
+	virtual bool operator>(const Self& rhs) const
+	{
+		return Base::operator>(static_cast<const Base&>(rhs));
+	}
+	virtual bool operator<=(const Self& rhs) const
+	{
+		return Base::operator<=(static_cast<const Base&>(rhs));
+	}
+	virtual bool operator>=(const Self& rhs) const
+	{
+		return Base::operator>=(static_cast<const Base&>(rhs));
+	}
 	using Base::operator==;
 	using Base::operator!=;
 	using Base::operator<;

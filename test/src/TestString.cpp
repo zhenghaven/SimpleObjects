@@ -252,6 +252,16 @@ GTEST_TEST(TestString, Capacity)
 	EXPECT_EQ(testStr, String(""));
 }
 
+GTEST_TEST(TestString, Compare)
+{
+	EXPECT_TRUE(String("test string1") == String("test string1"));
+	EXPECT_TRUE(String("test string1") != String("test string2"));
+	EXPECT_TRUE(String("test string1") <  String("test string2"));
+	EXPECT_TRUE(String("test string2") >  String("test string1"));
+	EXPECT_TRUE(String("test string1") <= String("test string2"));
+	EXPECT_TRUE(String("test string2") >= String("test string1"));
+}
+
 GTEST_TEST(TestString, BaseIsEqual)
 {
 	// Base object
@@ -309,10 +319,18 @@ GTEST_TEST(TestString, BaseCompare)
 	EXPECT_FALSE(*ObjPtr(new String("123466")) <= *ObjPtr(new String("123456")));
 	EXPECT_FALSE(*ObjPtr(new String("123456")) >= *ObjPtr(new String("123466")));
 
-	EXPECT_THROW(*ObjPtr(new String("123456")) >= *ObjPtr(new Null()), UnsupportedOperation);
-	EXPECT_THROW(*ObjPtr(new String("123456")) <= *ObjPtr(new Null()), UnsupportedOperation);
-	EXPECT_THROW(*ObjPtr(new String("123456")) >= *ObjPtr(new Int32(123456)), UnsupportedOperation);
-	EXPECT_THROW(*ObjPtr(new String("123456")) <= *ObjPtr(new Int32(123456)), UnsupportedOperation);
+	EXPECT_THROW(
+		(void)(*ObjPtr(new String("123456")) >= *ObjPtr(new Null())),
+		UnsupportedOperation);
+	EXPECT_THROW(
+		(void)(*ObjPtr(new String("123456")) <= *ObjPtr(new Null())),
+		UnsupportedOperation);
+	EXPECT_THROW(
+		(void)(*ObjPtr(new String("123456")) >= *ObjPtr(new Int32(123456))),
+		UnsupportedOperation);
+	EXPECT_THROW(
+		(void)(*ObjPtr(new String("123456")) <= *ObjPtr(new Int32(123456))),
+		UnsupportedOperation);
 }
 
 GTEST_TEST(TestString, ToString)

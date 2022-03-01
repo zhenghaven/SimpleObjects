@@ -118,6 +118,31 @@ public:
 		return rhs.GreaterThan(0, rhs.size(), ptr, ptr + size());
 	}
 
+	virtual bool operator==(const Self& rhs) const
+	{
+		return m_data == rhs.m_data;
+	}
+	virtual bool operator!=(const Self& rhs) const
+	{
+		return m_data != rhs.m_data;
+	}
+	virtual bool operator<(const Self& rhs) const
+	{
+		return m_data < rhs.m_data;
+	}
+	virtual bool operator>(const Self& rhs) const
+	{
+		return m_data > rhs.m_data;
+	}
+	virtual bool operator<=(const Self& rhs) const
+	{
+		return m_data <= rhs.m_data;
+	}
+	virtual bool operator>=(const Self& rhs) const
+	{
+		return m_data >= rhs.m_data;
+	}
+
 	virtual std::size_t Hash() const override
 	{
 		return std::hash<ContainerType>()(m_data);
@@ -127,6 +152,12 @@ public:
 	{
 		return m_data.size();
 	}
+	using Base::operator==;
+	using Base::operator!=;
+	using Base::operator<;
+	using Base::operator>;
+	using Base::operator<=;
+	using Base::operator>=;
 
 	using Base::begin;
 	using Base::end;
