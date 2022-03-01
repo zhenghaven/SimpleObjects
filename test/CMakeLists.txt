@@ -70,7 +70,7 @@ add_executable(SimpleObjects_test ${SOURCES})
 target_link_libraries(SimpleObjects_test SimpleObjects gtest) #SimpleUtf
 
 if(MSVC)
-	target_compile_options(SimpleObjects_test PUBLIC /GR)
+	target_compile_options(SimpleObjects_test PUBLIC /GR /Zc:__cplusplus)
 endif()
 
 add_test(NAME SimpleObjects_test
