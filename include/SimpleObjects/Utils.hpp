@@ -98,7 +98,7 @@ inline _ToType& DownCast(_FromType& from)
 	static_assert(std::is_base_of<_FromType, _ToType>::value,
 		"This function should only be used for downcasting.");
 
-#ifndef SIMPLEOBJECTS_DOWNCAST_USE_DYNAMIC_CAST
+#ifdef SIMPLEOBJECTS_DOWNCAST_USE_STATIC_CAST
 	return static_cast<_ToType&>(from);
 #else
 	return dynamic_cast<_ToType&>(from);
@@ -111,7 +111,7 @@ inline const _ToType& DownCast(const _FromType& from)
 	static_assert(std::is_base_of<_FromType, _ToType>::value,
 		"This function should only be used for downcasting.");
 
-#ifndef SIMPLEOBJECTS_DOWNCAST_USE_DYNAMIC_CAST
+#ifdef SIMPLEOBJECTS_DOWNCAST_USE_STATIC_CAST
 	return static_cast<const _ToType&>(from);
 #else
 	return dynamic_cast<const _ToType&>(from);

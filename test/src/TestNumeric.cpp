@@ -448,9 +448,11 @@ GTEST_TEST(TestNumeric, Operation)
 
 	// /
 	auto res32nu16 = Int32(23) / UInt16(12);
-	EXPECT_EQ(res32nu16.GetVal(), static_cast<int32_t>(23) / static_cast<uint16_t>(12));
+	EXPECT_NEAR(res32nu16.GetVal(), static_cast<int32_t>(23) / static_cast<uint16_t>(12),
+		0.0001);
 	auto res32ndbl = Int32(23) / Double(2.2);
-	EXPECT_EQ(res32ndbl.GetVal(), static_cast<int32_t>(23) / static_cast<double>(2.2));
+	EXPECT_NEAR(res32ndbl.GetVal(), static_cast<int32_t>(23) / static_cast<double>(2.2),
+		0.0001);
 
 	// %
 	auto res32n16 = Int32(23) % Int16(12);

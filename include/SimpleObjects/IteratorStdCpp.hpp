@@ -148,7 +148,8 @@ public:
 
 	virtual bool IsEqual(const _BaseIf& rhs) const override
 	{
-		return (this->GetPtr() == rhs.GetPtr());
+		const auto& otherWrap = Internal::DownCast<Self>(rhs);
+		return (m_it == otherWrap.m_it);
 	}
 
 	virtual _BaseIfPtr Copy(const _BaseIf&) const override

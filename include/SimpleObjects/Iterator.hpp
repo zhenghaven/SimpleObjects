@@ -191,6 +191,8 @@ public:
 		return copy;
 	}
 
+	// NOTE: we cannot compare iterator vs const_iterator for now, because we
+	// are using Downcast in the CppStdIterator implementation
 	bool operator==(const FrIterator& rhs) const
 	{
 		return m_it->IsEqual(*rhs.m_it);
