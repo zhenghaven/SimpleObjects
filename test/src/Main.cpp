@@ -12,6 +12,9 @@ int main(int argc, char** argv)
 	std::cout << "===== SimpleObjects test program =====" << std::endl;
 	std::cout << std::endl;
 
+	std::cout << "EXPECTED_NUM_OF_TEST_FILE = " << EXPECTED_NUM_OF_TEST_FILE << std::endl;
+	std::cout << "__cplusplus = " << __cplusplus << std::endl;
+
 	std::cout << std::endl;
 	std::cout << "===== SimpleObjects test start   =====" << std::endl;
 

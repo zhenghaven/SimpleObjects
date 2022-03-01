@@ -176,7 +176,6 @@ GTEST_TEST(TestDict, Iterator)
 		EXPECT_EQ(count.second, 1);
 		count.second = 0;
 	}
-	testCount == testCount;
 
 	// const obj begin & end
 	for(auto it = kCpDc.begin(); it != kCpDc.end(); ++it)
