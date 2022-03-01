@@ -971,7 +971,8 @@ GTEST_TEST(TestNumeric, BaseIsEqual)
 	EXPECT_EQ(*ObjPtr(new Double(1.0)) != *ObjPtr(new Double(2.0)), 1.0 != 2.0);
 
 	// Unsupported extensions
-	EXPECT_THROW(*ObjPtr(new Int8(1)) != *ObjPtr(new Int8Ext(1)),
+	EXPECT_THROW(
+		(void)(*ObjPtr(new Int8(1)) != *ObjPtr(new Int8Ext(1))),
 		UnsupportedOperation);
 
 

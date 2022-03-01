@@ -95,8 +95,12 @@ GTEST_TEST(TestNull, BaseCompare)
 
 	EXPECT_EQ(*ObjPtr(new Null()) != *ObjPtr(new Null()), nullptr != nullptr);
 
-	EXPECT_THROW(*ObjPtr(new Null()) >= *ObjPtr(new Null()), UnsupportedOperation);
-	EXPECT_THROW(*ObjPtr(new Null()) <= *ObjPtr(new Null()), UnsupportedOperation);
+	EXPECT_THROW(
+		(void)(*ObjPtr(new Null()) >= *ObjPtr(new Null())),
+		UnsupportedOperation);
+	EXPECT_THROW(
+		(void)(*ObjPtr(new Null()) <= *ObjPtr(new Null())),
+		UnsupportedOperation);
 }
 
 GTEST_TEST(TestNull, ToString)
