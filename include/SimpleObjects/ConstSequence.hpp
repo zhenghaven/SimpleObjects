@@ -42,6 +42,9 @@ struct DataSeq
 	template<size_t Len>
 	using StripTail = typename Internal::StripDataTailImpl<Len, ValType, data...>::type;
 
+	template<template<typename, _DataType...> typename _OtherType>
+	using ToOther = _OtherType<ValType, data...>;
+
 	static constexpr size_t sk_size = sizeof...(data);
 
 	using CArrayType = ValType[sk_size];

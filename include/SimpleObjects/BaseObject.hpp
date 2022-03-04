@@ -26,6 +26,7 @@ enum class ObjCategory
 	String,
 	List,
 	Dict,
+	StaticDict,
 };
 
 enum class NumericType
@@ -64,6 +65,10 @@ template<typename _ValType,  typename _ToStringType>
 class ListBaseObject;
 template<typename _KeyType,  typename _ValType,     typename _ToStringType>
 class DictBaseObject;
+template<typename _KeyType,  typename _ValType,     typename _ToStringType>
+class StaticDictBaseObject;
+template<typename _ToStringType>
+class HashableBaseObject;
 
 template<typename _ToStringType>
 class HashableObjectImpl;
@@ -90,6 +95,10 @@ public: // Static members:
 	using DictBase    = DictBaseObject<HashableObjectImpl<ToStringType>,
 		                               ObjectImpl<ToStringType>,
 		                               ToStringType>;
+
+	using StatDictBase = StaticDictBaseObject<HashableBaseObject<ToStringType>,
+		                                      BaseObject<ToStringType>,
+		                                      ToStringType>;
 
 	static constexpr Self* sk_null = nullptr;
 
@@ -201,6 +210,16 @@ public:
 	virtual const DictBase& AsDict() const
 	{
 		throw TypeError("Dict", this->GetCategoryName());
+	}
+
+	virtual StatDictBase& AsStaticDict()
+	{
+		throw TypeError("StaticDict", this->GetCategoryName());
+	}
+
+	virtual const StatDictBase& AsStaticDict() const
+	{
+		throw TypeError("StaticDict", this->GetCategoryName());
 	}
 
 	virtual std::unique_ptr<Self> Copy(const Self* /*unused*/) const = 0;

@@ -11,6 +11,7 @@
 #include "StringBaseObject.hpp"
 #include "ListBaseObject.hpp"
 #include "DictBaseObject.hpp"
+#include "StaticDictBaseObject.hpp"
 
 #ifndef SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE
 namespace SimpleObjects
@@ -44,6 +45,8 @@ inline bool BaseObject<_ToStringType>::operator==(const BaseObject<_ToStringType
 			return this->AsList() == rhs.AsList();
 		case ObjCategory::Dict:
 			return this->AsDict() == rhs.AsDict();
+		case ObjCategory::StaticDict:
+			return this->AsStaticDict() == rhs.AsStaticDict();
 		default:
 			throw UnsupportedOperation("==",
 				this->GetCategoryName(),
@@ -81,6 +84,7 @@ inline bool BaseObject<_ToStringType>::operator<(const BaseObject<_ToStringType>
 		case ObjCategory::Null:
 		case ObjCategory::List:
 		case ObjCategory::Dict:
+		case ObjCategory::StaticDict:
 		default:
 			break;
 		}
@@ -115,6 +119,7 @@ inline bool BaseObject<_ToStringType>::operator>(const BaseObject<_ToStringType>
 		case ObjCategory::Null:
 		case ObjCategory::List:
 		case ObjCategory::Dict:
+		case ObjCategory::StaticDict:
 		default:
 			break;
 		}

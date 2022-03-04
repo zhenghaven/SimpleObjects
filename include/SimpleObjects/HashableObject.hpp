@@ -29,11 +29,12 @@ public: // Static members
 
 	using BasePtr = std::unique_ptr<Base>;
 
-	using NullBase    = typename Base::NullBase;
-	using NumericBase = typename Base::NumericBase;
-	using StringBase  = typename Base::StringBase;
-	using ListBase    = typename Base::ListBase;
-	using DictBase    = typename Base::DictBase;
+	using NullBase     = typename Base::NullBase;
+	using NumericBase  = typename Base::NumericBase;
+	using StringBase   = typename Base::StringBase;
+	using ListBase     = typename Base::ListBase;
+	using DictBase     = typename Base::DictBase;
+	using StatDictBase = typename Base::StatDictBase;
 
 public:
 	HashableObjectImpl() :
@@ -147,6 +148,16 @@ public:
 	virtual const DictBase& AsDict() const override
 	{
 		return m_ptr->AsDict();
+	}
+
+	virtual StatDictBase& AsStaticDict() override
+	{
+		return m_ptr->AsStaticDict();
+	}
+
+	virtual const StatDictBase& AsStaticDict() const override
+	{
+		return m_ptr->AsStaticDict();
 	}
 
 	// HashableBaseObject virtual functions

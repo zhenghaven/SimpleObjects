@@ -27,11 +27,12 @@ public: // Static members
 	using Self = ObjectImpl<_ToStringType>;
 	using Base = BaseObject<_ToStringType>;
 
-	using NullBase    = typename Base::NullBase;
-	using NumericBase = typename Base::NumericBase;
-	using StringBase  = typename Base::StringBase;
-	using ListBase    = typename Base::ListBase;
-	using DictBase    = typename Base::DictBase;
+	using NullBase     = typename Base::NullBase;
+	using NumericBase  = typename Base::NumericBase;
+	using StringBase   = typename Base::StringBase;
+	using ListBase     = typename Base::ListBase;
+	using DictBase     = typename Base::DictBase;
+	using StatDictBase = typename Base::StatDictBase;
 
 	using BasePtr = std::unique_ptr<Base>;
 
@@ -147,6 +148,16 @@ public:
 	virtual const DictBase& AsDict() const override
 	{
 		return m_ptr->AsDict();
+	}
+
+	virtual StatDictBase& AsStaticDict() override
+	{
+		return m_ptr->AsStaticDict();
+	}
+
+	virtual const StatDictBase& AsStaticDict() const override
+	{
+		return m_ptr->AsStaticDict();
 	}
 
 	virtual std::unique_ptr<Base> Copy(const Base* unused) const override
