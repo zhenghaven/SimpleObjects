@@ -47,6 +47,9 @@ public:
 	const _StrType key;
 }; // class StaticString
 
+namespace Internal
+{
+
 /**
  * @brief Convert from const data sequence to static string class type
  *
@@ -121,9 +124,6 @@ struct DTupleFindElement
 template<typename _Tp, typename _KeyRefType, typename _ValRefType>
 struct DTupleToArray
 {
-	//
-	// std::reference_wrapper<_ValType>
-
 	using ArrayType = std::array<
 		std::pair<_KeyRefType, _ValRefType>,
 		std::tuple_size<_Tp>::value
@@ -150,14 +150,41 @@ struct DTupleToArray
 	}
 }; // struct DTupleToArray
 
+template<
+	typename _Tp,
+	typename _KeyRefType,
+	typename _ValRefType,
+	template<typename, typename> typename _MapType>
+struct DTupleToMap
+{
+	using MapType = _MapType<_KeyRefType,_ValRefType>;
+
+	struct ItemFuncType {
+		template <typename ItemType>
+		typename MapType::value_type
+		operator()(ItemType& item) const
+		{
+			return typename MapType::value_type(
+				std::get<0>(item).key,
+				std::get<1>(item)
+			);
+		}
+	}; // struct ItemFuncType
+
+	static MapType Convert(_Tp& tp)
+	{
+		return Internal::TupleToAggregate<MapType, _Tp>::Convert(
+			tp,
+			ItemFuncType()
+		);
+	}
+}; // struct DTupleToMap
+
+} // namespace Internal
+
 //template<typename
 class StaticDict
 {
 
 };
-
-namespace Internal
-{
-
-} // namespace Internal
 } // namespace SimpleObjects

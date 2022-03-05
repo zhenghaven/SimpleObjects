@@ -9,7 +9,6 @@
 
 #include <algorithm>
 
-#include <SimpleObjects/StaticDict.hpp>
 #include <SimpleObjects/DefaultTypes.hpp>
 
 #ifndef SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE
@@ -27,13 +26,6 @@ GTEST_TEST(TestStaticDict, CountTestFile)
 {
 	static auto tmp = ++SimpleObjects_Test::g_numOfTestFile;
 }
-
-//=====
-template<typename _ValType, _ValType ..._data>
-using FromStrSeq = FromDataSeqImpl<String, _ValType, _data...>;
-template<typename _StrSeq>
-using StrKey = typename _StrSeq::template ToOther<FromStrSeq>::type;
-//=====
 
 GTEST_TEST(TestStaticDict, StaticString)
 {
@@ -97,47 +89,84 @@ GTEST_TEST(TestStaticDict, KeyValuePairs)
 
 	// Tuple find element
 	static_assert(std::is_same<
-		typename DTupleFindElement<Key1, Tp>::type,
+		typename Internal::DTupleFindElement<Key1, Tp>::type,
 		String>::value,
 		"Implementation Error");
-	static_assert(DTupleFindElement<Key1, Tp>::index == 0,
+	static_assert(Internal::DTupleFindElement<Key1, Tp>::index == 0,
 		"Implementation Error");
 	static_assert(std::is_same<
-		typename DTupleFindElement<Key2, Tp>::type,
+		typename Internal::DTupleFindElement<Key2, Tp>::type,
 		Int64>::value,
 		"Implementation Error");
-	static_assert(DTupleFindElement<Key2, Tp>::index == 1,
+	static_assert(Internal::DTupleFindElement<Key2, Tp>::index == 1,
 		"Implementation Error");
 	static_assert(std::is_same<
-		typename DTupleFindElement<Key3, Tp>::type,
+		typename Internal::DTupleFindElement<Key3, Tp>::type,
 		List>::value,
 		"Implementation Error");
-	static_assert(DTupleFindElement<Key3, Tp>::index == 2,
+	static_assert(Internal::DTupleFindElement<Key3, Tp>::index == 2,
 		"Implementation Error");
 	//    Will cause compile error
 	// static_assert(std::is_same<
-	// 	typename DTupleFindElement<KeyX, Tp>::type,
+	// 	typename Internal::DTupleFindElement<KeyX, Tp>::type,
 	// 	List>::value,
 	// 	"Implementation Error");
 
 
 
 	// Reference types
-	using KeyRefType = std::reference_wrapper<
-		typename std::add_const<HashableBaseObj>::type
-	>;
-	using ValRefType = std::reference_wrapper<
-		typename std::add_const<BaseObj>::type
-	>;
+	// using KeyRefType = std::reference_wrapper<
+	// 	typename std::add_const<HashableBaseObj>::type
+	// >;
+	using KeyRefType = HashableBaseKRef;
+	using ValRefType = BaseRef;
 
 	// Instantiate Tuple
 	Tp tp1;
 
 	// Reference array
-	const auto refArray = DTupleToArray<Tp,
+	const auto refArray = Internal::DTupleToArray<Tp,
 		KeyRefType,
 		ValRefType>::Convert(tp1);
+	// Reference map
+	const auto refMap = Internal::DTupleToMap<Tp,
+		KeyRefType,
+		ValRefType,
+		MapType>::Convert(tp1);
 
+	// ensures the pointers are the same
+	//    Array
+	//        Key address
+	EXPECT_EQ(&refArray[0].first.get(), &std::get<0>(tp1).first.key);
+	EXPECT_EQ(&refArray[1].first.get(), &std::get<1>(tp1).first.key);
+	EXPECT_EQ(&refArray[2].first.get(), &std::get<2>(tp1).first.key);
+	//        Value address
+	EXPECT_EQ(&refArray[0].second.get(),
+		&static_cast<BaseObj&>(std::get<0>(tp1).second));
+	EXPECT_EQ(&refArray[1].second.get(),
+		&static_cast<BaseObj&>(std::get<1>(tp1).second));
+	EXPECT_EQ(&refArray[2].second.get(),
+		&static_cast<BaseObj&>(std::get<2>(tp1).second));
+	//    Dict
+	//        Key address
+	const auto findKey1 = String("Key1");
+	const auto findKey2 = String("Key2");
+	const auto findKey3 = String("Key3");
+	EXPECT_EQ(&(refMap.find(findKey1)->first.get()),
+		&std::get<0>(tp1).first.key);
+	EXPECT_EQ(&(refMap.find(findKey2)->first.get()),
+		&std::get<1>(tp1).first.key);
+	EXPECT_EQ(&(refMap.find(findKey3)->first.get()),
+		&std::get<2>(tp1).first.key);
+	//        Value address
+	EXPECT_EQ(&(refMap.find(findKey1)->second.get()),
+		&static_cast<BaseObj&>(std::get<0>(tp1).second));
+	EXPECT_EQ(&(refMap.find(findKey2)->second.get()),
+		&static_cast<BaseObj&>(std::get<1>(tp1).second));
+	EXPECT_EQ(&(refMap.find(findKey3)->second.get()),
+		&static_cast<BaseObj&>(std::get<2>(tp1).second));
+
+	//    ensures the initial values are correct
 	EXPECT_EQ(refArray[0].first.get(), String("Key1"));
 	EXPECT_EQ(refArray[1].first.get(), String("Key2"));
 	EXPECT_EQ(refArray[2].first.get(), String("Key3"));
@@ -146,11 +175,27 @@ GTEST_TEST(TestStaticDict, KeyValuePairs)
 	EXPECT_EQ(refArray[1].second.get(), Int64());
 	EXPECT_EQ(refArray[2].second.get(), List());
 
+	EXPECT_EQ((refMap.find(findKey1)->second.get()),
+		String());
+	EXPECT_EQ((refMap.find(findKey2)->second.get()),
+		Int64());
+	EXPECT_EQ((refMap.find(findKey3)->second.get()),
+		List());
+
+	//    change values in tuples
 	std::get<0>(tp1).second = String("ref array val1");
 	std::get<1>(tp1).second = Int64(12345);
 	std::get<2>(tp1).second = List({Null()});
 
+	//    ensures the change is reflected in the tuple
 	EXPECT_EQ(refArray[0].second.get(), String("ref array val1"));
 	EXPECT_EQ(refArray[1].second.get(), Int64(12345));
 	EXPECT_EQ(refArray[2].second.get(), List({Null()}));
+
+	EXPECT_EQ((refMap.find(findKey1)->second.get()),
+		String("ref array val1"));
+	EXPECT_EQ((refMap.find(findKey2)->second.get()),
+		Int64(12345));
+	EXPECT_EQ((refMap.find(findKey3)->second.get()),
+		List({Null()}));
 }

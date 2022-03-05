@@ -18,6 +18,9 @@
 #include "Object.hpp"
 #include "HashableObject.hpp"
 
+#include "ConstSequence.hpp"
+#include "StaticDict.hpp"
+
 #include "ToStringImpl.hpp"
 
 #ifndef SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE
@@ -91,5 +94,15 @@ using NumericBaseObj = NumericBaseObject<std::string>;
 using StringBaseObj = StringBaseObject<char, std::string>;
 using ListBaseObj = ListBaseObject<Object, std::string>;
 using DictBaseObj = DictBaseObject<HashableObject, Object, std::string>;
+
+// ========== Convenient types of static Dict ==========
+
+using BaseRef = std::reference_wrapper<BaseObj>;
+using HashableBaseKRef = HashableBaseReferenceWrapper<std::string, true>;
+
+template<typename _ValType, _ValType ..._data>
+using FromStrSeq = Internal::FromDataSeqImpl<String, _ValType, _data...>;
+template<typename _StrSeq>
+using StrKey = typename _StrSeq::template ToOther<FromStrSeq>::type;
 
 }//namespace SimpleObjects

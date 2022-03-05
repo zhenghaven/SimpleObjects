@@ -107,6 +107,9 @@ struct StrSeq : public DataSeq<char, chars...>
 	}
 }; // struct StrSeq
 
+namespace Internal
+{
+
 template<size_t arrayLen, typename _DataType, _DataType... data>
 struct ToSequence;
 
@@ -121,9 +124,6 @@ struct ToSequence<arrayLen, char, data...>
 {
 	using type = typename StrSeq<data...>::template StripStrTail<arrayLen - 1>;
 }; // struct ToSequence
-
-namespace Internal
-{
 
 template<typename T, T headArg, T... args>
 struct StripDataTailImpl<1, T, headArg, args...>
@@ -173,7 +173,7 @@ constexpr T ArrayLen(const T(&)[n])
 		::SimpleObjects::Internal::ArrayGetI<(I)>(S),\
 		::SimpleObjects::Internal::ArrayGetI<(I) + 1>(S)
 #	define SIMPLEOBJECTS_TO_SEQUENCE(L,T,D) \
-		::SimpleObjects::ToSequence< L, T, D >::type
+		::SimpleObjects::Internal::ToSequence< L, T, D >::type
 #	define SIMPLEOBJECTS_ARRAY_LEN(A) \
 		::SimpleObjects::Internal::ArrayLen(A)
 #else

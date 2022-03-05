@@ -64,11 +64,47 @@ public:
 
 }; // class HashableBaseObject
 
+template<typename _ToStringType, bool _IsConst>
+class HashableBaseReferenceWrapper :
+	public std::reference_wrapper<
+		typename std::conditional<
+			_IsConst,
+			typename std::add_const<HashableBaseObject<_ToStringType> >::type,
+			HashableBaseObject<_ToStringType> >::type>
+{
+public: // static members:
+
+	using Base = std::reference_wrapper<
+		typename std::conditional<
+			_IsConst,
+			typename std::add_const<HashableBaseObject<_ToStringType> >::type,
+			HashableBaseObject<_ToStringType> >::type>;
+	using Self = HashableBaseReferenceWrapper<_ToStringType, _IsConst>;
+
+public:
+
+	using Base::reference_wrapper;
+
+	virtual ~HashableBaseReferenceWrapper() = default;
+
+	bool operator==(const Self& rhs) const
+	{
+		return this->get() == rhs.get();
+	}
+
+	bool operator<(const Self& rhs) const
+	{
+		return this->get() < rhs.get();
+	}
+
+}; // class HashableBaseReferenceWrapper
+
 }//namespace SimpleObjects
 
 // ========== Hash ==========
 namespace std
 {
+	// ========== HashableBaseObject ==========
 	template<typename _ToStringType>
 #ifndef SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE
 	struct hash<SimpleObjects::HashableBaseObject<_ToStringType> >
@@ -90,5 +126,34 @@ namespace std
 		{
 			return obj.Hash();
 		}
-	};
+	}; // struct hash
+
+	// ========== HashableBaseReferenceWrapper ==========
+	template<typename _ToStringType, bool _IsConst>
+#ifndef SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE
+	struct hash<
+		SimpleObjects::HashableBaseReferenceWrapper<_ToStringType, _IsConst> >
+	{
+		using _ObjType = SimpleObjects::HashableBaseObject<_ToStringType>;
+		using _ArgType = SimpleObjects::HashableBaseReferenceWrapper<_ToStringType, _IsConst>;
+#else
+	struct hash<
+		SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE::HashableBaseReferenceWrapper<_ToStringType, _IsConst> >
+	{
+		using _ObjType = SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE::HashableBaseObject<_ToStringType>;
+		using _ArgType = SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE::HashableBaseReferenceWrapper<_ToStringType, _IsConst>;
+#endif
+
+	public:
+
+#if __cplusplus < 201703L
+		typedef size_t       result_type;
+		typedef _ArgType     argument_type;
+#endif
+
+		size_t operator()(const _ArgType& obj) const
+		{
+			return std::hash<_ObjType>()(obj.get());
+		}
+	}; // struct hash
 }
