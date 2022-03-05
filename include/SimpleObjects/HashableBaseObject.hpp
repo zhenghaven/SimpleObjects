@@ -83,7 +83,7 @@ public: // static members:
 
 public:
 
-	using Base::reference_wrapper;
+	using Base::Base;
 
 	virtual ~HashableBaseReferenceWrapper() = default;
 
