@@ -47,6 +47,34 @@ public:
 	const _StrType key;
 }; // class StaticString
 
+template<typename _ObjType, typename _ObjType::InternalType _Val>
+class StaticPrimitiveValue
+{
+
+public:
+	StaticPrimitiveValue() :
+		key(_Val)
+	{}
+
+	StaticPrimitiveValue(const StaticPrimitiveValue& other):
+		key(other.key)
+	{}
+
+	// No move constructor
+	StaticPrimitiveValue(StaticPrimitiveValue&& other) = delete;
+
+	~StaticPrimitiveValue() = default;
+
+	// No copy assignment
+	StaticPrimitiveValue& operator=(const StaticPrimitiveValue&) = delete;
+
+	// No Move assignment
+	StaticPrimitiveValue& operator=(StaticPrimitiveValue&&) = delete;
+
+	const _ObjType key;
+
+}; // class StaticPrimitiveValue
+
 namespace Internal
 {
 
@@ -182,9 +210,24 @@ struct DTupleToMap
 
 } // namespace Internal
 
-//template<typename
-class StaticDict
+/**
+ * @brief Static Dict type class, where the number of items and key to
+ *        value type mapping is static
+ *
+ * @tparam _Tp          The type of the tuple defining the core data store
+ * @tparam _DynKeyType  The key type for the dynamic access API
+ * @tparam _DynValType  The value type for the dynamic access API
+ * @tparam _MapType     The type of the map used to store the key and value
+ *                      reference for dynamic access
+ */
+template<
+	typename _Tp,
+	typename _DynKeyType,
+	typename _DynValType,
+	template<typename, typename> typename _MapType>
+class StaticDictImpl
 {
 
-};
+}; // class StaticDictImpl
+
 } // namespace SimpleObjects

@@ -104,5 +104,10 @@ template<typename _ValType, _ValType ..._data>
 using FromStrSeq = Internal::FromDataSeqImpl<String, _ValType, _data...>;
 template<typename _StrSeq>
 using StrKey = typename _StrSeq::template ToOther<FromStrSeq>::type;
+template<int64_t _Val>
+using Int64Key = StaticPrimitiveValue<Int64, _Val>;
+
+template<typename _Tp>
+using StaticDict = StaticDictImpl<_Tp, HashableBaseKRef, BaseRef, MapType>;
 
 }//namespace SimpleObjects

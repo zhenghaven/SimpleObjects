@@ -52,12 +52,26 @@ GTEST_TEST(TestStaticDict, StaticString)
 	EXPECT_EQ(KeyX().key, String("KeyX"));
 }
 
+GTEST_TEST(TestStaticDict, StaticInt)
+{
+	using Key1 = Int64Key<1>;
+	static_assert(std::is_same<Key1,
+		StaticPrimitiveValue<Int64, 1> >::value,
+		"Implementation Error");
+	EXPECT_EQ(Key1().key, Int64(1));
+	using Key2 = Int64Key<2>;
+	static_assert(std::is_same<Key2,
+		StaticPrimitiveValue<Int64, 2> >::value,
+		"Implementation Error");
+	EXPECT_EQ(Key2().key, Int64(2));
+}
+
 GTEST_TEST(TestStaticDict, KeyValuePairs)
 {
 	// Key types
 	using Key1 = StrKey<SIMOBJ_KSTR("Key1")>;
 	using Key2 = StrKey<SIMOBJ_KSTR("Key2")>;
-	using Key3 = StrKey<SIMOBJ_KSTR("Key3")>;
+	using Key3 = Int64Key<3>;
 	using KeyX = StrKey<SIMOBJ_KSTR("KeyX")>;
 
 	using Tp = std::tuple<
@@ -151,7 +165,7 @@ GTEST_TEST(TestStaticDict, KeyValuePairs)
 	//        Key address
 	const auto findKey1 = String("Key1");
 	const auto findKey2 = String("Key2");
-	const auto findKey3 = String("Key3");
+	const auto findKey3 = Int64(3);
 	EXPECT_EQ(&(refMap.find(findKey1)->first.get()),
 		&std::get<0>(tp1).first.key);
 	EXPECT_EQ(&(refMap.find(findKey2)->first.get()),
@@ -169,7 +183,7 @@ GTEST_TEST(TestStaticDict, KeyValuePairs)
 	//    ensures the initial values are correct
 	EXPECT_EQ(refArray[0].first.get(), String("Key1"));
 	EXPECT_EQ(refArray[1].first.get(), String("Key2"));
-	EXPECT_EQ(refArray[2].first.get(), String("Key3"));
+	EXPECT_EQ(refArray[2].first.get(), Int64(3));
 
 	EXPECT_EQ(refArray[0].second.get(), String());
 	EXPECT_EQ(refArray[1].second.get(), Int64());
