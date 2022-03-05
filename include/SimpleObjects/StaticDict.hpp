@@ -17,9 +17,35 @@ namespace SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE
 #endif
 {
 
-template<typename _StrType, char... chars>
+template<typename _StrType, char... ch>
 class StaticString
-{}; // class StaticString
+{
+public: // static members:
+
+	using KSeq = StrSeq<ch...>;
+
+public:
+	StaticString() :
+		key(KSeq::sk_str())
+	{}
+
+	StaticString(const StaticString& other):
+		key(other.key)
+	{}
+
+	// No move constructor
+	StaticString(StaticString&& other) = delete;
+
+	~StaticString() = default;
+
+	// No copy assignment
+	StaticString& operator=(const StaticString&) = delete;
+
+	// No Move assignment
+	StaticString& operator=(StaticString&&) = delete;
+
+	const _StrType key;
+}; // class StaticString
 
 /**
  * @brief Convert from const data sequence to static string class type
@@ -46,13 +72,13 @@ struct FromDataSeqImpl<_StrType, char, _ch...>
  * @tparam _Tp
  */
 template<size_t _itemIdx, bool _Found, typename _Key, typename _Tp>
-struct TupleFindElementImpl;
+struct DTupleFindElementImpl;
 
 // recursive case: non-zero and not found
 template<size_t _itemIdx, typename _Key, typename _Tp>
-struct TupleFindElementImpl<_itemIdx, false, _Key, _Tp>
+struct DTupleFindElementImpl<_itemIdx, false, _Key, _Tp>
 {
-	using type = typename TupleFindElementImpl<
+	static constexpr size_t index = DTupleFindElementImpl<
 			// Next index
 			_itemIdx - 1,
 			// is found in next index?
@@ -66,31 +92,65 @@ struct TupleFindElementImpl<_itemIdx, false, _Key, _Tp>
 			_Key,
 			// Tuple
 			_Tp
-		>::type;
-}; // struct TupleFindElementImpl
+		>::index;
+}; // struct DTupleFindElementImpl
 
 // base case 1: any index and found
 template<size_t _itemIdx, typename _Key, typename _Tp>
-struct TupleFindElementImpl<_itemIdx, true, _Key, _Tp>
+struct DTupleFindElementImpl<_itemIdx, true, _Key, _Tp>
 {
-	using type = typename std::tuple_element<1,
-			typename std::tuple_element<_itemIdx, _Tp>::type
-		>::type;
-}; // struct TupleFindElementImpl
+	static constexpr size_t index = _itemIdx;
+}; // struct DTupleFindElementImpl
 
 // base case 2: 0 and not found
 template<typename _Key, typename _Tp>
-struct TupleFindElementImpl<0, false, _Key, _Tp>
+struct DTupleFindElementImpl<0, false, _Key, _Tp>
 {
-}; // struct TupleFindElementImpl
+}; // struct DTupleFindElementImpl
 
 template<typename _Key, typename _Tp>
-struct TupleFindElement
+struct DTupleFindElement
 {
-	using type = typename TupleFindElementImpl<
-		std::tuple_size<_Tp>::value, false, _Key, _Tp>::type;
-}; // struct TupleFindElement
+	static constexpr size_t index = DTupleFindElementImpl<
+		std::tuple_size<_Tp>::value, false, _Key, _Tp>::index;
+	using type = typename std::tuple_element<1,
+			typename std::tuple_element<index, _Tp>::type
+		>::type;
+}; // struct DTupleFindElement
 
+template<typename _Tp, typename _KeyRefType, typename _ValRefType>
+struct DTupleToArray
+{
+	//
+	// std::reference_wrapper<_ValType>
+
+	using ArrayType = std::array<
+		std::pair<_KeyRefType, _ValRefType>,
+		std::tuple_size<_Tp>::value
+	>;
+
+	struct ItemFuncType {
+		template <typename ItemType>
+		typename ArrayType::value_type
+		operator()(ItemType& item) const
+		{
+			return typename ArrayType::value_type(
+				std::get<0>(item).key,
+				std::get<1>(item)
+			);
+		}
+	}; // struct ItemFuncType
+
+	static ArrayType Convert(_Tp& tp)
+	{
+		return Internal::TupleToAggregate<ArrayType, _Tp>::Convert(
+			tp,
+			ItemFuncType()
+		);
+	}
+}; // struct DTupleToArray
+
+//template<typename
 class StaticDict
 {
 

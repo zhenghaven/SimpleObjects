@@ -66,6 +66,14 @@ public:
 		m_data()
 	{}
 
+	StringCat(const ContainerType& str):
+		m_data(str)
+	{}
+
+	StringCat(ContainerType&& str):
+		m_data(std::forward<ContainerType>(str))
+	{}
+
 	StringCat(const_pointer str) :
 		m_data(str)
 	{}

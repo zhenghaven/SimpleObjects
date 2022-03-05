@@ -38,6 +38,9 @@ GTEST_TEST(TestString, Construction)
 		base.reset(new String());
 		base.reset();
 	});
+	EXPECT_EQ(String(std::string("test1")).GetVal(), "test1");
+	std::string testStr2 = "test2";
+	EXPECT_EQ(String(testStr2).GetVal(), testStr2);
 
 	// from const char*
 	EXPECT_EQ(String("test string").GetVal(), std::string("test string"));

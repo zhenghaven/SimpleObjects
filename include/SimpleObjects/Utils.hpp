@@ -123,6 +123,91 @@ inline const _ToType& DownCast(const _FromType& from)
 #endif
 }
 
+/**
+ * @brief Converts variables in a tuple to an aggregate type
+ *        NOTE: this is the detailed implementation
+ *
+ * @tparam _RetType
+ * @tparam _I
+ * @tparam _Tp
+ */
+template<typename _RetType, std::size_t _I, typename _Tp>
+struct TupleToAggregateImpl;
+
+// recursive case
+template<typename _RetType, std::size_t _I, typename _Tp>
+struct TupleToAggregateImpl
+{
+	template<typename _ItemCvtFunc, typename... _ItemTypes>
+	static _RetType Convert(
+		_Tp& tp,
+		_ItemCvtFunc iFunc,
+		_ItemTypes ...items)
+	{
+		return TupleToAggregateImpl<
+			_RetType,
+			_I - 1,
+			_Tp
+		>::Convert(
+			tp,
+			iFunc,
+			iFunc(std::get<_I>(tp)),
+			items...
+		);
+	}
+}; // struct TupleToAggregateImpl
+
+// base case
+template<typename _RetType, typename _Tp>
+struct TupleToAggregateImpl<
+	_RetType,
+	0,
+	_Tp>
+{
+	template<typename _ItemCvtFunc, typename... _ItemTypes>
+	static _RetType Convert(
+		_Tp& tp,
+		_ItemCvtFunc iFunc,
+		_ItemTypes ...items)
+	{
+		return {
+			iFunc(std::get<0>(tp)),
+			items...
+		};
+	}
+};
+
+/**
+ * @brief Converts variables in a tuple to an aggregate type
+ *
+ * @tparam _RetType Aggregate type going to be returned
+ * @tparam _Tp The type of the tuple
+ */
+template<typename _RetType, typename _Tp>
+struct TupleToAggregate
+{
+	/**
+	 * @brief The conversion function
+	 *
+	 * @tparam _ItemCvtFunc The type of the Item conversion function
+	 *                      this function is used to tweak the
+	 *                      individual item in the tuple to another
+	 *                      type, e.g., reference_wrapper
+	 * @param tp The tuple instance
+	 * @param iFunc The item conversion function instance; callable
+	 * @return The resulting aggregate
+	 */
+	template<typename _ItemCvtFunc>
+	static _RetType Convert(_Tp& tp, _ItemCvtFunc iFunc)
+	{
+		return TupleToAggregateImpl<
+			_RetType,
+			std::tuple_size<_Tp>::value - 1,
+			_Tp
+		>::Convert(tp, iFunc);
+	}
+}; // struct TupleToAggregate
+
 } // namespace Internal
 
 } // namespace SimpleObjects

@@ -27,6 +27,14 @@ namespace SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE
 #endif
 {
 
+// ========== Basic Type Controll ==========
+
+template<typename _KeyType, typename _ValType>
+using MapType = std::unordered_map<_KeyType, _ValType>;
+
+template<typename _ValType>
+using VecType = std::vector<_ValType>;
+
 // ========== Convenient types of Null ==========
 
 using Null = NullImpl<std::string>;
@@ -68,11 +76,11 @@ using HashableObject = HashableObjectImpl<std::string>;
 
 // ========== Convenient types of List ==========
 
-using List = ListCat<std::vector<Object>, std::string>;
+using List = ListCat<VecType<Object>, std::string>;
 
 // ========== Convenient types of Dict ==========
 
-using Dict = DictCat<std::unordered_map<HashableObject, Object>, std::string>;
+using Dict = DictCat<MapType<HashableObject, Object>, std::string>;
 
 // ========== Convenient types of base classes ==========
 
