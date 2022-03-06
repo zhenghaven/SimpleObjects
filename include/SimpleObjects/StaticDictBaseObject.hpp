@@ -16,22 +16,37 @@ namespace SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE
 #endif
 {
 
-template<typename _KeyType, typename _ValType, typename _ToStringType>
+template<
+	typename _DynKeyType,
+	typename _DynValType,
+	template<typename> typename _KeyRefWrapType,
+	template<typename> typename _RefWrapType,
+	typename _ToStringType>
 class StaticDictBaseObject : public BaseObject<_ToStringType>
 {
 public: // Static members
 
-	using Self = StaticDictBaseObject<_KeyType, _ValType, _ToStringType>;
+	using Self = StaticDictBaseObject<
+		_DynKeyType,
+		_DynValType,
+		_KeyRefWrapType,
+		_RefWrapType,
+		_ToStringType>;
 	using Base = BaseObject<_ToStringType>;
 	using ToStringType = _ToStringType;
 
-	typedef _KeyType                                  key_type;
-	typedef _ValType                                  mapped_type;
-	typedef std::pair<const key_type, mapped_type>    value_type;
-	typedef value_type&                               reference;
-	typedef const value_type&                         const_reference;
-	typedef FrIterator<value_type, false>             iterator;
-	typedef FrIterator<value_type, true>              const_iterator;
+	typedef _DynKeyType                               key_type;
+	typedef _DynValType                               mapped_type;
+	typedef _KeyRefWrapType<const key_type>           key_const_ref_type;
+	typedef _RefWrapType<mapped_type>                 mapped_ref_type;
+	typedef _RefWrapType<const mapped_type>           mapped_const_ref_type;
+
+	typedef std::pair<const key_const_ref_type, const mapped_ref_type>
+		iterator_value_type;
+	typedef std::pair<const key_const_ref_type, const mapped_const_ref_type>
+		const_iterator_value_type;
+	typedef RdIterator<iterator_value_type,       true>  iterator;
+	typedef RdIterator<const_iterator_value_type, true>  const_iterator;
 
 	static constexpr Self* sk_null = nullptr;
 
@@ -51,6 +66,7 @@ public:
 		return "StaticDict";
 	}
 
+	// TODO: move this to child class
 	virtual Self& AsStaticDict() override
 	{
 		return *this;
@@ -99,15 +115,15 @@ public:
 
 	virtual mapped_type& operator[](const key_type& key) = 0;
 
+	virtual const mapped_type& operator[](const key_type& key) const = 0;
+
 	virtual mapped_type& at(size_t idx) = 0;
 
 	virtual const mapped_type& at(size_t idx) const = 0;
 
 	virtual mapped_type& operator[](size_t idx) = 0;
 
-	virtual const_iterator find(const key_type& key) const = 0;
-
-	virtual iterator find(const key_type& key) = 0;
+	virtual const mapped_type& operator[](size_t idx) const = 0;
 
 	virtual bool HasKey(const key_type& key) const = 0;
 

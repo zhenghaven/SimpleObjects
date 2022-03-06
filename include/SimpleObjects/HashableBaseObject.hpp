@@ -46,6 +46,13 @@ public:
 	virtual ~HashableBaseObject() = default;
 	// LCOV_EXCL_STOP
 
+	using Base::operator==;
+	using Base::operator!=;
+	using Base::operator<;
+	using Base::operator>;
+	using Base::operator<=;
+	using Base::operator>=;
+
 	virtual std::size_t Hash() const = 0;
 
 	virtual std::unique_ptr<Self> Copy(const Self* /*unused*/) const = 0;
@@ -64,28 +71,19 @@ public:
 
 }; // class HashableBaseObject
 
-template<typename _ToStringType, bool _IsConst>
-class HashableBaseReferenceWrapper :
-	public std::reference_wrapper<
-		typename std::conditional<
-			_IsConst,
-			typename std::add_const<HashableBaseObject<_ToStringType> >::type,
-			HashableBaseObject<_ToStringType> >::type>
+template<typename _T>
+class HashableReferenceWrapper : public std::reference_wrapper<_T>
 {
 public: // static members:
 
-	using Base = std::reference_wrapper<
-		typename std::conditional<
-			_IsConst,
-			typename std::add_const<HashableBaseObject<_ToStringType> >::type,
-			HashableBaseObject<_ToStringType> >::type>;
-	using Self = HashableBaseReferenceWrapper<_ToStringType, _IsConst>;
+	using Base = std::reference_wrapper<_T>;
+	using Self = HashableReferenceWrapper<_T>;
 
 public:
 
 	using Base::Base;
 
-	virtual ~HashableBaseReferenceWrapper() = default;
+	virtual ~HashableReferenceWrapper() = default;
 
 	bool operator==(const Self& rhs) const
 	{
@@ -97,7 +95,7 @@ public:
 		return this->get() < rhs.get();
 	}
 
-}; // class HashableBaseReferenceWrapper
+}; // class HashableReferenceWrapper
 
 }//namespace SimpleObjects
 
@@ -128,21 +126,21 @@ namespace std
 		}
 	}; // struct hash
 
-	// ========== HashableBaseReferenceWrapper ==========
-	template<typename _ToStringType, bool _IsConst>
+	// ========== HashableReferenceWrapper ==========
+	template<typename _T>
 #ifndef SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE
 	struct hash<
-		SimpleObjects::HashableBaseReferenceWrapper<_ToStringType, _IsConst> >
+		SimpleObjects::HashableReferenceWrapper<_T> >
 	{
-		using _ObjType = SimpleObjects::HashableBaseObject<_ToStringType>;
-		using _ArgType = SimpleObjects::HashableBaseReferenceWrapper<_ToStringType, _IsConst>;
+		using _ArgType = SimpleObjects::HashableReferenceWrapper<_T>;
 #else
 	struct hash<
-		SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE::HashableBaseReferenceWrapper<_ToStringType, _IsConst> >
+		SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE::HashableReferenceWrapper<_T> >
 	{
-		using _ObjType = SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE::HashableBaseObject<_ToStringType>;
-		using _ArgType = SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE::HashableBaseReferenceWrapper<_ToStringType, _IsConst>;
+		using _ArgType = SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE::HashableReferenceWrapper<_T>;
 #endif
+
+		using _ObjType = typename std::remove_cv<_T>::type;
 
 	public:
 

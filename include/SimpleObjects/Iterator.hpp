@@ -507,7 +507,7 @@ inline OutIterator<_ValType> ToOutIt(_OriItType it)
 
 template<bool _IsConst,
 	typename _OriItType,
-	typename _ValType = typename _OriItType::value_type>
+	typename _ValType = typename std::iterator_traits<_OriItType>::value_type>
 inline FrIterator<_ValType, _IsConst> ToFrIt(_OriItType it)
 {
 	using ItWrap = CppStdFwIteratorWrap<_OriItType, _ValType, _IsConst>;
@@ -516,7 +516,7 @@ inline FrIterator<_ValType, _IsConst> ToFrIt(_OriItType it)
 
 template<bool _IsConst,
 	typename _OriItType,
-	typename _ValType = typename _OriItType::value_type>
+	typename _ValType = typename std::iterator_traits<_OriItType>::value_type>
 inline BiIterator<_ValType, _IsConst> ToBiIt(_OriItType it)
 {
 	using ItWrap = CppStdBiIteratorWrap<_OriItType, _ValType, _IsConst>;
@@ -525,7 +525,7 @@ inline BiIterator<_ValType, _IsConst> ToBiIt(_OriItType it)
 
 template<bool _IsConst,
 	typename _OriItType,
-	typename _ValType = typename _OriItType::value_type>
+	typename _ValType = typename std::iterator_traits<_OriItType>::value_type>
 inline RdIterator<_ValType, _IsConst> ToRdIt(_OriItType it)
 {
 	using ItWrap = CppStdRdIteratorWrap<_OriItType, _ValType, _IsConst>;

@@ -8,6 +8,7 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <functional>
 
 #include "Null.hpp"
 #include "Numeric.hpp"
@@ -97,9 +98,6 @@ using DictBaseObj = DictBaseObject<HashableObject, Object, std::string>;
 
 // ========== Convenient types of static Dict ==========
 
-using BaseRef = std::reference_wrapper<BaseObj>;
-using HashableBaseKRef = HashableBaseReferenceWrapper<std::string, true>;
-
 template<typename _ValType, _ValType ..._data>
 using FromStrSeq = Internal::FromDataSeqImpl<String, _ValType, _data...>;
 template<typename _StrSeq>
@@ -108,6 +106,13 @@ template<int64_t _Val>
 using Int64Key = StaticPrimitiveValue<Int64, _Val>;
 
 template<typename _Tp>
-using StaticDict = StaticDictImpl<_Tp, HashableBaseKRef, BaseRef, MapType>;
+using StaticDict = StaticDictImpl<
+	_Tp,
+	HashableBaseObj,
+	BaseObj,
+	HashableReferenceWrapper,
+	std::reference_wrapper,
+	MapType,
+	std::string>;
 
 }//namespace SimpleObjects

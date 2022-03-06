@@ -124,89 +124,111 @@ inline const _ToType& DownCast(const _FromType& from)
 }
 
 /**
- * @brief Converts variables in a tuple to an aggregate type
- *        NOTE: this is the detailed implementation
+ * @brief Expands (unfold) the tuple's value and call the callback function
+ *        with all values in order
  *
  * @tparam _RetType
  * @tparam _I
  * @tparam _Tp
  */
-template<typename _RetType, std::size_t _I, typename _Tp>
-struct TupleToAggregateImpl;
+template<typename _RetType, size_t _I, typename _Tp>
+struct TupleUnpackCallImpl;
 
-// recursive case
-template<typename _RetType, std::size_t _I, typename _Tp>
-struct TupleToAggregateImpl
+template<typename _RetType, size_t _I, typename _Tp>
+struct TupleUnpackCallImpl
 {
-	template<typename _ItemCvtFunc, typename... _ItemTypes>
-	static _RetType Convert(
-		_Tp& tp,
-		_ItemCvtFunc iFunc,
-		_ItemTypes ...items)
+	template<typename _CallbackFunc, typename... _ItemTypes>
+	static _RetType UnpackCall(
+		_Tp&& tp,
+		_CallbackFunc callback,
+		_ItemTypes&& ...items)
 	{
-		return TupleToAggregateImpl<
+		return TupleUnpackCallImpl<
 			_RetType,
 			_I - 1,
 			_Tp
-		>::Convert(
-			tp,
-			iFunc,
-			iFunc(std::get<_I>(tp)),
-			items...
+			>::UnpackCall(
+			std::forward<_Tp>(tp),
+			callback,
+			std::get<_I>(std::forward<_Tp>(tp)),
+			std::forward<_ItemTypes>(items)...
 		);
 	}
-}; // struct TupleToAggregateImpl
 
-// base case
-template<typename _RetType, typename _Tp>
-struct TupleToAggregateImpl<
-	_RetType,
-	0,
-	_Tp>
-{
-	template<typename _ItemCvtFunc, typename... _ItemTypes>
-	static _RetType Convert(
+	template<typename _CallbackFunc, typename... _ItemTypes>
+	static _RetType UnpackCall(
 		_Tp& tp,
-		_ItemCvtFunc iFunc,
-		_ItemTypes ...items)
+		_CallbackFunc callback,
+		_ItemTypes&& ...items)
 	{
-		return {
-			iFunc(std::get<0>(tp)),
-			items...
-		};
+		return TupleUnpackCallImpl<
+			_RetType,
+			_I - 1,
+			_Tp
+			>::UnpackCall(
+			tp,
+			callback,
+			std::get<_I>(tp),
+			std::forward<_ItemTypes>(items)...
+		);
 	}
-};
+}; // struct TupleUnpackCallImpl
 
-/**
- * @brief Converts variables in a tuple to an aggregate type
- *
- * @tparam _RetType Aggregate type going to be returned
- * @tparam _Tp The type of the tuple
- */
 template<typename _RetType, typename _Tp>
-struct TupleToAggregate
+struct TupleUnpackCallImpl<_RetType, 0, _Tp>
 {
-	/**
-	 * @brief The conversion function
-	 *
-	 * @tparam _ItemCvtFunc The type of the Item conversion function
-	 *                      this function is used to tweak the
-	 *                      individual item in the tuple to another
-	 *                      type, e.g., reference_wrapper
-	 * @param tp The tuple instance
-	 * @param iFunc The item conversion function instance; callable
-	 * @return The resulting aggregate
-	 */
-	template<typename _ItemCvtFunc>
-	static _RetType Convert(_Tp& tp, _ItemCvtFunc iFunc)
+	template<typename _CallbackFunc, typename... _ItemTypes>
+	static _RetType UnpackCall(
+		_Tp&& tp,
+		_CallbackFunc callback,
+		_ItemTypes&& ...items)
 	{
-		return TupleToAggregateImpl<
+		return callback(
+			std::get<0>(std::forward<_Tp>(tp)),
+			std::forward<_ItemTypes>(items)...
+		);
+	}
+
+	template<typename _CallbackFunc, typename... _ItemTypes>
+	static _RetType UnpackCall(
+		_Tp& tp,
+		_CallbackFunc callback,
+		_ItemTypes&& ...items)
+	{
+		return callback(
+			std::get<0>(tp),
+			std::forward<_ItemTypes>(items)...
+		);
+	}
+}; // struct TupleUnpackCallImpl
+
+template<typename _RetType, typename _Tp>
+struct TupleUnpackCall
+{
+	template<typename _CallbackFunc>
+	static _RetType UnpackCall(_Tp&& tp, _CallbackFunc callback)
+	{
+		return TupleUnpackCallImpl<
 			_RetType,
 			std::tuple_size<_Tp>::value - 1,
-			_Tp
-		>::Convert(tp, iFunc);
+			_Tp>::UnpackCall(
+			std::forward<_Tp>(tp),
+			callback
+		);
 	}
-}; // struct TupleToAggregate
+
+	template<typename _CallbackFunc>
+	static _RetType UnpackCall(_Tp& tp, _CallbackFunc callback)
+	{
+		return TupleUnpackCallImpl<
+			_RetType,
+			std::tuple_size<_Tp>::value - 1,
+			_Tp>::UnpackCall(
+			tp,
+			callback
+		);
+	}
+}; // struct TupleUnpackCall
 
 } // namespace Internal
 

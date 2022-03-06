@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <functional>
 #include <string>
 
 #include "Exception.hpp"
@@ -65,10 +66,17 @@ template<typename _ValType,  typename _ToStringType>
 class ListBaseObject;
 template<typename _KeyType,  typename _ValType,     typename _ToStringType>
 class DictBaseObject;
-template<typename _KeyType,  typename _ValType,     typename _ToStringType>
+template<
+	typename _DynKeyType,
+	typename _DynValType,
+	template<typename> typename _KeyRefWrapType,
+	template<typename> typename _RefWrapType,
+	typename _ToStringType>
 class StaticDictBaseObject;
 template<typename _ToStringType>
 class HashableBaseObject;
+template<typename _T>
+class HashableReferenceWrapper;
 
 template<typename _ToStringType>
 class HashableObjectImpl;
@@ -98,6 +106,8 @@ public: // Static members:
 
 	using StatDictBase = StaticDictBaseObject<HashableBaseObject<ToStringType>,
 		                                      BaseObject<ToStringType>,
+		                                      HashableReferenceWrapper,
+		                                      std::reference_wrapper,
 		                                      ToStringType>;
 
 	static constexpr Self* sk_null = nullptr;
@@ -149,6 +159,7 @@ public:
 	}
 
 	// TODO:
+	// =
 	// +=
 	// +
 	// slice

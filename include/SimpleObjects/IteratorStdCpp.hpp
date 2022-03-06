@@ -6,6 +6,7 @@
 #pragma once
 
 #include <memory>
+#include <type_traits>
 
 #include "IteratorIf.hpp"
 #include "Utils.hpp"
@@ -44,7 +45,9 @@ public: // Static members:
 	}
 
 	static_assert(
-		std::is_base_of<iterator_category, typename _OriItType::iterator_category>::value,
+		std::is_base_of<
+			iterator_category,
+			typename std::iterator_traits<_OriItType>::iterator_category>::value,
 		"The given C++ standard iterator must be a category based on output iterator");
 
 public:
@@ -114,7 +117,9 @@ public: // Static members:
 	}
 
 	static_assert(
-		std::is_base_of<iterator_category, typename _OriItType::iterator_category>::value,
+		std::is_base_of<
+			iterator_category,
+			typename std::iterator_traits<_OriItType>::iterator_category>::value,
 		"The given C++ standard iterator must be a category based on forward iterator");
 
 public:
@@ -148,7 +153,7 @@ public:
 
 	virtual pointer GetPtr() const override
 	{
-		return m_it.operator->();
+		return GetPtrImpl(m_it);
 	}
 
 	virtual bool IsEqual(const _BaseIf& rhs) const override
@@ -166,6 +171,25 @@ public:
 public:
 
 	_OriItType m_it;
+
+protected:
+
+	template<
+		typename _ItType,
+		typename std::enable_if<std::is_class<_ItType>::value, bool>::type = true>
+	static pointer GetPtrImpl(const _ItType& it)
+	{
+		return it.operator->();
+	}
+
+	template<
+		typename _ItType,
+		typename std::enable_if<std::is_pointer<_ItType>::value, bool>::type = true>
+	static pointer GetPtrImpl(const _ItType& it)
+	{
+		return it;
+	}
+
 }; // class CppStdFwIteratorWrap
 
 
@@ -197,7 +221,9 @@ public: // Static members:
 	}
 
 	static_assert(
-		std::is_base_of<iterator_category, typename _OriItType::iterator_category>::value,
+		std::is_base_of<
+			iterator_category,
+			typename std::iterator_traits<_OriItType>::iterator_category>::value,
 		"The given C++ standard iterator must be a category based on bidirectional iterator");
 
 public:
@@ -275,7 +301,9 @@ public: // Static members:
 	}
 
 	static_assert(
-		std::is_base_of<iterator_category, typename _OriItType::iterator_category>::value,
+		std::is_base_of<
+			iterator_category,
+			typename std::iterator_traits<_OriItType>::iterator_category>::value,
 		"The given C++ standard iterator must be a category based on random access iterator");
 
 public:

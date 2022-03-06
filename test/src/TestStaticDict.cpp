@@ -132,16 +132,16 @@ GTEST_TEST(TestStaticDict, KeyValuePairs)
 	// using KeyRefType = std::reference_wrapper<
 	// 	typename std::add_const<HashableBaseObj>::type
 	// >;
-	using KeyRefType = HashableBaseKRef;
-	using ValRefType = BaseRef;
+	using KeyRefType = HashableReferenceWrapper<const HashableBaseObj>;
+	using ValRefType = std::reference_wrapper<BaseObj>;
 
 	// Instantiate Tuple
 	Tp tp1;
 
 	// Reference array
 	const auto refArray = Internal::DTupleToArray<Tp,
-		KeyRefType,
-		ValRefType>::Convert(tp1);
+		const KeyRefType,
+		const ValRefType>::Convert(tp1);
 	// Reference map
 	const auto refMap = Internal::DTupleToMap<Tp,
 		KeyRefType,
@@ -161,7 +161,7 @@ GTEST_TEST(TestStaticDict, KeyValuePairs)
 		&static_cast<BaseObj&>(std::get<1>(tp1).second));
 	EXPECT_EQ(&refArray[2].second.get(),
 		&static_cast<BaseObj&>(std::get<2>(tp1).second));
-	//    Dict
+	//    Map
 	//        Key address
 	const auto findKey1 = String("Key1");
 	const auto findKey2 = String("Key2");
@@ -212,4 +212,101 @@ GTEST_TEST(TestStaticDict, KeyValuePairs)
 		Int64(12345));
 	EXPECT_EQ((refMap.find(findKey3)->second.get()),
 		List({Null()}));
+}
+
+using TestStaticDictBase1 = StaticDict<
+	std::tuple<
+		std::pair<StrKey<SIMOBJ_KSTR("Key2_1")>, Int64> > >;
+
+class TestStaticDict1 : public TestStaticDictBase1
+{
+public:
+	using Base = TestStaticDictBase1;
+
+	using Base::Base;
+
+	typename Base::GetRef<StrKey<SIMOBJ_KSTR("Key2_1")> >
+	get_Key2_1()
+	{
+		return Base::get<StrKey<SIMOBJ_KSTR("Key2_1")> >();
+	}
+
+	typename Base::GetConstRef<StrKey<SIMOBJ_KSTR("Key2_1")> >
+	get_Key2_1() const
+	{
+		return Base::get<StrKey<SIMOBJ_KSTR("Key2_1")> >();
+	}
+
+}; // class TestStaticDict1
+
+// using TestStaticDictBase2 = StaticDict<
+// 	std::tuple<
+// 		std::pair<SIMOBJ_KSTR("Key2_1"), String>,
+// 		std::pair<SIMOBJ_KSTR("Key2_2"), Int64>,
+// 		std::pair<SIMOBJ_KSTR("Key2_2"), Null> > >;
+
+GTEST_TEST(TestStaticDict, StaticDictBasic)
+{
+	// Some basic tests on a basic static Dict type
+	TestStaticDict1 dict;
+	const auto& kdict = static_cast<const TestStaticDict1&>(dict);
+	EXPECT_EQ(dict.get_Key2_1().GetVal(), 0);
+	dict.get_Key2_1() = Int64(12345);
+	EXPECT_EQ(kdict.get_Key2_1(), Int64(12345));
+
+	// iterators
+	EXPECT_EQ((dict.begin() + 0)->first.get(), String("Key2_1"));
+	EXPECT_EQ((dict.begin() + 0)->second.get(), Int64(12345));
+	// TODO: (dict.begin() + 0)->second.get() = Int64(54321);
+	// EXPECT_EQ((dict.begin() + 0)->second.get(), Int64(54321));
+	// Expected compile error:
+	// (dict.begin() + 0)->first.get() = String("Key2_x");
+
+	// const iterators
+	EXPECT_EQ((dict.cbegin() + 0)->first.get(), String("Key2_1"));
+	EXPECT_EQ((dict.cbegin() + 0)->second.get(), Int64(12345));
+	// Expected compile error:
+	// (dict.cbegin() + 0)->first.get() = String("Key2_2");
+	// (dict.cbegin() + 0)->second.get() = Int64(54321);
+
+	EXPECT_EQ(dict.size(), 1);
+
+	// index by key
+	EXPECT_EQ(dict.at(String("Key2_1")), Int64(12345));
+	EXPECT_EQ(kdict.at(String("Key2_1")), Int64(12345));
+	EXPECT_EQ(dict[String("Key2_1")], Int64(12345));
+	EXPECT_EQ(kdict[String("Key2_1")], Int64(12345));
+
+	EXPECT_THROW(dict.at(String("Key2_x")), std::out_of_range);
+	EXPECT_THROW(kdict.at(String("Key2_x")), std::out_of_range);
+	EXPECT_THROW(dict[String("Key2_x")], std::out_of_range);
+	EXPECT_THROW(kdict[String("Key2_x")], std::out_of_range);
+
+	// index by key
+	EXPECT_EQ(dict.at(0), Int64(12345));
+	EXPECT_EQ(kdict.at(0), Int64(12345));
+	EXPECT_EQ(dict[0], Int64(12345));
+	EXPECT_EQ(kdict[0], Int64(12345));
+
+	EXPECT_THROW(dict.at(100), std::out_of_range);
+	EXPECT_THROW(kdict.at(100), std::out_of_range);
+	EXPECT_THROW(dict[100], std::out_of_range);
+	EXPECT_THROW(kdict[100], std::out_of_range);
+
+	// has key
+	EXPECT_TRUE(dict.HasKey(String("Key2_1")));
+	EXPECT_FALSE(dict.HasKey(String("Key2_x")));
+
+	// copy
+	TestStaticDict1 dictcp(dict);
+	EXPECT_TRUE(dictcp == dict);
+	EXPECT_FALSE(dictcp != dict);
+	dict.get_Key2_1() = Int64(54321);
+	EXPECT_FALSE(dictcp == dict);
+	EXPECT_TRUE(dictcp != dict);
+
+	// move
+	TestStaticDict1 dictmv(std::move(dictcp));
+	EXPECT_TRUE(dictmv == dictcp);
+	EXPECT_FALSE(dictmv != dictcp);
 }
