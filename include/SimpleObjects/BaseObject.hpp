@@ -69,8 +69,8 @@ class DictBaseObject;
 template<
 	typename _DynKeyType,
 	typename _DynValType,
-	template<typename> typename _KeyRefWrapType,
-	template<typename> typename _RefWrapType,
+	template<typename> class _KeyRefWrapType,
+	template<typename> class _RefWrapType,
 	typename _ToStringType>
 class StaticDictBaseObject;
 template<typename _ToStringType>

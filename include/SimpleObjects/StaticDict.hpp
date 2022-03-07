@@ -212,13 +212,13 @@ template<
 	typename _Tp,
 	typename _KeyRefType,
 	typename _ValRefType,
-	template<typename, typename> typename _MapType>
+	template<typename, typename> class _MapType>
 struct DTupleToMap;
 
 template<
 	typename _KeyRefType,
 	typename _ValRefType,
-	template<typename, typename> typename _MapType,
+	template<typename, typename> class _MapType,
 	typename ..._DPairs>
 struct DTupleToMap<
 	std::tuple<_DPairs...>,
@@ -310,9 +310,9 @@ template<
 	typename _Tp,
 	typename _DynKeyType,
 	typename _DynValType,
-	template<typename> typename _KeyRefWrapType,
-	template<typename> typename _RefWrapType,
-	template<typename, typename> typename _MapType,
+	template<typename> class _KeyRefWrapType,
+	template<typename> class _RefWrapType,
+	template<typename, typename> class _MapType,
 	typename _ToStringType>
 class StaticDictImpl :
 	public StaticDictBaseObject<
