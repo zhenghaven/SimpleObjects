@@ -87,6 +87,36 @@ public:
 		return *this;
 	}
 
+	virtual bool operator==(const Self& rhs) const
+	{
+		return *m_ptr == *(rhs.m_ptr);
+	}
+
+	virtual bool operator!=(const Self& rhs) const
+	{
+		return *m_ptr != *(rhs.m_ptr);
+	}
+
+	virtual bool operator<(const Self& rhs) const
+	{
+		return *m_ptr < *(rhs.m_ptr);
+	}
+
+	virtual bool operator>(const Self& rhs) const
+	{
+		return *m_ptr > *(rhs.m_ptr);
+	}
+
+	virtual bool operator<=(const Self& rhs) const
+	{
+		return *m_ptr <= *(rhs.m_ptr);
+	}
+
+	virtual bool operator>=(const Self& rhs) const
+	{
+		return *m_ptr >= *(rhs.m_ptr);
+	}
+
 	// BaseObject virtual functions
 
 	virtual ObjCategory GetCategory() const override
@@ -169,6 +199,8 @@ public:
 		return m_ptr->operator==(rhs);
 	}
 
+	using Base::operator!=;
+
 	virtual bool operator<(const BaseBase& rhs) const override
 	{
 		return m_ptr->operator<(rhs);
@@ -178,6 +210,9 @@ public:
 	{
 		return m_ptr->operator>(rhs);
 	}
+
+	using Base::operator<=;
+	using Base::operator>=;
 
 	// HashableBaseObject virtual functions
 
