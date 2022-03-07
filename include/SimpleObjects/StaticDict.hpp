@@ -37,8 +37,9 @@ public:
 		key(other.key)
 	{}
 
-	// No move constructor
-	StaticString(Self&& other) = delete;
+	StaticString(Self&&) :
+		StaticString() // nothing to move
+	{}
 
 	~StaticString() = default;
 
@@ -258,7 +259,7 @@ struct DPairMove<std::pair<_First, _Second> >
 	static std::pair<_First, _Second> Move(std::pair<_First, _Second>&& p)
 	{
 		return std::pair<_First, _Second>(
-			_First(p.first), // copy key
+			std::forward<_First>(p.first), // copy key
 			std::forward<_Second>(p.second) // move value
 		);
 	}
@@ -442,12 +443,7 @@ public:
 	{}
 
 	StaticDictImpl(StaticDictImpl&& other) :
-		m_data(
-			Internal::DTupleMove<TupleCore>::Move(
-				std::forward<TupleCore>(other.m_data))),
-		m_refArray(RefArrayType::Convert(m_data)),
-		m_krefArray(KRefArrayType::Convert(m_data)),
-		m_refmap(RefMapType::Convert(m_data))
+		StaticDictImpl(std::forward<TupleCore>(other.m_data))
 	{}
 
 	StaticDictImpl(const TupleCore& other) :
@@ -458,7 +454,9 @@ public:
 	{}
 
 	StaticDictImpl(TupleCore&& other) :
-		m_data(std::forward<TupleCore>(other)),
+		m_data(
+			Internal::DTupleMove<TupleCore>::Move(
+				std::forward<TupleCore>(other))),
 		m_refArray(RefArrayType::Convert(m_data)),
 		m_krefArray(KRefArrayType::Convert(m_data)),
 		m_refmap(RefMapType::Convert(m_data))
