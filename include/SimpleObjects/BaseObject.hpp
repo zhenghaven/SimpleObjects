@@ -247,4 +247,47 @@ public:
 
 }; // class BaseObject
 
+namespace Internal
+{
+
+template<bool _Match, typename _Child, typename _RetType>
+struct AsChildType;
+
+template<typename _Child, typename _RetType>
+struct AsChildType<false, _Child, _RetType>
+{
+	static_assert(std::is_same<_Child, _RetType>::value,
+		"Implementation Error");
+
+	static _RetType& AsChild(_Child&,
+		const std::string& expTypeName, const std::string& srcTypeName)
+	{
+		throw TypeError(expTypeName, srcTypeName + "-non-default");
+	}
+
+	static const _RetType& AsChild(const _Child&,
+		const std::string& expTypeName, const std::string& srcTypeName)
+	{
+		throw TypeError(expTypeName, srcTypeName + "-non-default");
+	}
+}; // struct AsChildType
+
+template<typename _Child>
+struct AsChildType<true, _Child, _Child>
+{
+	static _Child& AsChild(_Child& c,
+		const std::string&, const std::string&)
+	{
+		return c;
+	}
+
+	static const _Child& AsChild(const _Child& c,
+		const std::string&, const std::string&)
+	{
+		return c;
+	}
+}; // struct AsChildType
+
+} // namespace Internal
+
 }//namespace SimpleObjects

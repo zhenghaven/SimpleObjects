@@ -23,6 +23,8 @@ public: // Static members
 	using Base = BaseObject<_ToStringType>;
 	using ToStringType = _ToStringType;
 
+	using DictBase = typename Base::DictBase;
+
 	typedef _KeyType                                  key_type;
 	typedef _ValType                                  mapped_type;
 	typedef std::pair<const key_type, mapped_type>    value_type;
@@ -49,14 +51,18 @@ public:
 		return "Dict";
 	}
 
-	virtual Self& AsDict() override
+	virtual DictBase& AsDict() override
 	{
-		return *this;
+		return Internal::AsChildType<
+				std::is_same<Self, DictBase>::value, Self, DictBase
+			>::AsChild(*this, "Dict", this->GetCategoryName());
 	}
 
-	virtual const Self& AsDict() const override
+	virtual const DictBase& AsDict() const override
 	{
-		return *this;
+		return Internal::AsChildType<
+				std::is_same<Self, DictBase>::value, Self, DictBase
+			>::AsChild(*this, "Dict", this->GetCategoryName());
 	}
 
 	virtual bool operator==(const Self& rhs) const = 0;

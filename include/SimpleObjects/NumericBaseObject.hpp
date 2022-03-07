@@ -31,6 +31,8 @@ public: // Static Member
 	static_assert(std::is_same<BaseBase, BaseObject<_ToStringType> >::value,
 		"Expecting Base::Base to be BaseObject class");
 
+	using NumericBase = typename BaseBase::NumericBase;
+
 	static constexpr Self* sk_null = nullptr;
 
 public:
@@ -48,14 +50,18 @@ public:
 
 	virtual const char* GetNumTypeName() const = 0;
 
-	virtual Self& AsNumeric() override
+	virtual NumericBase& AsNumeric() override
 	{
-		return *this;
+		return Internal::AsChildType<
+				std::is_same<Self, NumericBase>::value, Self, NumericBase
+			>::AsChild(*this, "Numeric Category", this->GetCategoryName());
 	}
 
-	virtual const Self& AsNumeric() const override
+	virtual const NumericBase& AsNumeric() const override
 	{
-		return *this;
+		return Internal::AsChildType<
+				std::is_same<Self, NumericBase>::value, Self, NumericBase
+			>::AsChild(*this, "Numeric Category", this->GetCategoryName());
 	}
 
 	virtual bool operator==(const Self& rhs) const = 0;

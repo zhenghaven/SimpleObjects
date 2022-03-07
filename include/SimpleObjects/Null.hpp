@@ -28,6 +28,8 @@ public: // Static member:
 	static_assert(std::is_same<BaseBase, BaseObject<_ToStringType> >::value,
 		"Expecting Base::Base to be BaseObject class");
 
+	using NullBase = typename BaseBase::NullBase;
+
 	static constexpr ObjCategory sk_cat()
 	{
 		return ObjCategory::Null;
@@ -64,14 +66,18 @@ public:
 		return true;
 	}
 
-	virtual Self& AsNull() override
+	virtual NullBase& AsNull() override
 	{
-		return *this;
+		return Internal::AsChildType<
+				std::is_same<Self, NullBase>::value, Self, NullBase
+			>::AsChild(*this, "Null", this->GetCategoryName());
 	}
 
-	virtual const Self& AsNull() const override
+	virtual const NullBase& AsNull() const override
 	{
-		return *this;
+		return Internal::AsChildType<
+				std::is_same<Self, NullBase>::value, Self, NullBase
+			>::AsChild(*this, "Null", this->GetCategoryName());
 	}
 
 	virtual bool operator==(const Self& rhs) const

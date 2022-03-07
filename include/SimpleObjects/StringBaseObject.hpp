@@ -34,6 +34,8 @@ public: // Static members
 	static_assert(std::is_same<BaseBase, BaseObject<_ToStringType> >::value,
 		"Expecting Base::Base to be BaseObject class");
 
+	using StringBase = typename BaseBase::StringBase;
+
 	typedef _CharType                           value_type;
 	typedef value_type&                         reference;
 	typedef const value_type&                   const_reference;
@@ -60,14 +62,18 @@ public:
 		return "String";
 	}
 
-	virtual Self& AsString() override
+	virtual StringBase& AsString() override
 	{
-		return *this;
+		return Internal::AsChildType<
+				std::is_same<Self, StringBase>::value, Self, StringBase
+			>::AsChild(*this, "String", this->GetCategoryName());
 	}
 
-	virtual const Self& AsString() const override
+	virtual const StringBase& AsString() const override
 	{
-		return *this;
+		return Internal::AsChildType<
+				std::is_same<Self, StringBase>::value, Self, StringBase
+			>::AsChild(*this, "String", this->GetCategoryName());
 	}
 
 	virtual std::unique_ptr<Self> Copy(const Self* /*unused*/) const = 0;

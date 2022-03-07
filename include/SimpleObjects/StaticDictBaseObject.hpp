@@ -35,6 +35,8 @@ public: // Static members
 	using Base = BaseObject<_ToStringType>;
 	using ToStringType = _ToStringType;
 
+	using StatDictBase = typename Base::StatDictBase;
+
 	typedef _DynKeyType                               key_type;
 	typedef _DynValType                               mapped_type;
 	typedef _KeyRefWrapType<const key_type>           key_const_ref_type;
@@ -66,15 +68,18 @@ public:
 		return "StaticDict";
 	}
 
-	// TODO: move this to child class
-	virtual Self& AsStaticDict() override
+	virtual StatDictBase& AsStaticDict() override
 	{
-		return *this;
+		return Internal::AsChildType<
+				std::is_same<Self, StatDictBase>::value, Self, StatDictBase
+			>::AsChild(*this, "StaticDict", this->GetCategoryName());
 	}
 
-	virtual const Self& AsStaticDict() const override
+	virtual const StatDictBase& AsStaticDict() const override
 	{
-		return *this;
+		return Internal::AsChildType<
+				std::is_same<Self, StatDictBase>::value, Self, StatDictBase
+			>::AsChild(*this, "StaticDict", this->GetCategoryName());
 	}
 
 	virtual bool operator==(const Self& rhs) const = 0;
