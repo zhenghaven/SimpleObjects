@@ -212,16 +212,88 @@ GTEST_TEST(TestStaticDict, KeyValuePairs)
 		Int64(12345));
 	EXPECT_EQ((refMap.find(findKey3)->second.get()),
 		List({Null()}));
+
+
+
+	// Copy
+	Tp tp2;
+	EXPECT_TRUE(std::get<0>(tp2).second == String());
+	EXPECT_TRUE(std::get<1>(tp2).second == Int64());
+	EXPECT_TRUE(std::get<2>(tp2).second == List());
+
+	Internal::DTupleAssign::Copy(tp2, tp1);
+	EXPECT_TRUE(std::get<0>(tp2).second == String("ref array val1"));
+	EXPECT_TRUE(std::get<1>(tp2).second == Int64(12345));
+	EXPECT_TRUE(std::get<2>(tp2).second == List({Null()}));
+
+	// Move
+	Tp tp3;
+	const auto refArray3 = Internal::DTupleToArray<Tp,
+		const KeyRefType,
+		const ValRefType>::Convert(tp3);
+	EXPECT_TRUE(refArray3[0].second.get() == String());
+	EXPECT_TRUE(refArray3[1].second.get() == Int64());
+	EXPECT_TRUE(refArray3[2].second.get() == List());
+
+	Internal::DTupleAssign::Move(tp3, std::move(tp2));
+
+	//    ensure the source is moved
+	EXPECT_TRUE(std::get<0>(tp2).second == String());
+	EXPECT_TRUE(std::get<1>(tp2).second == Int64(12345));
+	EXPECT_TRUE(std::get<2>(tp2).second == List());
+
+	//    ensure the original references are still valid
+	const auto refArray3_1 = Internal::DTupleToArray<Tp,
+		const KeyRefType,
+		const ValRefType>::Convert(tp3);
+	EXPECT_EQ(&refArray3[0].first.get(), &refArray3_1[0].first.get());
+	EXPECT_EQ(&refArray3[1].first.get(), &refArray3_1[1].first.get());
+	EXPECT_EQ(&refArray3[2].first.get(), &refArray3_1[2].first.get());
+	EXPECT_EQ(&refArray3[0].second.get(), &refArray3_1[0].second.get());
+	EXPECT_EQ(&refArray3[1].second.get(), &refArray3_1[1].second.get());
+	EXPECT_EQ(&refArray3[2].second.get(), &refArray3_1[2].second.get());
+
+	//    ensure the value is updated
+	EXPECT_TRUE(std::get<0>(tp3).second == String("ref array val1"));
+	EXPECT_TRUE(std::get<1>(tp3).second == Int64(12345));
+	EXPECT_TRUE(std::get<2>(tp3).second == List({Null()}));
 }
 
 using TestStaticDictBase1 = StaticDict<
 	std::tuple<
-		std::pair<StrKey<SIMOBJ_KSTR("Key2_1")>, Int64> > >;
+		std::pair<StrKey<SIMOBJ_KSTR("Key1_1")>, Int64> > >;
 
 class TestStaticDict1 : public TestStaticDictBase1
 {
 public:
 	using Base = TestStaticDictBase1;
+
+	using Base::Base;
+
+	typename Base::GetRef<StrKey<SIMOBJ_KSTR("Key1_1")> >
+	get_Key1_1()
+	{
+		return Base::get<StrKey<SIMOBJ_KSTR("Key1_1")> >();
+	}
+
+	typename Base::GetConstRef<StrKey<SIMOBJ_KSTR("Key1_1")> >
+	get_Key1_1() const
+	{
+		return Base::get<StrKey<SIMOBJ_KSTR("Key1_1")> >();
+	}
+
+}; // class TestStaticDict1
+
+using TestStaticDictBase2 = StaticDict<
+	std::tuple<
+		std::pair<StrKey<SIMOBJ_KSTR("Key2_1")>, String>,
+		std::pair<StrKey<SIMOBJ_KSTR("Key2_2")>, Int64>,
+		std::pair<StrKey<SIMOBJ_KSTR("Key2_3")>, TestStaticDict1> > >;
+
+class TestStaticDict2 : public TestStaticDictBase2
+{
+public:
+	using Base = TestStaticDictBase2;
 
 	using Base::Base;
 
@@ -237,34 +309,57 @@ public:
 		return Base::get<StrKey<SIMOBJ_KSTR("Key2_1")> >();
 	}
 
-}; // class TestStaticDict1
+	typename Base::GetRef<StrKey<SIMOBJ_KSTR("Key2_2")> >
+	get_Key2_2()
+	{
+		return Base::get<StrKey<SIMOBJ_KSTR("Key2_2")> >();
+	}
 
-// using TestStaticDictBase2 = StaticDict<
-// 	std::tuple<
-// 		std::pair<SIMOBJ_KSTR("Key2_1"), String>,
-// 		std::pair<SIMOBJ_KSTR("Key2_2"), Int64>,
-// 		std::pair<SIMOBJ_KSTR("Key2_2"), Null> > >;
+	typename Base::GetConstRef<StrKey<SIMOBJ_KSTR("Key2_2")> >
+	get_Key2_2() const
+	{
+		return Base::get<StrKey<SIMOBJ_KSTR("Key2_2")> >();
+	}
+
+	typename Base::GetRef<StrKey<SIMOBJ_KSTR("Key2_3")> >
+	get_Key2_3()
+	{
+		return Base::get<StrKey<SIMOBJ_KSTR("Key2_3")> >();
+	}
+
+	typename Base::GetConstRef<StrKey<SIMOBJ_KSTR("Key2_3")> >
+	get_Key2_3() const
+	{
+		return Base::get<StrKey<SIMOBJ_KSTR("Key2_3")> >();
+	}
+
+}; // class TestStaticDict2
 
 GTEST_TEST(TestStaticDict, StaticDictBasic)
 {
 	// Some basic tests on a basic static Dict type
 	TestStaticDict1 dict;
 	const auto& kdict = static_cast<const TestStaticDict1&>(dict);
-	EXPECT_EQ(dict.get_Key2_1().GetVal(), 0);
-	dict.get_Key2_1() = Int64(12345);
-	EXPECT_EQ(kdict.get_Key2_1(), Int64(12345));
+	EXPECT_EQ(dict.get_Key1_1().GetVal(), 0);
+	dict.get_Key1_1() = Int64(12345);
+	EXPECT_EQ(kdict.get_Key1_1(), Int64(12345));
 
 	// iterators
-	EXPECT_EQ((dict.begin() + 0)->first.get(), String("Key2_1"));
+	EXPECT_EQ((dict.begin() + 0)->first.get(), String("Key1_1"));
 	EXPECT_EQ((dict.begin() + 0)->second.get(), Int64(12345));
 	// TODO: (dict.begin() + 0)->second.get() = Int64(54321);
 	// EXPECT_EQ((dict.begin() + 0)->second.get(), Int64(54321));
+	EXPECT_NE(dict.begin(), dict.end());
 	// Expected compile error:
-	// (dict.begin() + 0)->first.get() = String("Key2_x");
+	// (dict.begin() + 0)->first.get() = String("KeyX");
 
 	// const iterators
-	EXPECT_EQ((dict.cbegin() + 0)->first.get(), String("Key2_1"));
+	EXPECT_EQ((dict.cbegin() + 0)->first.get(), String("Key1_1"));
 	EXPECT_EQ((dict.cbegin() + 0)->second.get(), Int64(12345));
+	EXPECT_NE(dict.cbegin(), dict.cend());
+	EXPECT_EQ((kdict.begin() + 0)->first.get(), String("Key1_1"));
+	EXPECT_EQ((kdict.begin() + 0)->second.get(), Int64(12345));
+	EXPECT_NE(kdict.begin(), kdict.end());
 	// Expected compile error:
 	// (dict.cbegin() + 0)->first.get() = String("Key2_2");
 	// (dict.cbegin() + 0)->second.get() = Int64(54321);
@@ -272,15 +367,15 @@ GTEST_TEST(TestStaticDict, StaticDictBasic)
 	EXPECT_EQ(dict.size(), 1);
 
 	// index by key
-	EXPECT_EQ(dict.at(String("Key2_1")), Int64(12345));
-	EXPECT_EQ(kdict.at(String("Key2_1")), Int64(12345));
-	EXPECT_EQ(dict[String("Key2_1")], Int64(12345));
-	EXPECT_EQ(kdict[String("Key2_1")], Int64(12345));
+	EXPECT_EQ(dict.at(String("Key1_1")), Int64(12345));
+	EXPECT_EQ(kdict.at(String("Key1_1")), Int64(12345));
+	EXPECT_EQ(dict[String("Key1_1")], Int64(12345));
+	EXPECT_EQ(kdict[String("Key1_1")], Int64(12345));
 
-	EXPECT_THROW(dict.at(String("Key2_x")), std::out_of_range);
-	EXPECT_THROW(kdict.at(String("Key2_x")), std::out_of_range);
-	EXPECT_THROW(dict[String("Key2_x")], std::out_of_range);
-	EXPECT_THROW(kdict[String("Key2_x")], std::out_of_range);
+	EXPECT_THROW(dict.at(String("KeyX")), KeyError);
+	EXPECT_THROW(kdict.at(String("KeyX")), KeyError);
+	EXPECT_THROW(dict[String("KeyX")], KeyError);
+	EXPECT_THROW(kdict[String("KeyX")], KeyError);
 
 	// index by key
 	EXPECT_EQ(dict.at(0), Int64(12345));
@@ -288,25 +383,335 @@ GTEST_TEST(TestStaticDict, StaticDictBasic)
 	EXPECT_EQ(dict[0], Int64(12345));
 	EXPECT_EQ(kdict[0], Int64(12345));
 
-	EXPECT_THROW(dict.at(100), std::out_of_range);
-	EXPECT_THROW(kdict.at(100), std::out_of_range);
-	EXPECT_THROW(dict[100], std::out_of_range);
-	EXPECT_THROW(kdict[100], std::out_of_range);
+	EXPECT_THROW(dict.at(100), IndexError);
+	EXPECT_THROW(kdict.at(100), IndexError);
+	EXPECT_THROW(dict[100], IndexError);
+	EXPECT_THROW(kdict[100], IndexError);
 
 	// has key
-	EXPECT_TRUE(dict.HasKey(String("Key2_1")));
-	EXPECT_FALSE(dict.HasKey(String("Key2_x")));
+	EXPECT_TRUE(dict.HasKey(String("Key1_1")));
+	EXPECT_FALSE(dict.HasKey(String("KeyX")));
 
 	// copy
 	TestStaticDict1 dictcp(dict);
 	EXPECT_TRUE(dictcp == dict);
 	EXPECT_FALSE(dictcp != dict);
-	dict.get_Key2_1() = Int64(54321);
+	dict.get_Key1_1() = Int64(54321);
 	EXPECT_FALSE(dictcp == dict);
 	EXPECT_TRUE(dictcp != dict);
+	EXPECT_TRUE(*(dict.Copy(StaticDictBaseObj::sk_null)) == dict);
+	EXPECT_TRUE(*(dict.Copy(BaseObj::sk_null)) == dict);
 
 	// move
 	TestStaticDict1 dictmv(std::move(dictcp));
 	EXPECT_TRUE(dictmv == dictcp);
 	EXPECT_FALSE(dictmv != dictcp);
+	dictcp = dict;
+	EXPECT_TRUE(*(dictcp.Move(StaticDictBaseObj::sk_null)) == dict);
+	dictcp = dict;
+	EXPECT_TRUE(*(dictcp.Move(BaseObj::sk_null)) == dict);
+}
+
+GTEST_TEST(TestStaticDict, Construction)
+{
+	// Default
+	EXPECT_NO_THROW({
+		TestStaticDict2().get_Key2_1();
+	});
+	EXPECT_NO_THROW({
+		std::unique_ptr<BaseObj> base;
+		base.reset(new TestStaticDict2());
+		base.reset();
+	});
+
+	// Copy & Move
+	TestStaticDict2 dict;
+	dict.get_Key2_1() = String("val2_1");
+	dict.get_Key2_2() = Int64(12345);
+	dict.get_Key2_3().get_Key1_1() = Int64(54321);
+	TestStaticDict2 dictCp = dict;
+	EXPECT_EQ(dictCp.get_Key2_1(), String("val2_1"));
+	EXPECT_EQ(dictCp.get_Key2_2(), Int64(12345));
+	EXPECT_EQ(dictCp.get_Key2_3().get_Key1_1(), Int64(54321));
+	TestStaticDict2 dictMv = std::move(dictCp);
+	EXPECT_EQ(dictCp.get_Key2_1(), String());
+	EXPECT_EQ(dictMv.get_Key2_1(), String("val2_1"));
+	EXPECT_EQ(dictMv.get_Key2_2(), Int64(12345));
+	EXPECT_EQ(dictMv.get_Key2_3().get_Key1_1(), Int64(54321));
+}
+
+GTEST_TEST(TestStaticDict, Assignment)
+{
+	TestStaticDict2 dict;
+	dict.get_Key2_1() = String("val2_1");
+	dict.get_Key2_2() = Int64(12345);
+	dict.get_Key2_3().get_Key1_1() = Int64(54321);
+
+	TestStaticDict2 dictCp;
+	EXPECT_EQ(dictCp.get_Key2_1(), String());
+	EXPECT_EQ(dictCp.get_Key2_2(), Int64());
+	EXPECT_EQ(dictCp.get_Key2_3().get_Key1_1(), Int64());
+	dictCp = dict;
+	EXPECT_EQ(dictCp.get_Key2_1(), String("val2_1"));
+	EXPECT_EQ(dictCp.get_Key2_2(), Int64(12345));
+	EXPECT_EQ(dictCp.get_Key2_3().get_Key1_1(), Int64(54321));
+	dictCp = dictCp; // self copy ==> no op
+	EXPECT_EQ(dictCp.get_Key2_1(), String("val2_1"));
+	EXPECT_EQ(dictCp.get_Key2_2(), Int64(12345));
+	EXPECT_EQ(dictCp.get_Key2_3().get_Key1_1(), Int64(54321));
+
+	TestStaticDict2 dictMv;
+	EXPECT_EQ(dictMv.get_Key2_1(), String());
+	EXPECT_EQ(dictMv.get_Key2_2(), Int64());
+	EXPECT_EQ(dictMv.get_Key2_3().get_Key1_1(), Int64());
+	dictMv = std::move(dictCp);
+	EXPECT_EQ(dictCp.get_Key2_1(), String());
+	EXPECT_EQ(dictMv.get_Key2_1(), String("val2_1"));
+	EXPECT_EQ(dictMv.get_Key2_2(), Int64(12345));
+	EXPECT_EQ(dictMv.get_Key2_3().get_Key1_1(), Int64(54321));
+	dictMv = std::move(dictMv); // self move ==> no op
+	EXPECT_EQ(dictMv.get_Key2_1(), String("val2_1"));
+	EXPECT_EQ(dictMv.get_Key2_2(), Int64(12345));
+	EXPECT_EQ(dictMv.get_Key2_3().get_Key1_1(), Int64(54321));
+}
+
+GTEST_TEST(TestStaticDict, Category)
+{
+	static_assert(TestStaticDict2::sk_cat() == ObjCategory::StaticDict, "Category failed.");
+	EXPECT_EQ(TestStaticDict2::sk_cat(), ObjCategory::StaticDict);
+
+	TestStaticDict2 val;
+	EXPECT_EQ(val.GetCategory(), ObjCategory::StaticDict);
+}
+
+GTEST_TEST(TestStaticDict, CategoryName)
+{
+	EXPECT_EQ(TestStaticDict2().GetCategoryName(), std::string("StaticDict"));
+}
+
+GTEST_TEST(TestStaticDict, Compare)
+{
+	TestStaticDict2 dict1;
+	dict1.get_Key2_1() = String("val2_1");
+	dict1.get_Key2_2() = Int64(12345);
+	dict1.get_Key2_3().get_Key1_1() = Int64(54321);
+	TestStaticDict2 dict2;
+	dict2.get_Key2_1() = String("val2_1");
+	dict2.get_Key2_2() = Int64(12345);
+	dict2.get_Key2_3().get_Key1_1() = Int64(54321);
+	TestStaticDict2 dict3;
+	dict3.get_Key2_1() = String("val2_1");
+	dict3.get_Key2_2() = Int64(55555);
+	dict3.get_Key2_3().get_Key1_1() = Int64(54321);
+
+	// ==
+	EXPECT_TRUE( dict1 == dict2);
+	EXPECT_FALSE(dict1 != dict2);
+	EXPECT_TRUE( dict1 != dict3);
+	EXPECT_FALSE(dict1 == dict3);
+	EXPECT_FALSE(dict1 !=
+		static_cast<const StaticDictBaseObj&>(dict2));
+	EXPECT_TRUE( dict1 !=
+		static_cast<const StaticDictBaseObj&>(dict3));
+	EXPECT_TRUE( dict1 !=
+		static_cast<const StaticDictBaseObj&>(dict3.get_Key2_3()));
+
+	// == diff obj
+	EXPECT_TRUE(dict1 != static_cast<const BaseObj&>(Null()));
+	EXPECT_TRUE(dict1 != static_cast<const BaseObj&>(String()));
+
+	// <
+	EXPECT_THROW((void)(dict1 <  static_cast<const BaseObj&>(Null())), UnsupportedOperation);
+	EXPECT_THROW((void)(dict1 >  static_cast<const BaseObj&>(Null())), UnsupportedOperation);
+	EXPECT_THROW((void)(dict1 <= static_cast<const BaseObj&>(Null())), UnsupportedOperation);
+	EXPECT_THROW((void)(dict1 >= static_cast<const BaseObj&>(Null())), UnsupportedOperation);
+}
+
+GTEST_TEST(TestStaticDict, Len)
+{
+	TestStaticDict2 dict1;
+	EXPECT_EQ(dict1.size(), 3);
+	EXPECT_EQ(dict1.get_Key2_3().size(), 1);
+}
+
+GTEST_TEST(TestStaticDict, Iterator)
+{
+	TestStaticDict2 dict1;
+	dict1.get_Key2_1() = String("val2_1");
+	dict1.get_Key2_2() = Int64(12345);
+	dict1.get_Key2_3().get_Key1_1() = Int64(54321);
+	const TestStaticDict2& kdict1 = dict1;
+
+	using _ExpArrayItemT = std::pair<String, std::reference_wrapper<BaseObj> >;
+	std::array<_ExpArrayItemT, 3> expRes =
+	{
+		_ExpArrayItemT(String("Key2_1"), dict1.get_Key2_1()),
+		_ExpArrayItemT(String("Key2_2"), dict1.get_Key2_2()),
+		_ExpArrayItemT(String("Key2_3"), dict1.get_Key2_3()),
+	};
+
+	// const it
+	auto expIt = expRes.cbegin();
+	for(auto it = dict1.cbegin();
+		it != dict1.cend() && expIt != expRes.cend();
+		it++, ++expIt)
+	{
+		EXPECT_TRUE(it->first.get()  == expIt->first);
+		EXPECT_TRUE(it->second.get() == expIt->second.get());
+	}
+
+	// const obj begin & end
+	expIt = expRes.cbegin();
+	for(auto it = kdict1.begin();
+		it != kdict1.end() && expIt != expRes.cend();
+		++it, ++expIt)
+	{
+		EXPECT_TRUE(it->first.get()  == expIt->first);
+		EXPECT_TRUE(it->second.get() == expIt->second.get());
+	}
+
+	// it
+	expIt = expRes.cbegin();
+	for(auto it = dict1.begin();
+		it != dict1.end() && expIt != expRes.cend();
+		it++, ++expIt)
+	{
+		EXPECT_TRUE(it->first.get()  == expIt->first);
+		EXPECT_TRUE(it->second.get() == expIt->second.get());
+	}
+}
+
+GTEST_TEST(TestStaticDict, At)
+{
+	TestStaticDict2 dict1;
+	dict1.get_Key2_1() = String("val2_1");
+	dict1.get_Key2_2() = Int64(12345);
+	dict1.get_Key2_3().get_Key1_1() = Int64(54321);
+
+	EXPECT_TRUE(dict1[String("Key2_1")] == String("val2_1"));
+	EXPECT_TRUE(dict1[String("Key2_2")] == Int64(12345));
+	EXPECT_TRUE(dict1[String("Key2_3")] == dict1.get_Key2_3());
+	EXPECT_THROW(dict1[String("KeyX")], KeyError);
+
+	EXPECT_TRUE(dict1[0] == String("val2_1"));
+	EXPECT_TRUE(dict1[1] == Int64(12345));
+	EXPECT_TRUE(dict1[2] == dict1.get_Key2_3());
+	EXPECT_THROW(dict1[100], IndexError);
+
+	const TestStaticDict2& kdict1 = dict1;
+
+	EXPECT_TRUE(kdict1[String("Key2_1")] == String("val2_1"));
+	EXPECT_TRUE(kdict1[String("Key2_2")] == Int64(12345));
+	EXPECT_TRUE(kdict1[String("Key2_3")] == kdict1.get_Key2_3());
+	EXPECT_THROW(kdict1[String("KeyX")], KeyError);
+
+	EXPECT_TRUE(kdict1[0] == String("val2_1"));
+	EXPECT_TRUE(kdict1[1] == Int64(12345));
+	EXPECT_TRUE(kdict1[2] == kdict1.get_Key2_3());
+	EXPECT_THROW(kdict1[100], IndexError);
+}
+
+GTEST_TEST(TestStaticDict, FindKey)
+{
+	TestStaticDict2 dict1;
+
+	EXPECT_TRUE(dict1.HasKey(String("Key2_1")));
+	EXPECT_TRUE(dict1.HasKey(String("Key2_2")));
+	EXPECT_TRUE(dict1.HasKey(String("Key2_3")));
+	EXPECT_FALSE(dict1.HasKey(String("KeyX")));
+}
+
+GTEST_TEST(TestStaticDict, Miscs)
+{
+	TestStaticDict2 dict1;
+	dict1.get_Key2_1() = String("val2_1");
+	dict1.get_Key2_2() = Int64(12345);
+	dict1.get_Key2_3().get_Key1_1() = Int64(54321);
+
+	// Is null
+	EXPECT_FALSE(dict1.IsNull());
+
+	// Cast
+	EXPECT_NO_THROW(dict1.AsStaticDict());
+	EXPECT_THROW(dict1.AsDict(),    TypeError);
+	EXPECT_THROW(dict1.AsNull(),    TypeError);
+	EXPECT_THROW(dict1.AsNumeric(), TypeError);
+	EXPECT_THROW(dict1.AsString(),  TypeError);
+	EXPECT_THROW(dict1.AsList(),    TypeError);
+
+	const auto& kDict1 = dict1;
+	EXPECT_NO_THROW(kDict1.AsStaticDict());
+	EXPECT_THROW(kDict1.AsDict(),    TypeError);
+	EXPECT_THROW(kDict1.AsNull(),    TypeError);
+	EXPECT_THROW(kDict1.AsNumeric(), TypeError);
+	EXPECT_THROW(kDict1.AsString(),  TypeError);
+	EXPECT_THROW(kDict1.AsList(),    TypeError);
+
+	// Copy
+	static_assert(std::is_same<
+		decltype(*dict1.Copy(StaticDictBaseObj::sk_null)),
+		StaticDictBaseObj&>::value, "Failed to test Copy virtual func");
+	EXPECT_EQ(
+		*dict1.Copy(StaticDictBaseObj::sk_null),
+		dict1);
+
+	static_assert(std::is_same<
+		decltype(*dict1.Copy(BaseObj::sk_null)),
+		BaseObj&>::value, "Failed to test Copy virtual func");
+	EXPECT_EQ(
+		*dict1.Copy(BaseObj::sk_null),
+		dict1);
+
+	// Move
+	TestStaticDict2 mDict = dict1;
+
+	static_assert(std::is_same<
+		decltype(*TestStaticDict2().Move(StaticDictBaseObj::sk_null)),
+		StaticDictBaseObj&>::value, "Failed to test Move virtual func");
+	mDict = dict1;
+	EXPECT_TRUE(mDict.get_Key2_1() == String("val2_1"));
+	EXPECT_EQ(
+		*mDict.Move(StaticDictBaseObj::sk_null),
+		dict1);
+	EXPECT_TRUE(mDict.get_Key2_1() == String());
+
+	static_assert(std::is_same<
+		decltype(*TestStaticDict2().Move(BaseObj::sk_null)),
+		BaseObj&>::value, "Failed to test Move virtual func");
+	mDict = dict1;
+	EXPECT_TRUE(mDict.get_Key2_1() == String("val2_1"));
+	EXPECT_EQ(
+		*mDict.Move(BaseObj::sk_null),
+		dict1);
+	EXPECT_TRUE(mDict.get_Key2_1() == String());
+}
+
+GTEST_TEST(TestStaticDict, ToString)
+{
+	TestStaticDict2 dict1;
+	dict1.get_Key2_1() = String("val2_1");
+	dict1.get_Key2_2() = Int64(12345);
+	dict1.get_Key2_3().get_Key1_1() = Int64(54321);
+
+	std::string expRes1 = "{ \"Key2_1\" : \"val2_1\", \"Key2_2\" : 12345, \"Key2_3\" : { \"Key1_1\" : 54321 } }";
+	std::string expSRes1 = "{\"Key2_1\":\"val2_1\",\"Key2_2\":12345,\"Key2_3\":{\"Key1_1\":54321}}";
+
+	// DebugString
+	{
+		EXPECT_TRUE(dict1.DebugString() == expRes1);
+		EXPECT_TRUE(dict1.ShortDebugString() == expSRes1);
+	}
+
+	// ToString
+	{
+		EXPECT_TRUE(dict1.ToString() == expRes1);
+	}
+
+	// DumpString
+	{
+		std::string res;
+		EXPECT_NO_THROW(
+			dict1.DumpString(ToOutIt<char>(std::back_inserter(res))));
+		EXPECT_TRUE(res == expRes1);
+	}
 }

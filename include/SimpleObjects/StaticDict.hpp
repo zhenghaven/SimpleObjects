@@ -288,6 +288,44 @@ struct DTupleMove<std::tuple<_DPairs...> >
 	}
 };
 
+struct DTupleAssign
+{
+	struct DPairAssignCopy
+	{
+		template<typename _Pair1First, typename _Pair1Second,
+			typename _Pair2First, typename _Pair2Second>
+		void operator()(std::pair<_Pair1First, _Pair1Second>& p1,
+			const std::pair<_Pair2First, _Pair2Second>& p2)
+		{
+			p1.second = p2.second;
+		}
+	}; // struct DPairAssignCopy
+
+	struct DPairAssignMove
+	{
+		template<typename _Pair1First, typename _Pair1Second,
+			typename _Pair2First, typename _Pair2Second>
+		void operator()(std::pair<_Pair1First, _Pair1Second>& p1,
+			std::pair<_Pair2First, _Pair2Second>&& p2)
+		{
+			p1.second = std::forward<_Pair2Second>(p2.second);
+		}
+	}; // struct DPairAssignCopy
+
+	template<typename _Tp1, typename _Tp2>
+	static void Copy(_Tp1& tp1, const _Tp2& tp2)
+	{
+		Internal::TupleOperation::BinOp(tp1, tp2, DPairAssignCopy());
+	}
+
+	template<typename _Tp1, typename _Tp2>
+	static void Move(_Tp1& tp1, _Tp2&& tp2)
+	{
+		Internal::TupleOperation::BinOp(
+			tp1, std::forward<_Tp2>(tp2), DPairAssignMove());
+	}
+}; // struct DTupleAssign
+
 } // namespace Internal
 
 /**
@@ -339,6 +377,11 @@ public: // Static members:
 		_RefWrapType,
 		_ToStringType>;
 	using ToStringType = _ToStringType;
+	using BaseBase = typename Base::Base;
+
+	static_assert(std::is_same<BaseBase, BaseObject<_ToStringType> >::value,
+		"Expecting Base::Base to be BaseObject class");
+
 	using TupleCore = _Tp;
 
 	typedef _DynKeyType                               key_type;
@@ -395,10 +438,7 @@ public:
 	{}
 
 	StaticDictImpl(const StaticDictImpl& other) :
-		m_data(other.m_data),
-		m_refArray(RefArrayType::Convert(m_data)),
-		m_krefArray(KRefArrayType::Convert(m_data)),
-		m_refmap(RefMapType::Convert(m_data))
+		StaticDictImpl(other.m_data)
 	{}
 
 	StaticDictImpl(StaticDictImpl&& other) :
@@ -410,7 +450,40 @@ public:
 		m_refmap(RefMapType::Convert(m_data))
 	{}
 
+	StaticDictImpl(const TupleCore& other) :
+		m_data(other),
+		m_refArray(RefArrayType::Convert(m_data)),
+		m_krefArray(KRefArrayType::Convert(m_data)),
+		m_refmap(RefMapType::Convert(m_data))
+	{}
+
+	StaticDictImpl(TupleCore&& other) :
+		m_data(std::forward<TupleCore>(other)),
+		m_refArray(RefArrayType::Convert(m_data)),
+		m_krefArray(KRefArrayType::Convert(m_data)),
+		m_refmap(RefMapType::Convert(m_data))
+	{}
+
 	virtual ~StaticDictImpl() = default;
+
+	StaticDictImpl& operator=(const Self& rhs)
+	{
+		if (this != &rhs)
+		{
+			Internal::DTupleAssign::Copy(m_data, rhs.m_data);
+		}
+		return *this;
+	}
+
+	StaticDictImpl& operator=(Self&& rhs)
+	{
+		if (this != &rhs)
+		{
+			Internal::DTupleAssign::Move(
+				m_data, std::forward<TupleCore>(rhs.m_data));
+		}
+		return *this;
+	}
 
 	template<typename _Key>
 	GetRef<_Key> get()
@@ -428,6 +501,7 @@ public:
 		return std::get<idx>(m_data).second;
 	}
 
+	// overrides Base::operator==
 	virtual bool operator==(const Base& rhs) const override
 	{
 		if (sk_size != rhs.size())
@@ -450,6 +524,13 @@ public:
 		return true;
 	}
 
+	using Base::operator!=;
+
+	using BaseBase::operator<;
+	using BaseBase::operator>;
+	using BaseBase::operator<=;
+	using BaseBase::operator>=;
+
 	virtual bool operator==(const Self& rhs) const
 	{
 		return m_data == rhs.m_data;
@@ -460,11 +541,18 @@ public:
 		return m_data != rhs.m_data;
 	}
 
+	bool operator<(const Self& rhs) const = delete;
+	bool operator>(const Self& rhs) const = delete;
+	bool operator<=(const Self& rhs) const = delete;
+	bool operator>=(const Self& rhs) const = delete;
+
+	using Base::begin;
 	virtual iterator begin() override
 	{
 		return ToRdIt<true>(m_refArray.cbegin());
 	}
 
+	using Base::end;
 	virtual iterator end() override
 	{
 		return ToRdIt<true>(m_refArray.cend());
@@ -487,12 +575,26 @@ public:
 
 	virtual mapped_type& at(const key_type& key) override
 	{
-		return m_refmap.at(key).get();
+		try
+		{
+			return m_refmap.at(key).get();
+		}
+		catch (const std::out_of_range&)
+		{
+			throw KeyError(key.DebugString(), KeyError::sk_keyName);
+		}
 	}
 
 	virtual const mapped_type& at(const key_type& key) const override
 	{
-		return m_refmap.at(key).get();
+		try
+		{
+			return m_refmap.at(key).get();
+		}
+		catch (const std::out_of_range&)
+		{
+			throw KeyError(key.DebugString(), KeyError::sk_keyName);
+		}
 	}
 
 	virtual mapped_type& operator[](const key_type& key) override
@@ -507,12 +609,26 @@ public:
 
 	virtual mapped_type& at(size_t idx) override
 	{
-		return m_refArray.at(idx).second.get();
+		try
+		{
+			return m_refArray.at(idx).second.get();
+		}
+		catch (const std::out_of_range&)
+		{
+			throw IndexError(idx);
+		}
 	}
 
 	virtual const mapped_type& at(size_t idx) const override
 	{
-		return m_refArray.at(idx).second.get();
+		try
+		{
+			return m_refArray.at(idx).second.get();
+		}
+		catch (const std::out_of_range&)
+		{
+			throw IndexError(idx);
+		}
 	}
 
 	virtual mapped_type& operator[](size_t idx) override

@@ -95,6 +95,12 @@ using NumericBaseObj = NumericBaseObject<std::string>;
 using StringBaseObj = StringBaseObject<char, std::string>;
 using ListBaseObj = ListBaseObject<Object, std::string>;
 using DictBaseObj = DictBaseObject<HashableObject, Object, std::string>;
+using StaticDictBaseObj = StaticDictBaseObject<
+	HashableBaseObj,
+	BaseObj,
+	HashableReferenceWrapper,
+	std::reference_wrapper,
+	std::string>;
 
 // ========== Convenient types of static Dict ==========
 

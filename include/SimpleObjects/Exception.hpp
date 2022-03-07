@@ -30,7 +30,7 @@ public:
 	 *
 	 * @param what_arg explanatory string
 	 */
-	Exception(const std::string& what_arg) :
+	explicit Exception(const std::string& what_arg) :
 		std::runtime_error(what_arg)
 	{}
 
@@ -40,7 +40,7 @@ public:
 	 *
 	 * @param what_arg explanatory string
 	 */
-	Exception(const char* what_arg) :
+	explicit Exception(const char* what_arg) :
 		std::runtime_error(what_arg)
 	{}
 
@@ -103,5 +103,45 @@ public:
 	// LCOV_EXCL_STOP
 
 }; // class TypeError
+
+class KeyError : public Exception
+{
+public:
+
+	struct KeyName { explicit KeyName() = default; };
+
+	static constexpr KeyName sk_keyName = KeyName{};
+
+	KeyError(const std::string& keyName, KeyName /* unused */) :
+		Exception("Key named \'" + keyName + "\' is not found")
+	{}
+
+	// LCOV_EXCL_START
+	/**
+	 * @brief Destroy the Type Error object
+	 *
+	 */
+	virtual ~KeyError() = default;
+	// LCOV_EXCL_STOP
+
+}; // class KeyError
+
+class IndexError : public Exception
+{
+public:
+
+	explicit IndexError(size_t idx) :
+		Exception("Index \'" + std::to_string(idx) + "\' is out of range")
+	{}
+
+	// LCOV_EXCL_START
+	/**
+	 * @brief Destroy the Type Error object
+	 *
+	 */
+	virtual ~IndexError() = default;
+	// LCOV_EXCL_STOP
+
+}; // class IndexError
 
 }//namespace SimpleObjects
