@@ -23,6 +23,10 @@ public: // Static member:
 	using ToStringType = _ToStringType;
 	using Self = NullImpl<_ToStringType>;
 	using Base = HashableBaseObject<_ToStringType>;
+	using BaseBase = typename Base::Base;
+
+	static_assert(std::is_same<BaseBase, BaseObject<_ToStringType> >::value,
+		"Expecting Base::Base to be BaseObject class");
 
 	static constexpr ObjCategory sk_cat()
 	{
@@ -68,6 +72,23 @@ public:
 	virtual const Self& AsNull() const override
 	{
 		return *this;
+	}
+
+	virtual bool operator==(const BaseBase& rhs) const override
+	{
+		return rhs.IsNull();
+	}
+
+	virtual bool operator<(const BaseBase& rhs) const override
+	{
+		throw UnsupportedOperation("<",
+			this->GetCategoryName(), rhs.GetCategoryName());
+	}
+
+	virtual bool operator>(const BaseBase& rhs) const override
+	{
+		throw UnsupportedOperation(">",
+			this->GetCategoryName(), rhs.GetCategoryName());
 	}
 
 	using Base::Copy;

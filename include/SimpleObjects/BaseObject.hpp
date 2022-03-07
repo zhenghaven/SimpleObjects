@@ -137,21 +137,21 @@ public:
 	 * @param rhs The other object to test with
 	 * @return whether two objects are equal
 	 */
-	virtual bool operator==(const Self& rhs) const;
+	virtual bool operator==(const Self& rhs) const = 0;
 
 	virtual bool operator!=(const Self& rhs) const
 	{
 		return !((*this) == rhs);
 	}
 
-	virtual bool operator<(const Self& rhs) const;
+	virtual bool operator<(const Self& rhs) const = 0;
 
 	virtual bool operator>=(const Self& rhs) const
 	{
 		return !((*this) < rhs);
 	}
 
-	virtual bool operator>(const Self& rhs) const;
+	virtual bool operator>(const Self& rhs) const = 0;
 
 	virtual bool operator<=(const Self& rhs) const
 	{

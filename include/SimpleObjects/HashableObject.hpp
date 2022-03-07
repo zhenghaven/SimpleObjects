@@ -26,6 +26,10 @@ public: // Static members
 	using ToStringType = _ToStringType;
 	using Self = HashableObjectImpl<_ToStringType>;
 	using Base = HashableBaseObject<_ToStringType>;
+	using BaseBase = typename Base::Base;
+
+	static_assert(std::is_same<BaseBase, BaseObject<_ToStringType> >::value,
+		"Expecting Base::Base to be BaseObject class");
 
 	using BasePtr = std::unique_ptr<Base>;
 
@@ -158,6 +162,21 @@ public:
 	virtual const StatDictBase& AsStaticDict() const override
 	{
 		return m_ptr->AsStaticDict();
+	}
+
+	virtual bool operator==(const BaseBase& rhs) const override
+	{
+		return m_ptr->operator==(rhs);
+	}
+
+	virtual bool operator<(const BaseBase& rhs) const override
+	{
+		return m_ptr->operator<(rhs);
+	}
+
+	virtual bool operator>(const BaseBase& rhs) const override
+	{
+		return m_ptr->operator>(rhs);
 	}
 
 	// HashableBaseObject virtual functions

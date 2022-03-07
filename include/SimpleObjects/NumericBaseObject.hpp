@@ -26,6 +26,10 @@ public: // Static Member
 	using ToStringType = _ToStringType;
 	using Self = NumericBaseObject<_ToStringType>;
 	using Base = HashableBaseObject<_ToStringType>;
+	using BaseBase = typename Base::Base;
+
+	static_assert(std::is_same<BaseBase, BaseObject<_ToStringType> >::value,
+		"Expecting Base::Base to be BaseObject class");
 
 	static constexpr Self* sk_null = nullptr;
 
@@ -74,6 +78,49 @@ public:
 	{
 		return !(*this > rhs);
 	}
+
+	virtual bool operator==(const BaseBase& rhs) const override
+	{
+		const auto rhsCat = rhs.GetCategory();
+		if (rhsCat != ObjCategory::Bool &&
+			rhsCat != ObjCategory::Integer &&
+			rhsCat != ObjCategory::Real)
+		{
+			return false;
+		}
+		return *this == rhs.AsNumeric();
+	}
+
+	using BaseBase::operator!=;
+
+	virtual bool operator<(const BaseBase& rhs) const override
+	{
+		const auto rhsCat = rhs.GetCategory();
+		if (rhsCat != ObjCategory::Bool &&
+			rhsCat != ObjCategory::Integer &&
+			rhsCat != ObjCategory::Real)
+		{
+			throw UnsupportedOperation("<",
+				this->GetCategoryName(), rhs.GetCategoryName());
+		}
+		return *this < rhs.AsNumeric();
+	}
+
+	virtual bool operator>(const BaseBase& rhs) const override
+	{
+		const auto rhsCat = rhs.GetCategory();
+		if (rhsCat != ObjCategory::Bool &&
+			rhsCat != ObjCategory::Integer &&
+			rhsCat != ObjCategory::Real)
+		{
+			throw UnsupportedOperation(">",
+				this->GetCategoryName(), rhs.GetCategoryName());
+		}
+		return *this > rhs.AsNumeric();
+	}
+
+	using BaseBase::operator<=;
+	using BaseBase::operator>=;
 
 	virtual std::unique_ptr<Self> Copy(const Self* /*unused*/) const = 0;
 

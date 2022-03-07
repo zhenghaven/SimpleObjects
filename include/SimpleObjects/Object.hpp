@@ -160,6 +160,21 @@ public:
 		return m_ptr->AsStaticDict();
 	}
 
+	virtual bool operator==(const Base& rhs) const override
+	{
+		return m_ptr->operator==(rhs);
+	}
+
+	virtual bool operator<(const Base& rhs) const override
+	{
+		return m_ptr->operator<(rhs);
+	}
+
+	virtual bool operator>(const Base& rhs) const override
+	{
+		return m_ptr->operator>(rhs);
+	}
+
 	virtual std::unique_ptr<Base> Copy(const Base* unused) const override
 	{
 		return m_ptr->Copy(unused);

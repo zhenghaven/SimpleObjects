@@ -71,8 +71,15 @@ public: // Static member:
 	using InternalType = _ValType;
 	using ToStringType = _ToStringType;
 	using Self = Numeric<InternalType, ToStringType>;
-	using Base = NumericBaseObject<ToStringType>;
 	using SelfBool = Numeric<bool, ToStringType>;
+	using Base = NumericBaseObject<ToStringType>;
+	using BaseBase = typename Base::Base;
+	using BaseBaseBase = typename BaseBase::Base;
+
+	static_assert(std::is_same<BaseBase, HashableBaseObject<_ToStringType> >::value,
+		"Expecting Base::Base to be HashableBaseObject class");
+	static_assert(std::is_same<BaseBaseBase, BaseObject<_ToStringType> >::value,
+		"Expecting Base::Base::Base to be BaseObject class");
 
 	template<typename _OtherInternalType, typename _OtherToStringType>
 	friend class Numeric;
@@ -360,20 +367,34 @@ public:
 		return NumericUtils<InternalType>::sk_catName();
 	}
 
+	// overrides Base::operator==
 	virtual bool operator==(const Base& rhs) const override
 	{
 		return GenericBinaryOpThrow<bool>("=", rhs, Internal::NumCompareEq());
 	}
 
+	using BaseBaseBase::operator==;
+
+	using Base::operator!=;
+
+	// overrides Base::operator<
 	virtual bool operator<(const Base& rhs) const override
 	{
 		return GenericBinaryOpThrow<bool>("<", rhs, Internal::NumCompareLt());
 	}
 
+	using BaseBaseBase::operator<;
+
+	// overrides Base::operator>
 	virtual bool operator>(const Base& rhs) const override
 	{
 		return GenericBinaryOpThrow<bool>(">", rhs, Internal::NumCompareGt());
 	}
+
+	using BaseBaseBase::operator>;
+
+	using Base::operator<=;
+	using Base::operator>=;
 
 	virtual std::size_t Hash() const override
 	{

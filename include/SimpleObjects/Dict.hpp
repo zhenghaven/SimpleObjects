@@ -29,11 +29,15 @@ public: // Static member:
 
 	using ContainerType = _CtnType;
 	using ToStringType = _ToStringType;
+	using Self = DictCat<_CtnType, _ToStringType>;
 	using Base = DictBaseObject<
 		typename _CtnType::key_type,
 		typename _CtnType::mapped_type,
 		_ToStringType>;
-	using Self = DictCat<_CtnType, _ToStringType>;
+	using BaseBase = typename Base::Base;
+
+	static_assert(std::is_same<BaseBase, BaseObject<_ToStringType> >::value,
+		"Expecting Base::Base to be BaseObject class");
 
 	typedef typename ContainerType::key_type             key_type;
 	typedef typename ContainerType::mapped_type          mapped_type;
@@ -94,6 +98,7 @@ public:
 		return sk_cat();
 	}
 
+	// overrides Base::operator==
 	virtual bool operator==(const Base& rhs) const override
 	{
 		// reference: https://github.com/llvm/llvm-project/blob/main/libcxx/include/unordered_map#L1877
@@ -115,6 +120,10 @@ public:
 		return true;
 	}
 
+	using BaseBase::operator==;
+
+	using Base::operator!=;
+
 	virtual bool operator==(const Self& rhs) const
 	{
 		return m_data == rhs.m_data;
@@ -123,24 +132,12 @@ public:
 	{
 		return !(m_data == rhs.m_data);
 	}
-	virtual bool operator<(const Self& rhs) const
-	{
-		return Base::operator<(static_cast<const Base&>(rhs));
-	}
-	virtual bool operator>(const Self& rhs) const
-	{
-		return Base::operator>(static_cast<const Base&>(rhs));
-	}
-	virtual bool operator<=(const Self& rhs) const
-	{
-		return Base::operator<=(static_cast<const Base&>(rhs));
-	}
-	virtual bool operator>=(const Self& rhs) const
-	{
-		return Base::operator>=(static_cast<const Base&>(rhs));
-	}
-	using Base::operator==;
-	using Base::operator!=;
+
+	bool operator<(const Self& rhs) = delete;
+	bool operator>(const Self& rhs) = delete;
+	bool operator<=(const Self& rhs) = delete;
+	bool operator>=(const Self& rhs) = delete;
+
 	using Base::operator<;
 	using Base::operator>;
 	using Base::operator<=;

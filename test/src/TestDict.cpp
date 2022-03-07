@@ -125,16 +125,13 @@ GTEST_TEST(TestDict, Compare)
 	EXPECT_TRUE(Dict() != String());
 
 	// <
-	EXPECT_THROW((void)(Dict() <  Dict()), UnsupportedOperation);
-	EXPECT_THROW((void)(Dict() >  Dict()), UnsupportedOperation);
-	EXPECT_THROW((void)(Dict() <= Dict()), UnsupportedOperation);
-	EXPECT_THROW((void)(Dict() >= Dict()), UnsupportedOperation);
+	EXPECT_THROW((void)(Dict() <  static_cast<const BaseObj&>(Dict())), UnsupportedOperation);
+	EXPECT_THROW((void)(Dict() >  static_cast<const BaseObj&>(Dict())), UnsupportedOperation);
+	EXPECT_THROW((void)(Dict() <= static_cast<const BaseObj&>(Dict())), UnsupportedOperation);
+	EXPECT_THROW((void)(Dict() >= static_cast<const BaseObj&>(Dict())), UnsupportedOperation);
 
 	// < diff obj
 	EXPECT_THROW((void)(Dict() < String()), UnsupportedOperation);
-
-	// >
-	EXPECT_THROW((void)(Dict() > Dict()), UnsupportedOperation);
 
 	// > diff obj
 	EXPECT_THROW((void)(Dict() < String()), UnsupportedOperation);

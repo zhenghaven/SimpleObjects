@@ -32,6 +32,13 @@ public: // Static member:
 	using Self = StringCat<ContainerType, ToStringType>;
 	using Base = StringBaseObject<
 		typename ContainerType::value_type, ToStringType>;
+	using BaseBase = typename Base::Base;
+	using BaseBaseBase = typename BaseBase::Base;
+
+	static_assert(std::is_same<BaseBase, HashableBaseObject<_ToStringType> >::value,
+		"Expecting Base::Base to be HashableBaseObject class");
+	static_assert(std::is_same<BaseBaseBase, BaseObject<_ToStringType> >::value,
+		"Expecting Base::Base::Base to be BaseObject class");
 
 	typedef typename ContainerType::traits_type          traits_type;
 	typedef typename ContainerType::allocator_type       allocator_type;
@@ -111,12 +118,28 @@ public:
 		return sk_cat();
 	}
 
+	// overrides Base::operator==
 	virtual bool operator==(const Base& rhs) const override
 	{
 		auto ptr = m_data.data();
 		return rhs.Equal(0, rhs.size(), ptr, ptr + size());
 	}
 
+	using BaseBaseBase::operator==;
+
+	using Base::operator!=;
+
+	// overrides Base::operator<
+	virtual bool operator<(const Base& rhs) const override
+	{
+		auto ptr = m_data.data();
+		// rhs > this ==> this < rhs
+		return rhs.GreaterThan(0, rhs.size(), ptr, ptr + size());
+	}
+
+	using BaseBaseBase::operator<;
+
+	// overrides Base::operator>
 	virtual bool operator>(const Base& rhs) const override
 	{
 		auto ptr = m_data.data();
@@ -124,12 +147,10 @@ public:
 		return rhs.LessThan(0, rhs.size(), ptr, ptr + size());
 	}
 
-	virtual bool operator<(const Base& rhs) const override
-	{
-		auto ptr = m_data.data();
-		// rhs > this ==> this < rhs
-		return rhs.GreaterThan(0, rhs.size(), ptr, ptr + size());
-	}
+	using BaseBaseBase::operator>;
+
+	using Base::operator<=;
+	using Base::operator>=;
 
 	virtual bool operator==(const Self& rhs) const
 	{
@@ -165,12 +186,6 @@ public:
 	{
 		return m_data.size();
 	}
-	using Base::operator==;
-	using Base::operator!=;
-	using Base::operator<;
-	using Base::operator>;
-	using Base::operator<=;
-	using Base::operator>=;
 
 	using Base::begin;
 	using Base::end;

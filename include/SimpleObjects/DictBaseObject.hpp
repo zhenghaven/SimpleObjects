@@ -66,10 +66,34 @@ public:
 		return !(*this == rhs);
 	}
 
-	using Base::operator==;
+	bool operator<(const Self& rhs) = delete;
+	bool operator>(const Self& rhs) = delete;
+	bool operator<=(const Self& rhs) = delete;
+	bool operator>=(const Self& rhs) = delete;
+
+	virtual bool operator==(const Base& rhs) const override
+	{
+		if (rhs.GetCategory() != ObjCategory::Dict)
+		{
+			return false;
+		}
+		return *this == rhs.AsDict();
+	}
+
 	using Base::operator!=;
-	using Base::operator<;
-	using Base::operator>;
+
+	virtual bool operator<(const Base& rhs) const override
+	{
+		throw UnsupportedOperation("<",
+			this->GetCategoryName(), rhs.GetCategoryName());
+	}
+
+	virtual bool operator>(const Base& rhs) const override
+	{
+		throw UnsupportedOperation(">",
+			this->GetCategoryName(), rhs.GetCategoryName());
+	}
+
 	using Base::operator<=;
 	using Base::operator>=;
 

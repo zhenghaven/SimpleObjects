@@ -46,13 +46,6 @@ public:
 	virtual ~HashableBaseObject() = default;
 	// LCOV_EXCL_STOP
 
-	using Base::operator==;
-	using Base::operator!=;
-	using Base::operator<;
-	using Base::operator>;
-	using Base::operator<=;
-	using Base::operator>=;
-
 	virtual std::size_t Hash() const = 0;
 
 	virtual std::unique_ptr<Self> Copy(const Self* /*unused*/) const = 0;

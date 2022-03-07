@@ -28,8 +28,12 @@ public: // Static member:
 
 	using ContainerType = _CtnType;
 	using ToStringType  = _ToStringType;
-	using Base = ListBaseObject<typename _CtnType::value_type, _ToStringType>;
 	using Self = ListCat<_CtnType, _ToStringType>;
+	using Base = ListBaseObject<typename _CtnType::value_type, _ToStringType>;
+	using BaseBase = typename Base::Base;
+
+	static_assert(std::is_same<BaseBase, BaseObject<_ToStringType> >::value,
+		"Expecting Base::Base to be BaseObject class");
 
 	typedef typename ContainerType::allocator_type       allocator_type;
 	typedef typename ContainerType::value_type           value_type;
@@ -92,54 +96,86 @@ public:
 		return sk_cat();
 	}
 
+	// overrides Base::operator==
 	virtual bool operator==(const Base& rhs) const override
 	{
-		if (size() != rhs.size())
+		if (m_data.size() != rhs.size())
 		{
 			return false;
 		}
-		auto ita = cbegin();
-		auto itb = rhs.cbegin();
-		for (; ita != cend() && itb != rhs.cend(); ++ita, ++itb)
-		{
-			if (*ita != *itb)
-			{
-				return false;
-			}
-		}
-		return true;
+
+		auto ita  = m_data.cbegin();
+		auto itae = m_data.cend();
+		auto itb  = rhs.cbegin();
+		return std::equal(
+			ita, itae,
+			itb);
 	}
+
+	using BaseBase::operator==;
+
+	using Base::operator!=;
+
+	// overrides Base::operator<
+	virtual bool operator<(const Base& rhs) const override
+	{
+		auto ita  = m_data.cbegin();
+		auto itae = m_data.cend();
+		auto itb  = rhs.cbegin();
+		auto itbe = rhs.cend();
+		return std::lexicographical_compare(
+			ita, itae,
+			itb, itbe);
+	}
+
+	using BaseBase::operator<;
+
+	// overrides Base::operator>
+	virtual bool operator>(const Base& rhs) const override
+	{
+		auto ita  = m_data.cbegin();
+		auto itae = m_data.cend();
+		auto itb  = rhs.cbegin();
+		auto itbe = rhs.cend();
+		return std::lexicographical_compare(
+			itb, itbe,
+			ita, itae);
+	}
+
+	using BaseBase::operator>;
+
+	using Base::operator<=;
+	using Base::operator>=;
 
 	virtual bool operator==(const Self& rhs) const
 	{
 		return m_data == rhs.m_data;
 	}
+
 	virtual bool operator!=(const Self& rhs) const
 	{
 		return m_data != rhs.m_data;
 	}
+
 	virtual bool operator<(const Self& rhs) const
 	{
-		return Base::operator<(static_cast<const Base&>(rhs));
+		return m_data < rhs.m_data;
 	}
+
 	virtual bool operator>(const Self& rhs) const
 	{
-		return Base::operator>(static_cast<const Base&>(rhs));
+		return m_data > rhs.m_data;
 	}
+
 	virtual bool operator<=(const Self& rhs) const
 	{
-		return Base::operator<=(static_cast<const Base&>(rhs));
+		return m_data <= rhs.m_data;
 	}
+
 	virtual bool operator>=(const Self& rhs) const
 	{
-		return Base::operator>=(static_cast<const Base&>(rhs));
+		return m_data >= rhs.m_data;
 	}
-	using Base::operator==;
-	using Base::operator!=;
-	using Base::operator<;
-	using Base::operator>;
-	using Base::operator<=;
-	using Base::operator>=;
 
 	virtual size_t size() const override
 	{

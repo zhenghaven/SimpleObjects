@@ -103,10 +103,10 @@ GTEST_TEST(TestList, Compare)
 	EXPECT_TRUE(List() != String());
 
 	// List vs List
-	EXPECT_THROW((void)(List() <  List()), UnsupportedOperation);
-	EXPECT_THROW((void)(List() >  List()), UnsupportedOperation);
-	EXPECT_THROW((void)(List() <= List()), UnsupportedOperation);
-	EXPECT_THROW((void)(List() >= List()), UnsupportedOperation);
+	EXPECT_TRUE(List({Int64(1), Int64(2), Int64(3)}) <  List({Int64(3), Int64(2)}));
+	EXPECT_TRUE(List({Int64(3), Int64(2)}) >  List({Int64(1), Int64(2), Int64(3)}));
+	EXPECT_TRUE(List({Int64(1), Int64(2), Int64(3)}) <= List({Int64(3), Int64(2)}));
+	EXPECT_TRUE(List({Int64(3), Int64(2)}) >= List({Int64(1), Int64(2), Int64(3)}));
 
 	// < diff obj
 	EXPECT_THROW((void)(List() < String()), UnsupportedOperation);
