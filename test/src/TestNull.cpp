@@ -64,12 +64,18 @@ GTEST_TEST(TestNull, Miscs)
 	// Cast
 	const auto kNull = Null();
 	EXPECT_NO_THROW(kNull.AsNull());
-	EXPECT_THROW(kNull.AsNumeric(), TypeError);
-	EXPECT_THROW(kNull.AsString(), TypeError);
+	EXPECT_THROW(kNull.AsNumeric(),    TypeError);
+	EXPECT_THROW(kNull.AsString(),     TypeError);
+	EXPECT_THROW(kNull.AsList(),       TypeError);
+	EXPECT_THROW(kNull.AsDict(),       TypeError);
+	EXPECT_THROW(kNull.AsStaticDict(), TypeError);
 
 	EXPECT_NO_THROW(Null().AsNull());
-	EXPECT_THROW(Null().AsNumeric(), TypeError);
-	EXPECT_THROW(Null().AsString(), TypeError);
+	EXPECT_THROW(Null().AsNumeric(),    TypeError);
+	EXPECT_THROW(Null().AsString(),     TypeError);
+	EXPECT_THROW(Null().AsList(),       TypeError);
+	EXPECT_THROW(Null().AsDict(),       TypeError);
+	EXPECT_THROW(Null().AsStaticDict(), TypeError);
 
 	// Copy
 	static_assert(std::is_same<
@@ -94,8 +100,13 @@ GTEST_TEST(TestNull, Miscs)
 	EXPECT_EQ(*Null().Move(Null::Base::Base::sk_null), Null());
 }
 
-GTEST_TEST(TestNull, BaseCompare)
+GTEST_TEST(TestNull, Compare)
 {
+	// Self
+	EXPECT_TRUE(Null() == Null());
+	EXPECT_FALSE(Null() != Null());
+
+	// Base
 	using ObjPtr = std::unique_ptr<BaseObj>;
 
 	EXPECT_EQ(*ObjPtr(new Null()) != *ObjPtr(new Null()), nullptr != nullptr);

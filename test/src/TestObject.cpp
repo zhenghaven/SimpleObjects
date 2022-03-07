@@ -90,6 +90,7 @@ GTEST_TEST(TestObject, Cast)
 	EXPECT_THROW(obj.AsString(), TypeError);
 	EXPECT_THROW(obj.AsList(), TypeError);
 	EXPECT_THROW(obj.AsDict(), TypeError);
+	EXPECT_THROW(obj.AsStaticDict(), TypeError);
 	// test const version
 	[obj](){
 		EXPECT_NO_THROW(obj.AsNull());
@@ -97,6 +98,7 @@ GTEST_TEST(TestObject, Cast)
 		EXPECT_THROW(obj.AsString(), TypeError);
 		EXPECT_THROW(obj.AsList(), TypeError);
 		EXPECT_THROW(obj.AsDict(), TypeError);
+		EXPECT_THROW(obj.AsStaticDict(), TypeError);
 	}();
 
 	obj = Bool(true);
@@ -105,6 +107,7 @@ GTEST_TEST(TestObject, Cast)
 	EXPECT_THROW(obj.AsString(), TypeError);
 	EXPECT_THROW(obj.AsList(), TypeError);
 	EXPECT_THROW(obj.AsDict(), TypeError);
+	EXPECT_THROW(obj.AsStaticDict(), TypeError);
 	// test const version
 	[obj](){
 		EXPECT_THROW(obj.AsNull(), TypeError);
@@ -112,6 +115,7 @@ GTEST_TEST(TestObject, Cast)
 		EXPECT_THROW(obj.AsString(), TypeError);
 		EXPECT_THROW(obj.AsList(), TypeError);
 		EXPECT_THROW(obj.AsDict(), TypeError);
+		EXPECT_THROW(obj.AsStaticDict(), TypeError);
 	}();
 
 	obj = String("Test");
@@ -120,6 +124,7 @@ GTEST_TEST(TestObject, Cast)
 	EXPECT_NO_THROW(obj.AsString());
 	EXPECT_THROW(obj.AsList(), TypeError);
 	EXPECT_THROW(obj.AsDict(), TypeError);
+	EXPECT_THROW(obj.AsStaticDict(), TypeError);
 	// test const version
 	[obj](){
 		EXPECT_THROW(obj.AsNull(), TypeError);
@@ -127,6 +132,7 @@ GTEST_TEST(TestObject, Cast)
 		EXPECT_NO_THROW(obj.AsString());
 		EXPECT_THROW(obj.AsList(), TypeError);
 		EXPECT_THROW(obj.AsDict(), TypeError);
+		EXPECT_THROW(obj.AsStaticDict(), TypeError);
 	}();
 
 	obj = List();
@@ -135,6 +141,7 @@ GTEST_TEST(TestObject, Cast)
 	EXPECT_THROW(obj.AsString(), TypeError);
 	EXPECT_NO_THROW(obj.AsList());
 	EXPECT_THROW(obj.AsDict(), TypeError);
+	EXPECT_THROW(obj.AsStaticDict(), TypeError);
 	// test const version
 	[obj](){
 		EXPECT_THROW(obj.AsNull(), TypeError);
@@ -142,6 +149,7 @@ GTEST_TEST(TestObject, Cast)
 		EXPECT_THROW(obj.AsString(), TypeError);
 		EXPECT_NO_THROW(obj.AsList());
 		EXPECT_THROW(obj.AsDict(), TypeError);
+		EXPECT_THROW(obj.AsStaticDict(), TypeError);
 	}();
 
 	obj = Dict();
@@ -150,6 +158,7 @@ GTEST_TEST(TestObject, Cast)
 	EXPECT_THROW(obj.AsString(), TypeError);
 	EXPECT_THROW(obj.AsList(), TypeError);
 	EXPECT_NO_THROW(obj.AsDict());
+	EXPECT_THROW(obj.AsStaticDict(), TypeError);
 	// test const version
 	[obj](){
 		EXPECT_THROW(obj.AsNull(), TypeError);
@@ -157,6 +166,7 @@ GTEST_TEST(TestObject, Cast)
 		EXPECT_THROW(obj.AsString(), TypeError);
 		EXPECT_THROW(obj.AsList(), TypeError);
 		EXPECT_NO_THROW(obj.AsDict());
+		EXPECT_THROW(obj.AsStaticDict(), TypeError);
 	}();
 }
 
@@ -172,10 +182,93 @@ GTEST_TEST(TestObject, Copy)
 
 GTEST_TEST(TestObject, Compare)
 {
-	EXPECT_TRUE(Object(String("")) != Object(Bool(false)));
-	EXPECT_TRUE(Object() != Object(Bool(false)));
+	// Self
+	//    !=
+	EXPECT_TRUE(
+		Object(String("")) !=
+		Object(Bool(false)));
+	EXPECT_TRUE(
+		Object() !=
+		Object(Bool(false)));
 
-	EXPECT_TRUE(Object() == Object(Null()));
-	EXPECT_TRUE(Object(String("Test")) == Object(String("Test")));
-	EXPECT_TRUE(Object(String("Test")) == static_cast<const BaseObj&>(String("Test")));
+	//    ==
+	EXPECT_TRUE(
+		Object() ==
+		Object(Null()));
+	EXPECT_TRUE(
+		Object(String("Test")) ==
+		Object(String("Test")));
+
+	//    <
+	EXPECT_TRUE(
+		Object(Int64(12345)) <
+		Object(Int64(54321)));
+	EXPECT_THROW(
+		(void)(Object() <
+		Object(Bool(false))), UnsupportedOperation);
+
+	//    >
+	EXPECT_TRUE(
+		Object(Int64(54321)) >
+		Object(Int64(12345)));
+	EXPECT_THROW(
+		(void)(Object(String("test")) >
+		Object(Bool(false))), UnsupportedOperation);
+
+	//    <=
+	EXPECT_TRUE(
+		Object(Int64(12345)) <=
+		Object(Int64(54321)));
+	EXPECT_THROW(
+		(void)(Object(List()) <=
+		Object(Bool(false))), UnsupportedOperation);
+
+	//    >=
+	EXPECT_TRUE(
+		Object(Int64(54321)) >=
+		Object(Int64(12345)));
+	EXPECT_THROW(
+		(void)(Object(Dict()) >=
+		Object(Bool(false))), UnsupportedOperation);
+
+	// Base
+	//    ==, !=
+	EXPECT_TRUE(
+		Object(String("Test")) ==
+		static_cast<const BaseObj&>(String("Test")));
+	EXPECT_FALSE(
+		Object(String("Test")) !=
+		static_cast<const BaseObj&>(String("Test")));
+
+	//    <
+	EXPECT_TRUE(
+		Object(Int64(12345)) <
+		static_cast<const BaseObj&>(Int64(54321)));
+	EXPECT_THROW(
+		(void)(Object() <
+		static_cast<const BaseObj&>(Bool(false))), UnsupportedOperation);
+
+	//    >
+	EXPECT_TRUE(
+		Object(Int64(54321)) >
+		static_cast<const BaseObj&>(Int64(12345)));
+	EXPECT_THROW(
+		(void)(Object(String("test")) >
+		static_cast<const BaseObj&>(Bool(false))), UnsupportedOperation);
+
+	//    <=
+	EXPECT_TRUE(
+		Object(Int64(12345)) <=
+		static_cast<const BaseObj&>(Int64(54321)));
+	EXPECT_THROW(
+		(void)(Object(List()) <=
+		static_cast<const BaseObj&>(Bool(false))), UnsupportedOperation);
+
+	//    >=
+	EXPECT_TRUE(
+		Object(Int64(54321)) >=
+		static_cast<const BaseObj&>(Int64(12345)));
+	EXPECT_THROW(
+		(void)(Object(Dict()) >=
+		static_cast<const BaseObj&>(Bool(false))), UnsupportedOperation);
 }

@@ -90,29 +90,134 @@ GTEST_TEST(TestList, Compare)
 		List({String("Test String"), Bool(true)});
 	const List testLs_12000 =
 		List({String("Test String"), Bool(true), Int64(12000)});
+
+	// Self
 	// ==
+	EXPECT_FALSE(testLs_12345 == testLs_true);
+	EXPECT_FALSE(testLs_12345 == testLs_12000);
+	EXPECT_TRUE(testLs_12345 == testLs_12345_2);
+
+	// !=
 	EXPECT_TRUE(testLs_12345 != testLs_true);
 	EXPECT_TRUE(testLs_12345 != testLs_12000);
 	EXPECT_FALSE(testLs_12345 != testLs_12345_2);
-	EXPECT_TRUE(testLs_12345 != static_cast<const ListBaseObj&>(testLs_true));
-	EXPECT_TRUE(testLs_12345 != static_cast<const ListBaseObj&>(testLs_12000));
-	EXPECT_FALSE(testLs_12345 != static_cast<const ListBaseObj&>(testLs_12345_2));
 
-	// == diff obj
-	EXPECT_TRUE(List() != static_cast<const BaseObj&>(Null()));
-	EXPECT_TRUE(List() != static_cast<const BaseObj&>(String()));
+	// <
+	EXPECT_TRUE(
+		List({Int64(1), Int64(2), Int64(3)}) <
+		List({Int64(3), Int64(2)}));
 
-	// List vs List
-	EXPECT_TRUE(List({Int64(1), Int64(2), Int64(3)}) <  List({Int64(3), Int64(2)}));
-	EXPECT_TRUE(List({Int64(3), Int64(2)}) >  List({Int64(1), Int64(2), Int64(3)}));
-	EXPECT_TRUE(List({Int64(1), Int64(2), Int64(3)}) <= List({Int64(3), Int64(2)}));
-	EXPECT_TRUE(List({Int64(3), Int64(2)}) >= List({Int64(1), Int64(2), Int64(3)}));
+	// >
+	EXPECT_TRUE(
+		List({Int64(3), Int64(2)}) >
+		List({Int64(1), Int64(2), Int64(3)}));
 
-	// < diff obj
-	EXPECT_THROW((void)(List() < String()), UnsupportedOperation);
+	// <=
+	EXPECT_TRUE(
+		List({Int64(1), Int64(2), Int64(3)}) <=
+		List({Int64(3), Int64(2)}));
 
-	// > diff obj
-	EXPECT_THROW((void)(List() < String()), UnsupportedOperation);
+	// >=
+	EXPECT_TRUE(
+		List({Int64(3), Int64(2)}) >=
+		List({Int64(1), Int64(2), Int64(3)}));
+
+	// Base
+	// ==
+	EXPECT_FALSE(
+		testLs_12345 ==
+		static_cast<const ListBaseObj&>(testLs_true));
+	EXPECT_FALSE(
+		testLs_12345 ==
+		static_cast<const ListBaseObj&>(testLs_12000));
+	EXPECT_TRUE(
+		testLs_12345 ==
+		static_cast<const ListBaseObj&>(testLs_12345_2));
+
+	// !=
+	EXPECT_TRUE(
+		testLs_12345 !=
+		static_cast<const ListBaseObj&>(testLs_true));
+	EXPECT_TRUE(
+		testLs_12345 !=
+		static_cast<const ListBaseObj&>(testLs_12000));
+	EXPECT_FALSE(
+		testLs_12345 !=
+		static_cast<const ListBaseObj&>(testLs_12345_2));
+
+	// <
+	EXPECT_TRUE(
+		List({Int64(1), Int64(2), Int64(3)}) <
+		static_cast<const ListBaseObj&>(List({Int64(3), Int64(2)})));
+
+	// >
+	EXPECT_TRUE(
+		List({Int64(3), Int64(2)}) >
+		static_cast<const ListBaseObj&>(List({Int64(1), Int64(2), Int64(3)})));
+
+	// <=
+	EXPECT_TRUE(
+		List({Int64(1), Int64(2), Int64(3)}) <=
+		static_cast<const ListBaseObj&>(List({Int64(3), Int64(2)})));
+
+	// >=
+	EXPECT_TRUE(
+		List({Int64(3), Int64(2)}) >=
+		static_cast<const ListBaseObj&>(List({Int64(1), Int64(2), Int64(3)})));
+
+
+	// BaseBase => BaseObj
+	// ==
+	EXPECT_FALSE(
+		testLs_12345 ==
+		static_cast<const BaseObj&>(testLs_true));
+	EXPECT_FALSE(
+		testLs_12345 ==
+		static_cast<const BaseObj&>(testLs_12000));
+	EXPECT_TRUE(
+		testLs_12345 ==
+		static_cast<const BaseObj&>(testLs_12345_2));
+
+	// !=
+	EXPECT_TRUE(
+		testLs_12345 !=
+		static_cast<const BaseObj&>(testLs_true));
+	EXPECT_TRUE(
+		testLs_12345 !=
+		static_cast<const BaseObj&>(testLs_12000));
+	EXPECT_FALSE(
+		testLs_12345 !=
+		static_cast<const BaseObj&>(testLs_12345_2));
+	EXPECT_TRUE(
+		List() !=
+		static_cast<const BaseObj&>(Null()));
+	EXPECT_TRUE(
+		List() !=
+		static_cast<const BaseObj&>(String()));
+
+	// <
+	EXPECT_TRUE(
+		List({Int64(1), Int64(2), Int64(3)}) <
+		static_cast<const BaseObj&>(List({Int64(3), Int64(2)})));
+	EXPECT_THROW(
+		(void)(List() < String()), UnsupportedOperation);
+
+	// >
+	EXPECT_TRUE(
+		List({Int64(3), Int64(2)}) >
+		static_cast<const BaseObj&>(List({Int64(1), Int64(2), Int64(3)})));
+	EXPECT_THROW(
+		(void)(List() > String()), UnsupportedOperation);
+
+	// <=
+	EXPECT_TRUE(
+		List({Int64(1), Int64(2), Int64(3)}) <=
+		static_cast<const BaseObj&>(List({Int64(3), Int64(2)})));
+
+	// >=
+	EXPECT_TRUE(
+		List({Int64(3), Int64(2)}) >=
+		static_cast<const BaseObj&>(List({Int64(1), Int64(2), Int64(3)})));
 }
 
 GTEST_TEST(TestList, Len)
@@ -264,16 +369,18 @@ GTEST_TEST(TestList, Miscs)
 	// Cast
 	const auto kList = List();
 	EXPECT_NO_THROW(kList.AsList());
-	EXPECT_THROW(kList.AsNull(), TypeError);
-	EXPECT_THROW(kList.AsNumeric(), TypeError);
-	EXPECT_THROW(kList.AsString(), TypeError);
-	EXPECT_THROW(kList.AsDict(), TypeError);
+	EXPECT_THROW(kList.AsNull(),       TypeError);
+	EXPECT_THROW(kList.AsNumeric(),    TypeError);
+	EXPECT_THROW(kList.AsString(),     TypeError);
+	EXPECT_THROW(kList.AsDict(),       TypeError);
+	EXPECT_THROW(kList.AsStaticDict(), TypeError);
 
 	EXPECT_NO_THROW(List().AsList());
-	EXPECT_THROW(List().AsNull(), TypeError);
-	EXPECT_THROW(List().AsNumeric(), TypeError);
-	EXPECT_THROW(List().AsString(), TypeError);
-	EXPECT_THROW(List().AsDict(), TypeError);
+	EXPECT_THROW(List().AsNull(),       TypeError);
+	EXPECT_THROW(List().AsNumeric(),    TypeError);
+	EXPECT_THROW(List().AsString(),     TypeError);
+	EXPECT_THROW(List().AsDict(),       TypeError);
+	EXPECT_THROW(List().AsStaticDict(), TypeError);
 
 	// Copy
 	static_assert(std::is_same<

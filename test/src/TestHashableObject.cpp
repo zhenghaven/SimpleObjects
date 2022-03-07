@@ -90,6 +90,7 @@ GTEST_TEST(TestHashableObj, Cast)
 	EXPECT_THROW(obj.AsString(), TypeError);
 	EXPECT_THROW(obj.AsList(), TypeError);
 	EXPECT_THROW(obj.AsDict(), TypeError);
+	EXPECT_THROW(obj.AsStaticDict(), TypeError);
 	// test const version
 	[obj](){
 		EXPECT_NO_THROW(obj.AsNull());
@@ -97,6 +98,7 @@ GTEST_TEST(TestHashableObj, Cast)
 		EXPECT_THROW(obj.AsString(), TypeError);
 		EXPECT_THROW(obj.AsList(), TypeError);
 		EXPECT_THROW(obj.AsDict(), TypeError);
+		EXPECT_THROW(obj.AsStaticDict(), TypeError);
 	}();
 
 	obj = Bool(true);
@@ -105,6 +107,7 @@ GTEST_TEST(TestHashableObj, Cast)
 	EXPECT_THROW(obj.AsString(), TypeError);
 	EXPECT_THROW(obj.AsList(), TypeError);
 	EXPECT_THROW(obj.AsDict(), TypeError);
+	EXPECT_THROW(obj.AsStaticDict(), TypeError);
 	// test const version
 	[obj](){
 		EXPECT_THROW(obj.AsNull(), TypeError);
@@ -112,6 +115,7 @@ GTEST_TEST(TestHashableObj, Cast)
 		EXPECT_THROW(obj.AsString(), TypeError);
 		EXPECT_THROW(obj.AsList(), TypeError);
 		EXPECT_THROW(obj.AsDict(), TypeError);
+		EXPECT_THROW(obj.AsStaticDict(), TypeError);
 	}();
 
 	obj = String("Test");
@@ -120,6 +124,7 @@ GTEST_TEST(TestHashableObj, Cast)
 	EXPECT_NO_THROW(obj.AsString());
 	EXPECT_THROW(obj.AsList(), TypeError);
 	EXPECT_THROW(obj.AsDict(), TypeError);
+	EXPECT_THROW(obj.AsStaticDict(), TypeError);
 	// test const version
 	[obj](){
 		EXPECT_THROW(obj.AsNull(), TypeError);
@@ -127,6 +132,7 @@ GTEST_TEST(TestHashableObj, Cast)
 		EXPECT_NO_THROW(obj.AsString());
 		EXPECT_THROW(obj.AsList(), TypeError);
 		EXPECT_THROW(obj.AsDict(), TypeError);
+		EXPECT_THROW(obj.AsStaticDict(), TypeError);
 	}();
 }
 
@@ -150,11 +156,90 @@ GTEST_TEST(TestHashableObj, Copy)
 
 GTEST_TEST(TestHashableObj, Compare)
 {
-	EXPECT_TRUE(HashableObject(String("")) != HashableObject(Bool(false)));
-	EXPECT_TRUE(HashableObject() != HashableObject(Bool(false)));
+	// Self
+	//    !=
+	EXPECT_TRUE(
+		HashableObject(String("")) !=
+		HashableObject(Bool(false)));
+	EXPECT_TRUE(
+		HashableObject() !=
+		HashableObject(Bool(false)));
 
-	EXPECT_TRUE(HashableObject() == HashableObject(Null()));
-	EXPECT_TRUE(HashableObject(String("Test")) == HashableObject(String("Test")));
+	EXPECT_TRUE(
+		HashableObject() ==
+		HashableObject(Null()));
+	EXPECT_TRUE(
+		HashableObject(String("Test")) ==
+		HashableObject(String("Test")));
+
+	//    <
+	EXPECT_TRUE(
+		HashableObject(Int64(12345)) <
+		HashableObject(Int64(54321)));
+	EXPECT_THROW(
+		(void)(HashableObject() <
+		HashableObject(Bool(false))), UnsupportedOperation);
+
+	//    >
+	EXPECT_TRUE(
+		HashableObject(Int64(54321)) >
+		HashableObject(Int64(12345)));
+	EXPECT_THROW(
+		(void)(HashableObject(String("test")) >
+		HashableObject(Bool(false))), UnsupportedOperation);
+
+	//    <=
+	EXPECT_TRUE(
+		HashableObject(Int8(123)) <=
+		HashableObject(Int64(54321)));
+	EXPECT_THROW(
+		(void)(HashableObject() <=
+		HashableObject(Bool(false))), UnsupportedOperation);
+
+	//    >=
+	EXPECT_TRUE(
+		HashableObject(Int64(54321)) >=
+		HashableObject(Bool(true)));
+	EXPECT_THROW(
+		(void)(HashableObject(String("test")) >=
+		HashableObject(Bool(false))), UnsupportedOperation);
+
+	// Base
+	//    ==, !=
 	EXPECT_TRUE(HashableObject(String("Test")) ==
-		static_cast<const HashableBaseObj&>(String("Test")));
+		static_cast<const BaseObj&>(String("Test")));
+	EXPECT_TRUE(HashableObject(String("Test")) !=
+		static_cast<const BaseObj&>(Int64(12345)));
+
+	//    <
+	EXPECT_TRUE(
+		HashableObject(Int64(12345)) <
+		static_cast<const BaseObj&>(Int64(54321)));
+	EXPECT_THROW(
+		(void)(HashableObject() <
+		static_cast<const BaseObj&>(Bool(false))), UnsupportedOperation);
+
+	//    >
+	EXPECT_TRUE(
+		HashableObject(Int64(54321)) >
+		static_cast<const BaseObj&>(Int32(12345)));
+	EXPECT_THROW(
+		(void)(HashableObject(String("test")) >
+		static_cast<const BaseObj&>(Bool(false))), UnsupportedOperation);
+
+	//    <=
+	EXPECT_TRUE(
+		HashableObject(Int64(12345)) <=
+		static_cast<const BaseObj&>(Int32(54321)));
+	EXPECT_THROW(
+		(void)(HashableObject() <=
+		static_cast<const BaseObj&>(Bool(false))), UnsupportedOperation);
+
+	//    >=
+	EXPECT_TRUE(
+		HashableObject(Int64(54321)) >=
+		static_cast<const BaseObj&>(Int64(12345)));
+	EXPECT_THROW(
+		(void)(HashableObject(String("test")) >=
+		static_cast<const BaseObj&>(Bool(false))), UnsupportedOperation);
 }

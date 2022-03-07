@@ -316,16 +316,18 @@ GTEST_TEST(TestDict, Miscs)
 	// Cast
 	const auto kDict = Dict();
 	EXPECT_NO_THROW(kDict.AsDict());
-	EXPECT_THROW(kDict.AsNull(), TypeError);
-	EXPECT_THROW(kDict.AsNumeric(), TypeError);
-	EXPECT_THROW(kDict.AsString(), TypeError);
-	EXPECT_THROW(kDict.AsList(), TypeError);
+	EXPECT_THROW(kDict.AsNull(),       TypeError);
+	EXPECT_THROW(kDict.AsNumeric(),    TypeError);
+	EXPECT_THROW(kDict.AsString(),     TypeError);
+	EXPECT_THROW(kDict.AsList(),       TypeError);
+	EXPECT_THROW(kDict.AsStaticDict(), TypeError);
 
 	EXPECT_NO_THROW(Dict().AsDict());
-	EXPECT_THROW(Dict().AsNull(), TypeError);
-	EXPECT_THROW(Dict().AsNumeric(), TypeError);
-	EXPECT_THROW(Dict().AsString(), TypeError);
-	EXPECT_THROW(Dict().AsList(), TypeError);
+	EXPECT_THROW(Dict().AsNull(),       TypeError);
+	EXPECT_THROW(Dict().AsNumeric(),    TypeError);
+	EXPECT_THROW(Dict().AsString(),     TypeError);
+	EXPECT_THROW(Dict().AsList(),       TypeError);
+	EXPECT_THROW(Dict().AsStaticDict(), TypeError);
 
 	// Copy
 	static_assert(std::is_same<

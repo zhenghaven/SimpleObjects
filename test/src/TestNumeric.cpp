@@ -568,16 +568,18 @@ GTEST_TEST(TestNumeric, Miscs)
 	// Cast
 	const auto kNum = Int8();
 	EXPECT_NO_THROW(kNum.AsNumeric());
-	EXPECT_THROW(kNum.AsNull(), TypeError);
-	EXPECT_THROW(kNum.AsString(), TypeError);
-	EXPECT_THROW(kNum.AsList(), TypeError);
-	EXPECT_THROW(kNum.AsDict(), TypeError);
+	EXPECT_THROW(kNum.AsNull(),       TypeError);
+	EXPECT_THROW(kNum.AsString(),     TypeError);
+	EXPECT_THROW(kNum.AsList(),       TypeError);
+	EXPECT_THROW(kNum.AsDict(),       TypeError);
+	EXPECT_THROW(kNum.AsStaticDict(), TypeError);
 
 	EXPECT_NO_THROW(Int16().AsNumeric());
-	EXPECT_THROW(Int32().AsNull(), TypeError);
-	EXPECT_THROW(Int64().AsString(), TypeError);
-	EXPECT_THROW(Int64().AsList(), TypeError);
-	EXPECT_THROW(Int64().AsDict(), TypeError);
+	EXPECT_THROW(Int32().AsNull(),       TypeError);
+	EXPECT_THROW(Int64().AsString(),     TypeError);
+	EXPECT_THROW(Int64().AsList(),       TypeError);
+	EXPECT_THROW(Int64().AsDict(),       TypeError);
+	EXPECT_THROW(Int64().AsStaticDict(), TypeError);
 
 	// Copy
 	static_assert(std::is_same<
@@ -980,6 +982,9 @@ GTEST_TEST(TestNumeric, BaseIsEqual)
 		(void)(*ObjPtr(new Int8(1)) != *ObjPtr(new Int8Ext(1))),
 		UnsupportedOperation);
 
+	// different objs
+	EXPECT_TRUE(*ObjPtr(new Int8(1)) != *ObjPtr(new Null()));
+
 
 
 	// Numeric base object
@@ -1129,6 +1134,11 @@ GTEST_TEST(TestNumeric, BaseIsLessThan)
 	using ObjPtr = std::unique_ptr<BaseObj>;
 
 	EXPECT_FALSE(*ObjPtr(new Bool(false)) >= *ObjPtr(new Int8(2)));
+
+	// different objs
+	EXPECT_THROW(
+		(void)(*ObjPtr(new Int8(1)) >= *ObjPtr(new Null())),
+		UnsupportedOperation);
 }
 
 GTEST_TEST(TestNumeric, BaseIsGreaterThan)
@@ -1271,6 +1281,11 @@ GTEST_TEST(TestNumeric, BaseIsGreaterThan)
 	using ObjPtr = std::unique_ptr<BaseObj>;
 
 	EXPECT_FALSE(*ObjPtr(new Bool(true)) <= *ObjPtr(new Int8(0)));
+
+	// different objs
+	EXPECT_THROW(
+		(void)(*ObjPtr(new Int8(1)) <= *ObjPtr(new Null())),
+		UnsupportedOperation);
 }
 
 GTEST_TEST(TestNumeric, ToString)

@@ -76,7 +76,13 @@ public:
 
 	using Base::Base;
 
+	// LCOV_EXCL_START
+	/**
+	 * @brief Destroy the Hashable Reference Wrapper object
+	 *
+	 */
 	virtual ~HashableReferenceWrapper() = default;
+	// LCOV_EXCL_STOP
 
 	bool operator==(const Self& rhs) const
 	{
