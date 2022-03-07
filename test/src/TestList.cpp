@@ -99,8 +99,8 @@ GTEST_TEST(TestList, Compare)
 	EXPECT_FALSE(testLs_12345 != static_cast<const ListBaseObj&>(testLs_12345_2));
 
 	// == diff obj
-	EXPECT_TRUE(List() != Null());
-	EXPECT_TRUE(List() != String());
+	EXPECT_TRUE(List() != static_cast<const BaseObj&>(Null()));
+	EXPECT_TRUE(List() != static_cast<const BaseObj&>(String()));
 
 	// List vs List
 	EXPECT_TRUE(List({Int64(1), Int64(2), Int64(3)}) <  List({Int64(3), Int64(2)}));

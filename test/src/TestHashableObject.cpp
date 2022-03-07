@@ -155,5 +155,6 @@ GTEST_TEST(TestHashableObj, Compare)
 
 	EXPECT_TRUE(HashableObject() == HashableObject(Null()));
 	EXPECT_TRUE(HashableObject(String("Test")) == HashableObject(String("Test")));
-	EXPECT_TRUE(HashableObject(String("Test")) == String("Test"));
+	EXPECT_TRUE(HashableObject(String("Test")) ==
+		static_cast<const HashableBaseObj&>(String("Test")));
 }

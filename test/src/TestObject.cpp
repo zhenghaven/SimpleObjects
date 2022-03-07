@@ -177,5 +177,5 @@ GTEST_TEST(TestObject, Compare)
 
 	EXPECT_TRUE(Object() == Object(Null()));
 	EXPECT_TRUE(Object(String("Test")) == Object(String("Test")));
-	EXPECT_TRUE(Object(String("Test")) == String("Test"));
+	EXPECT_TRUE(Object(String("Test")) == static_cast<const BaseObj&>(String("Test")));
 }

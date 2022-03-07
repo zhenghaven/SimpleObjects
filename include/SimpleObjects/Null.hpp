@@ -74,10 +74,27 @@ public:
 		return *this;
 	}
 
+	virtual bool operator==(const Self& rhs) const
+	{
+		return true;
+	}
+
+	virtual bool operator!=(const Self& rhs) const
+	{
+		return false;
+	}
+
+	bool operator<(const Self& rhs) const = delete;
+	bool operator>(const Self& rhs) const = delete;
+	bool operator<=(const Self& rhs) const = delete;
+	bool operator>=(const Self& rhs) const = delete;
+
 	virtual bool operator==(const BaseBase& rhs) const override
 	{
 		return rhs.IsNull();
 	}
+
+	using BaseBase::operator!=;
 
 	virtual bool operator<(const BaseBase& rhs) const override
 	{
@@ -90,6 +107,9 @@ public:
 		throw UnsupportedOperation(">",
 			this->GetCategoryName(), rhs.GetCategoryName());
 	}
+
+	using BaseBase::operator<=;
+	using BaseBase::operator>=;
 
 	using Base::Copy;
 	virtual std::unique_ptr<Base> Copy(const Base* /*unused*/) const override
