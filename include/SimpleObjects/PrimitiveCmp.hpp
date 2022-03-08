@@ -45,6 +45,47 @@ static_assert(IsPrimitiveType<uint64_t>::value, "Implementation Error");
 static_assert(IsPrimitiveType<float   >::value, "Implementation Error");
 static_assert(IsPrimitiveType<double  >::value, "Implementation Error");
 
+template<bool _IsTSigned, bool _IsUSigned>
+struct cmp_impl;
+
+template<>
+struct cmp_impl<true, true>
+{
+	template<typename T, typename U>
+	static constexpr bool cmp_less(T t, U u) noexcept
+	{ return t < u; }
+}; // struct cmp_impl
+
+template<>
+struct cmp_impl<false, false>
+{
+	template<typename T, typename U>
+	static constexpr bool cmp_less(T t, U u) noexcept
+	{ return t < u; }
+}; // struct cmp_impl
+
+template<>
+struct cmp_impl<true, false>
+{
+	template<typename T, typename U>
+	static constexpr bool cmp_less(T t, U u) noexcept
+	{
+		using UT = typename std::make_unsigned<T>::type;
+		return (t < 0 ? true : UT(t) < u);
+	}
+}; // struct cmp_impl
+
+template<>
+struct cmp_impl<false, true>
+{
+	template<typename T, typename U>
+	static constexpr bool cmp_less(T t, U u) noexcept
+	{
+		using UU = typename std::make_unsigned<U>::type;
+		return (u < 0 ? false : t < UU(u));
+	}
+}; // struct cmp_impl
+
 /**
  * @brief A comparison that is safe against lossy integer conversion.
  *        source: https://en.cppreference.com/w/cpp/utility/intcmp
@@ -62,16 +103,9 @@ inline constexpr bool cmp_less(T t, U u) noexcept
 {
 	static_assert(IsPrimitiveType<T>::value, "Expecting a primitive type");
 	static_assert(IsPrimitiveType<U>::value, "Expecting a primitive type");
-	using UT = typename std::make_unsigned<T>::type;
-	using UU = typename std::make_unsigned<U>::type;
 
-	return
-		std::is_signed<T>::value == std::is_signed<U>::value ?
-			(t < u) :
-			(std::is_signed<T>::value ?
-				(t < 0 ? true  : UT(t) < u   ) :
-				(u < 0 ? false : t     < UU(u))
-			);
+	return cmp_impl<std::is_signed<T>::value,
+		std::is_signed<U>::value>::cmp_less(t, u);
 }
 
 /**
