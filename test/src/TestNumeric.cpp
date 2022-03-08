@@ -130,82 +130,789 @@ GTEST_TEST(TestNumeric, Construction)
 	EXPECT_EQ(Int32(Int32(testVal2)).GetVal(), testVal2);
 }
 
-GTEST_TEST(TestNumeric, Cast)
+GTEST_TEST(TestNumeric, Setter)
 {
-	EXPECT_EQ(static_cast<bool>(Bool(true)),
-		static_cast<bool>(true));
-	EXPECT_EQ(static_cast<bool>(Bool(false)),
-		static_cast<bool>(false));
+	Bool   b_l( true);
+	Int8   i8_l(-12);
+	Int16  i16_l(-1234);
+	Int32  i32_l(-123456);
+	Int64  i64_l(-123456789012);
+	UInt8  u8_l( 12);
+	UInt16 u16_l(1234);
+	UInt32 u32_l(123456);
+	UInt64 u64_l(123456789012);
+	Float  f_l(1e12F);
+	Double d_l(1e123);
+
+	Bool   b;
+	Int8   i8;
+	Int16  i16;
+	Int32  i32;
+	Int64  i64;
+	UInt8  u8;
+	UInt16 u16;
+	UInt32 u32;
+	UInt64 u64;
+	Float  f;
+	Double d;
+
+	// bool
+	EXPECT_THROW(b.Set(Double());, TypeError);
+	EXPECT_THROW(b.Set(d_l);,      TypeError);
+	EXPECT_NO_THROW(b = Bool(); b.Set(Bool(true)););
+	EXPECT_TRUE(b.GetVal() == true);
+	EXPECT_NO_THROW(b = Bool(); b.Set(b_l));
+	EXPECT_TRUE(b.GetVal() == true);
+	//    bool -> bool
+	EXPECT_NO_THROW(b = Bool(); b.Set(true););
+	EXPECT_TRUE(b.GetVal() == true);
+	//    uint8_t -> bool
+	EXPECT_NO_THROW(b = Bool(); b.Set(uint8_t(1)););
+	EXPECT_TRUE(b.GetVal() == true);
+	EXPECT_THROW(b.Set(std::numeric_limits<uint8_t>::max());, TypeError);
+	//    uint32_t -> bool
+	EXPECT_NO_THROW(b = Bool(); b.Set(uint32_t(1)););
+	EXPECT_TRUE(b.GetVal() == true);
+	EXPECT_THROW(b.Set(std::numeric_limits<uint32_t>::max());, TypeError);
+	//    uint64_t -> bool
+	EXPECT_NO_THROW(b = Bool(); b.Set(uint64_t(1)););
+	EXPECT_TRUE(b.GetVal() == true);
+	EXPECT_THROW(b.Set(std::numeric_limits<uint64_t>::max());, TypeError);
+	//    int8_t -> bool
+	EXPECT_NO_THROW(b = Bool(); b.Set(int8_t(1)););
+	EXPECT_TRUE(b.GetVal() == true);
+	EXPECT_THROW(b.Set(std::numeric_limits<int8_t>::max());, TypeError);
+	EXPECT_THROW(b.Set(std::numeric_limits<int8_t>::lowest());, TypeError);
+	//    int32_t -> bool
+	EXPECT_NO_THROW(b = Bool(); b.Set(int32_t(1)););
+	EXPECT_TRUE(b.GetVal() == true);
+	EXPECT_THROW(b.Set(std::numeric_limits<int32_t>::max());, TypeError);
+	EXPECT_THROW(b.Set(std::numeric_limits<int32_t>::lowest());, TypeError);
+	//    int64_t -> bool
+	EXPECT_NO_THROW(b = Bool(); b.Set(int64_t(1)););
+	EXPECT_TRUE(b.GetVal() == true);
+	EXPECT_THROW(b.Set(std::numeric_limits<int64_t>::max());, TypeError);
+	EXPECT_THROW(b.Set(std::numeric_limits<int64_t>::lowest());, TypeError);
+	//    double -> bool
+	EXPECT_NO_THROW(b = Bool(); b.Set(double(1)););
+	EXPECT_TRUE(b.GetVal() == true);
+	EXPECT_THROW(b.Set(std::numeric_limits<double>::max());, TypeError);
+	EXPECT_THROW(b.Set(std::numeric_limits<double>::lowest());, TypeError);
+
+	// int8_t
+	EXPECT_THROW(i8.Set(Double());, TypeError);
+	EXPECT_THROW(i8.Set(d_l);,      TypeError);
+	EXPECT_NO_THROW(i8 = Int8(); i8.Set(Int8(-12)););
+	EXPECT_TRUE(i8.GetVal() == -12);
+	EXPECT_NO_THROW(i8 = Int8(); i8.Set(i8_l));
+	EXPECT_TRUE(i8.GetVal() == -12);
+	//    bool ->
+	EXPECT_NO_THROW(i8 = Int8(); i8.Set(true););
+	EXPECT_TRUE(i8.GetVal() == 1);
+	//    uint8_t ->
+	EXPECT_NO_THROW(i8 = Int8(); i8.Set(uint8_t(12)););
+	EXPECT_TRUE(i8.GetVal() == 12);
+	EXPECT_THROW(i8.Set(std::numeric_limits<uint8_t>::max());, TypeError);
+	//    uint32_t ->
+	EXPECT_NO_THROW(i8 = Int8(); i8.Set(uint32_t(12)););
+	EXPECT_TRUE(i8.GetVal() == 12);
+	EXPECT_THROW(i8.Set(std::numeric_limits<uint32_t>::max());, TypeError);
+	//    uint64_t ->
+	EXPECT_NO_THROW(i8 = Int8(); i8.Set(uint64_t(12)););
+	EXPECT_TRUE(i8.GetVal() == 12);
+	EXPECT_THROW(i8.Set(std::numeric_limits<uint64_t>::max());, TypeError);
+	//    int8_t ->
+	EXPECT_NO_THROW(i8 = Int8(); i8.Set(int8_t(12)););
+	EXPECT_TRUE(i8.GetVal() == 12);
+	//    int32_t ->
+	EXPECT_NO_THROW(i8 = Int8(); i8.Set(int32_t(12)););
+	EXPECT_TRUE(i8.GetVal() == 12);
+	EXPECT_THROW(i8.Set(std::numeric_limits<int32_t>::max());, TypeError);
+	EXPECT_THROW(i8.Set(std::numeric_limits<int32_t>::lowest());, TypeError);
+	//    int64_t ->
+	EXPECT_NO_THROW(i8 = Int8(); i8.Set(int64_t(12)););
+	EXPECT_TRUE(i8.GetVal() == 12);
+	EXPECT_THROW(i8.Set(std::numeric_limits<int64_t>::max());, TypeError);
+	EXPECT_THROW(i8.Set(std::numeric_limits<int64_t>::lowest());, TypeError);
+	//    double ->
+	EXPECT_NO_THROW(i8 = Int8(); i8.Set(double(12)););
+	EXPECT_TRUE(i8.GetVal() == 12);
+	EXPECT_THROW(i8.Set(std::numeric_limits<double>::max());, TypeError);
+	EXPECT_THROW(i8.Set(std::numeric_limits<double>::lowest());, TypeError);
+
+	// int16_t
+	EXPECT_THROW(i16.Set(Double());, TypeError);
+	EXPECT_THROW(i16.Set(d_l);,      TypeError);
+	EXPECT_NO_THROW(i16 = Int16(); i16.Set(Int16(-1234)););
+	EXPECT_TRUE(i16.GetVal() == -1234);
+	EXPECT_NO_THROW(i16 = Int16(); i16.Set(i16_l));
+	EXPECT_TRUE(i16.GetVal() == -1234);
+	//    bool ->
+	EXPECT_NO_THROW(i16 = Int16(); i16.Set(true););
+	EXPECT_TRUE(i16.GetVal() == 1);
+	//    uint8_t ->
+	EXPECT_NO_THROW(i16 = Int16(); i16.Set(uint8_t(12)););
+	EXPECT_TRUE(i16.GetVal() == 12);
+	//    uint32_t ->
+	EXPECT_NO_THROW(i16 = Int16(); i16.Set(uint32_t(12)););
+	EXPECT_TRUE(i16.GetVal() == 12);
+	EXPECT_THROW(i16.Set(std::numeric_limits<uint32_t>::max());, TypeError);
+	//    uint64_t ->
+	EXPECT_NO_THROW(i16 = Int16(); i16.Set(uint64_t(12)););
+	EXPECT_TRUE(i16.GetVal() == 12);
+	EXPECT_THROW(i16.Set(std::numeric_limits<uint64_t>::max());, TypeError);
+	//    int8_t ->
+	EXPECT_NO_THROW(i16 = Int16(); i16.Set(int8_t(12)););
+	EXPECT_TRUE(i16.GetVal() == 12);
+	//    int32_t ->
+	EXPECT_NO_THROW(i16 = Int16(); i16.Set(int32_t(12)););
+	EXPECT_TRUE(i16.GetVal() == 12);
+	EXPECT_THROW(i16.Set(std::numeric_limits<int32_t>::max());, TypeError);
+	EXPECT_THROW(i16.Set(std::numeric_limits<int32_t>::lowest());, TypeError);
+	//    int64_t ->
+	EXPECT_NO_THROW(i16 = Int16(); i16.Set(int64_t(12)););
+	EXPECT_TRUE(i16.GetVal() == 12);
+	EXPECT_THROW(i16.Set(std::numeric_limits<int64_t>::max());, TypeError);
+	EXPECT_THROW(i16.Set(std::numeric_limits<int64_t>::lowest());, TypeError);
+	//    double ->
+	EXPECT_NO_THROW(i16 = Int16(); i16.Set(double(12)););
+	EXPECT_TRUE(i16.GetVal() == 12);
+	EXPECT_THROW(i16.Set(std::numeric_limits<double>::max());, TypeError);
+	EXPECT_THROW(i16.Set(std::numeric_limits<double>::lowest());, TypeError);
+
+	// int32_t
+	EXPECT_THROW(i32.Set(Double());, TypeError);
+	EXPECT_THROW(i32.Set(d_l);,      TypeError);
+	EXPECT_NO_THROW(i32 = Int32(); i32.Set(Int32(-123456)););
+	EXPECT_TRUE(i32.GetVal() == -123456);
+	EXPECT_NO_THROW(i32 = Int32(); i32.Set(i32_l));
+	EXPECT_TRUE(i32.GetVal() == -123456);
+	//    bool ->
+	EXPECT_NO_THROW(i32 = Int32(); i32.Set(true););
+	EXPECT_TRUE(i32.GetVal() == 1);
+	//    uint8_t ->
+	EXPECT_NO_THROW(i32 = Int32(); i32.Set(uint8_t(12)););
+	EXPECT_TRUE(i32.GetVal() == 12);
+	//    uint32_t ->
+	EXPECT_NO_THROW(i32 = Int32(); i32.Set(uint32_t(12)););
+	EXPECT_TRUE(i32.GetVal() == 12);
+	EXPECT_THROW(i32.Set(std::numeric_limits<uint32_t>::max());, TypeError);
+	//    uint64_t ->
+	EXPECT_NO_THROW(i32 = Int32(); i32.Set(uint64_t(12)););
+	EXPECT_TRUE(i32.GetVal() == 12);
+	EXPECT_THROW(i32.Set(std::numeric_limits<uint64_t>::max());, TypeError);
+	//    int8_t ->
+	EXPECT_NO_THROW(i32 = Int32(); i32.Set(int8_t(12)););
+	EXPECT_TRUE(i32.GetVal() == 12);
+	//    int32_t ->
+	EXPECT_NO_THROW(i32 = Int32(); i32.Set(int32_t(12)););
+	EXPECT_TRUE(i32.GetVal() == 12);
+	//    int64_t ->
+	EXPECT_NO_THROW(i32 = Int32(); i32.Set(int64_t(12)););
+	EXPECT_TRUE(i32.GetVal() == 12);
+	EXPECT_THROW(i32.Set(std::numeric_limits<int64_t>::max());, TypeError);
+	EXPECT_THROW(i32.Set(std::numeric_limits<int64_t>::lowest());, TypeError);
+	//    double ->
+	EXPECT_NO_THROW(i32 = Int32(); i32.Set(double(12)););
+	EXPECT_TRUE(i32.GetVal() == 12);
+	EXPECT_THROW(i32.Set(std::numeric_limits<double>::max());, TypeError);
+	EXPECT_THROW(i32.Set(std::numeric_limits<double>::lowest());, TypeError);
+
+	// int64_t
+	EXPECT_THROW(i64.Set(Double());, TypeError);
+	EXPECT_THROW(i64.Set(d_l);,      TypeError);
+	EXPECT_NO_THROW(i64 = Int64(); i64.Set(Int64(-123456789012)););
+	EXPECT_TRUE(i64.GetVal() == -123456789012);
+	EXPECT_NO_THROW(i64 = Int64(); i64.Set(i64_l));
+	EXPECT_TRUE(i64.GetVal() == -123456789012);
+	//    bool ->
+	EXPECT_NO_THROW(i64 = Int64(); i64.Set(true););
+	EXPECT_TRUE(i64.GetVal() == 1);
+	//    uint8_t ->
+	EXPECT_NO_THROW(i64 = Int64(); i64.Set(uint8_t(12)););
+	EXPECT_TRUE(i64.GetVal() == 12);
+	//    uint32_t ->
+	EXPECT_NO_THROW(i64 = Int64(); i64.Set(uint32_t(12)););
+	EXPECT_TRUE(i64.GetVal() == 12);
+	//    uint64_t ->
+	EXPECT_NO_THROW(i64 = Int64(); i64.Set(uint64_t(12)););
+	EXPECT_TRUE(i64.GetVal() == 12);
+	EXPECT_THROW(i64.Set(std::numeric_limits<uint64_t>::max());, TypeError);
+	//    int8_t ->
+	EXPECT_NO_THROW(i64 = Int64(); i64.Set(int8_t(12)););
+	EXPECT_TRUE(i64.GetVal() == 12);
+	//    int32_t ->
+	EXPECT_NO_THROW(i64 = Int64(); i64.Set(int32_t(12)););
+	EXPECT_TRUE(i64.GetVal() == 12);
+	//    int64_t ->
+	EXPECT_NO_THROW(i64 = Int64(); i64.Set(int64_t(12)););
+	EXPECT_TRUE(i64.GetVal() == 12);
+	//    double ->
+	EXPECT_NO_THROW(i64 = Int64(); i64.Set(double(12)););
+	EXPECT_TRUE(i64.GetVal() == 12);
+	EXPECT_THROW(i64.Set(std::numeric_limits<double>::max());, TypeError);
+	EXPECT_THROW(i64.Set(std::numeric_limits<double>::lowest());, TypeError);
+
+	// uint8_t
+	EXPECT_THROW(u8.Set(Double());, TypeError);
+	EXPECT_THROW(u8.Set(d_l);,      TypeError);
+	EXPECT_NO_THROW(u8 = UInt8(); u8.Set(UInt8(12)););
+	EXPECT_TRUE(u8.GetVal() == 12);
+	EXPECT_NO_THROW(u8 = UInt8(); u8.Set(u8_l));
+	EXPECT_TRUE(u8.GetVal() == 12);
+	//    bool ->
+	EXPECT_NO_THROW(u8 = UInt8(); u8.Set(true););
+	EXPECT_TRUE(u8.GetVal() == 1);
+	//    uint8_t ->
+	EXPECT_NO_THROW(u8 = UInt8(); u8.Set(uint8_t(12)););
+	EXPECT_TRUE(u8.GetVal() == 12);
+	//    uint32_t ->
+	EXPECT_NO_THROW(u8 = UInt8(); u8.Set(uint32_t(12)););
+	EXPECT_TRUE(u8.GetVal() == 12);
+	EXPECT_THROW(u8.Set(std::numeric_limits<uint32_t>::max());, TypeError);
+	//    uint64_t ->
+	EXPECT_NO_THROW(u8 = UInt8(); u8.Set(uint64_t(12)););
+	EXPECT_TRUE(u8.GetVal() == 12);
+	EXPECT_THROW(u8.Set(std::numeric_limits<uint64_t>::max());, TypeError);
+	//    int8_t ->
+	EXPECT_NO_THROW(u8 = UInt8(); u8.Set(int8_t(12)););
+	EXPECT_TRUE(u8.GetVal() == 12);
+	EXPECT_THROW(u8.Set(std::numeric_limits<int8_t>::lowest());, TypeError);
+	//    int32_t ->
+	EXPECT_NO_THROW(u8 = UInt8(); u8.Set(int32_t(12)););
+	EXPECT_TRUE(u8.GetVal() == 12);
+	EXPECT_THROW(u8.Set(std::numeric_limits<int32_t>::max());, TypeError);
+	EXPECT_THROW(u8.Set(std::numeric_limits<int32_t>::lowest());, TypeError);
+	//    int64_t ->
+	EXPECT_NO_THROW(u8 = UInt8(); u8.Set(int64_t(12)););
+	EXPECT_TRUE(u8.GetVal() == 12);
+	EXPECT_THROW(u8.Set(std::numeric_limits<int64_t>::max());, TypeError);
+	EXPECT_THROW(u8.Set(std::numeric_limits<int64_t>::lowest());, TypeError);
+	//    double ->
+	EXPECT_NO_THROW(u8 = UInt8(); u8.Set(double(12)););
+	EXPECT_TRUE(u8.GetVal() == 12);
+	EXPECT_THROW(u8.Set(std::numeric_limits<double>::max());, TypeError);
+	EXPECT_THROW(u8.Set(std::numeric_limits<double>::lowest());, TypeError);
+
+	// uint16_t
+	EXPECT_THROW(u16.Set(Double());, TypeError);
+	EXPECT_THROW(u16.Set(d_l);,      TypeError);
+	EXPECT_NO_THROW(u16 = UInt16(); u16.Set(UInt16(1234)););
+	EXPECT_TRUE(u16.GetVal() == 1234);
+	EXPECT_NO_THROW(u16 = UInt16(); u16.Set(u16_l));
+	EXPECT_TRUE(u16.GetVal() == 1234);
+	//    bool ->
+	EXPECT_NO_THROW(u16 = UInt16(); u16.Set(true););
+	EXPECT_TRUE(u16.GetVal() == 1);
+	//    uint8_t ->
+	EXPECT_NO_THROW(u16 = UInt16(); u16.Set(uint8_t(12)););
+	EXPECT_TRUE(u16.GetVal() == 12);
+	//    uint32_t ->
+	EXPECT_NO_THROW(u16 = UInt16(); u16.Set(uint32_t(12)););
+	EXPECT_TRUE(u16.GetVal() == 12);
+	EXPECT_THROW(u16.Set(std::numeric_limits<uint32_t>::max());, TypeError);
+	//    uint64_t ->
+	EXPECT_NO_THROW(u16 = UInt16(); u16.Set(uint64_t(12)););
+	EXPECT_TRUE(u16.GetVal() == 12);
+	EXPECT_THROW(u16.Set(std::numeric_limits<uint64_t>::max());, TypeError);
+	//    int8_t ->
+	EXPECT_NO_THROW(u16 = UInt16(); u16.Set(int8_t(12)););
+	EXPECT_TRUE(u16.GetVal() == 12);
+	EXPECT_THROW(u16.Set(std::numeric_limits<int8_t>::lowest());, TypeError);
+	//    int32_t ->
+	EXPECT_NO_THROW(u16 = UInt16(); u16.Set(int32_t(12)););
+	EXPECT_TRUE(u16.GetVal() == 12);
+	EXPECT_THROW(u16.Set(std::numeric_limits<int32_t>::max());, TypeError);
+	EXPECT_THROW(u16.Set(std::numeric_limits<int32_t>::lowest());, TypeError);
+	//    int64_t ->
+	EXPECT_NO_THROW(u16 = UInt16(); u16.Set(int64_t(12)););
+	EXPECT_TRUE(u16.GetVal() == 12);
+	EXPECT_THROW(u16.Set(std::numeric_limits<int64_t>::max());, TypeError);
+	EXPECT_THROW(u16.Set(std::numeric_limits<int64_t>::lowest());, TypeError);
+	//    double ->
+	EXPECT_NO_THROW(u16 = UInt16(); u16.Set(double(12)););
+	EXPECT_TRUE(u16.GetVal() == 12);
+	EXPECT_THROW(u16.Set(std::numeric_limits<double>::max());, TypeError);
+	EXPECT_THROW(u16.Set(std::numeric_limits<double>::lowest());, TypeError);
+
+	// uint32_t
+	EXPECT_THROW(u32.Set(Double());, TypeError);
+	EXPECT_THROW(u32.Set(d_l);,      TypeError);
+	EXPECT_NO_THROW(u32 = UInt32(); u32.Set(UInt32(123456)););
+	EXPECT_TRUE(u32.GetVal() == 123456);
+	EXPECT_NO_THROW(u32 = UInt32(); u32.Set(u32_l));
+	EXPECT_TRUE(u32.GetVal() == 123456);
+	//    bool ->
+	EXPECT_NO_THROW(u32 = UInt32(); u32.Set(true););
+	EXPECT_TRUE(u32.GetVal() == 1);
+	//    uint8_t ->
+	EXPECT_NO_THROW(u32 = UInt32(); u32.Set(uint8_t(12)););
+	EXPECT_TRUE(u32.GetVal() == 12);
+	//    uint32_t ->
+	EXPECT_NO_THROW(u32 = UInt32(); u32.Set(uint32_t(12)););
+	EXPECT_TRUE(u32.GetVal() == 12);
+	//    uint64_t ->
+	EXPECT_NO_THROW(u32 = UInt32(); u32.Set(uint64_t(12)););
+	EXPECT_TRUE(u32.GetVal() == 12);
+	EXPECT_THROW(u32.Set(std::numeric_limits<uint64_t>::max());, TypeError);
+	//    int8_t ->
+	EXPECT_NO_THROW(u32 = UInt32(); u32.Set(int8_t(12)););
+	EXPECT_TRUE(u32.GetVal() == 12);
+	EXPECT_THROW(u32.Set(std::numeric_limits<int8_t>::lowest());, TypeError);
+	//    int32_t ->
+	EXPECT_NO_THROW(u32 = UInt32(); u32.Set(int32_t(12)););
+	EXPECT_TRUE(u32.GetVal() == 12);
+	EXPECT_THROW(u32.Set(std::numeric_limits<int32_t>::lowest());, TypeError);
+	//    int64_t ->
+	EXPECT_NO_THROW(u32 = UInt32(); u32.Set(int64_t(12)););
+	EXPECT_TRUE(u32.GetVal() == 12);
+	EXPECT_THROW(u32.Set(std::numeric_limits<int64_t>::max());, TypeError);
+	EXPECT_THROW(u32.Set(std::numeric_limits<int64_t>::lowest());, TypeError);
+	//    double ->
+	EXPECT_NO_THROW(u32 = UInt32(); u32.Set(double(12)););
+	EXPECT_TRUE(u32.GetVal() == 12);
+	EXPECT_THROW(u32.Set(std::numeric_limits<double>::max());, TypeError);
+	EXPECT_THROW(u32.Set(std::numeric_limits<double>::lowest());, TypeError);
+
+	// uint64_t
+	EXPECT_THROW(u64.Set(Double());, TypeError);
+	EXPECT_THROW(u64.Set(d_l);,      TypeError);
+	EXPECT_NO_THROW(u64 = UInt64(); u64.Set(UInt64(123456789012)););
+	EXPECT_TRUE(u64.GetVal() == 123456789012);
+	EXPECT_NO_THROW(u64 = UInt64(); u64.Set(u64_l));
+	EXPECT_TRUE(u64.GetVal() == 123456789012);
+	//    bool ->
+	EXPECT_NO_THROW(u64 = UInt64(); u64.Set(true););
+	EXPECT_TRUE(u64.GetVal() == 1);
+	//    uint8_t ->
+	EXPECT_NO_THROW(u64 = UInt64(); u64.Set(uint8_t(12)););
+	EXPECT_TRUE(u64.GetVal() == 12);
+	//    uint32_t ->
+	EXPECT_NO_THROW(u64 = UInt64(); u64.Set(uint32_t(12)););
+	EXPECT_TRUE(u64.GetVal() == 12);
+	//    uint64_t ->
+	EXPECT_NO_THROW(u64 = UInt64(); u64.Set(uint64_t(12)););
+	EXPECT_TRUE(u64.GetVal() == 12);
+	//    int8_t ->
+	EXPECT_NO_THROW(u64 = UInt64(); u64.Set(int8_t(12)););
+	EXPECT_TRUE(u64.GetVal() == 12);
+	EXPECT_THROW(u64.Set(std::numeric_limits<int8_t>::lowest());, TypeError);
+	//    int32_t ->
+	EXPECT_NO_THROW(u64 = UInt64(); u64.Set(int32_t(12)););
+	EXPECT_TRUE(u64.GetVal() == 12);
+	EXPECT_THROW(u64.Set(std::numeric_limits<int32_t>::lowest());, TypeError);
+	//    int64_t ->
+	EXPECT_NO_THROW(u64 = UInt64(); u64.Set(int64_t(12)););
+	EXPECT_TRUE(u64.GetVal() == 12);
+	EXPECT_THROW(u64.Set(std::numeric_limits<int64_t>::lowest());, TypeError);
+	//    double ->
+	EXPECT_NO_THROW(u64 = UInt64(); u64.Set(double(12)););
+	EXPECT_TRUE(u64.GetVal() == 12);
+	EXPECT_THROW(u64.Set(std::numeric_limits<double>::max());, TypeError);
+	EXPECT_THROW(u64.Set(std::numeric_limits<double>::lowest());, TypeError);
+
+	// float
+	EXPECT_THROW(f.Set(Double());, TypeError);
+	EXPECT_THROW(f.Set(d_l);,      TypeError);
+	EXPECT_NO_THROW(f = Float(); f.Set(Float(1e12F)););
+	EXPECT_TRUE(f.GetVal() == 1e12F);
+	EXPECT_NO_THROW(f = Float(); f.Set(f_l));
+	EXPECT_TRUE(f.GetVal() == 1e12F);
+	//    bool ->
+	EXPECT_NO_THROW(f = Float(); f.Set(true););
+	EXPECT_TRUE(f.GetVal() == 1);
+	//    uint8_t ->
+	EXPECT_NO_THROW(f = Float(); f.Set(uint8_t(12)););
+	EXPECT_TRUE(f.GetVal() == 12);
+	//    uint32_t ->
+	EXPECT_NO_THROW(f = Float(); f.Set(uint32_t(12)););
+	EXPECT_TRUE(f.GetVal() == 12);
+	//    uint64_t ->
+	EXPECT_NO_THROW(f = Float(); f.Set(uint64_t(12)););
+	EXPECT_TRUE(f.GetVal() == 12);
+	//    int8_t ->
+	EXPECT_NO_THROW(f = Float(); f.Set(int8_t(12)););
+	EXPECT_TRUE(f.GetVal() == 12);
+	//    int32_t ->
+	EXPECT_NO_THROW(f = Float(); f.Set(int32_t(12)););
+	EXPECT_TRUE(f.GetVal() == 12);
+	//    int64_t ->
+	EXPECT_NO_THROW(f = Float(); f.Set(int64_t(12)););
+	EXPECT_TRUE(f.GetVal() == 12);
+	//    double ->
+	EXPECT_NO_THROW(f = Float(); f.Set(double(12)););
+	EXPECT_TRUE(f.GetVal() == 12);
+	EXPECT_THROW(f.Set(std::numeric_limits<double>::max());, TypeError);
+	EXPECT_THROW(f.Set(std::numeric_limits<double>::lowest());, TypeError);
+
+	// double
+	EXPECT_THROW(d.Set(Float());, TypeError);
+	EXPECT_THROW(d.Set(f_l);,      TypeError);
+	EXPECT_NO_THROW(d = Double(); d.Set(Double(1e123)););
+	EXPECT_TRUE(d.GetVal() == 1e123);
+	EXPECT_NO_THROW(d = Double(); d.Set(d_l));
+	EXPECT_TRUE(d.GetVal() == 1e123);
+	//    bool ->
+	EXPECT_NO_THROW(d = Double(); d.Set(true););
+	EXPECT_TRUE(d.GetVal() == 1);
+	//    uint8_t ->
+	EXPECT_NO_THROW(d = Double(); d.Set(uint8_t(12)););
+	EXPECT_TRUE(d.GetVal() == 12);
+	//    uint32_t ->
+	EXPECT_NO_THROW(d = Double(); d.Set(uint32_t(12)););
+	EXPECT_TRUE(d.GetVal() == 12);
+	//    uint64_t ->
+	EXPECT_NO_THROW(d = Double(); d.Set(uint64_t(12)););
+	EXPECT_TRUE(d.GetVal() == 12);
+	//    int8_t ->
+	EXPECT_NO_THROW(d = Double(); d.Set(int8_t(12)););
+	EXPECT_TRUE(d.GetVal() == 12);
+	//    int32_t ->
+	EXPECT_NO_THROW(d = Double(); d.Set(int32_t(12)););
+	EXPECT_TRUE(d.GetVal() == 12);
+	//    int64_t ->
+	EXPECT_NO_THROW(d = Double(); d.Set(int64_t(12)););
+	EXPECT_TRUE(d.GetVal() == 12);
+	//    double ->
+	EXPECT_NO_THROW(d = Double(); d.Set(double(12)););
+	EXPECT_TRUE(d.GetVal() == 12);
+
+}
+
+GTEST_TEST(TestNumeric, Getter)
+{
+	// bool
+	//      -> int8_t
+	EXPECT_TRUE(Bool(true).AsCppInt8()   == static_cast<int8_t  >(1));
+	//      -> int32_t
+	EXPECT_TRUE(Bool(true).AsCppInt32()  == static_cast<int32_t >(1));
+	//      -> int64_t
+	EXPECT_TRUE(Bool(true).AsCppInt64()  == static_cast<int64_t >(1));
+	//      -> uint8_t
+	EXPECT_TRUE(Bool(true).AsCppUInt8()  == static_cast<uint8_t >(1));
+	//      -> uint32_t
+	EXPECT_TRUE(Bool(true).AsCppUInt32() == static_cast<uint32_t>(1));
+	//      -> uint64_t
+	EXPECT_TRUE(Bool(true).AsCppUInt64() == static_cast<uint64_t>(1));
+	//      -> double
+	EXPECT_TRUE(Bool(true).AsCppDouble() == static_cast<double  >(1));
+
+	// int8_t
+	//      -> int8_t
+	EXPECT_TRUE(Int8(12).AsCppInt8()   == static_cast<int8_t  >(12));
+	//      -> int32_t
+	EXPECT_TRUE(Int8(12).AsCppInt32()  == static_cast<int32_t >(12));
+	//      -> int64_t
+	EXPECT_TRUE(Int8(12).AsCppInt64()  == static_cast<int64_t >(12));
+	//      -> uint8_t
+	EXPECT_THROW(
+		Int8(std::numeric_limits<int8_t>::lowest()).AsCppUInt8(), TypeError);
+	EXPECT_TRUE(Int8(12).AsCppUInt8()  == static_cast<uint8_t >(12));
+	//      -> uint32_t
+	EXPECT_THROW(
+		Int8(std::numeric_limits<int8_t>::lowest()).AsCppUInt32(), TypeError);
+	EXPECT_TRUE(Int8(12).AsCppUInt32() == static_cast<uint32_t>(12));
+	//      -> uint64_t
+	EXPECT_THROW(
+		Int8(std::numeric_limits<int8_t>::lowest()).AsCppUInt64(), TypeError);
+	EXPECT_TRUE(Int8(12).AsCppUInt64() == static_cast<uint64_t>(12));
+	//      -> double
+	EXPECT_TRUE(Int8(12).AsCppDouble() == static_cast<double  >(12));
+
+	// int16_t
+	//      -> int8_t
+	EXPECT_THROW(
+		Int16(std::numeric_limits<int16_t>::max()).AsCppInt8(), TypeError);
+	EXPECT_TRUE(Int16(12).AsCppInt8()   == static_cast<int8_t  >(12));
+	//      -> int32_t
+	EXPECT_TRUE(Int16(12).AsCppInt32()  == static_cast<int32_t >(12));
+	//      -> int64_t
+	EXPECT_TRUE(Int16(12).AsCppInt64()  == static_cast<int64_t >(12));
+	//      -> uint8_t
+	EXPECT_THROW(
+		Int16(std::numeric_limits<int16_t>::lowest()).AsCppUInt8(), TypeError);
+	EXPECT_TRUE(Int16(12).AsCppUInt8()  == static_cast<uint8_t >(12));
+	//      -> uint32_t
+	EXPECT_THROW(
+		Int16(std::numeric_limits<int16_t>::lowest()).AsCppUInt32(), TypeError);
+	EXPECT_TRUE(Int16(12).AsCppUInt32() == static_cast<uint32_t>(12));
+	//      -> uint64_t
+	EXPECT_THROW(
+		Int16(std::numeric_limits<int16_t>::lowest()).AsCppUInt64(), TypeError);
+	EXPECT_TRUE(Int16(12).AsCppUInt64() == static_cast<uint64_t>(12));
+	//      -> double
+	EXPECT_TRUE(Int16(12).AsCppDouble() == static_cast<double  >(12));
+
+	// int32_t
+	//      -> int8_t
+	EXPECT_THROW(
+		Int32(std::numeric_limits<int32_t>::max()).AsCppInt8(), TypeError);
+	EXPECT_TRUE(Int32(12).AsCppInt8()   == static_cast<int8_t  >(12));
+	//      -> int32_t
+	EXPECT_TRUE(Int32(12).AsCppInt32()  == static_cast<int32_t >(12));
+	//      -> int64_t
+	EXPECT_TRUE(Int32(12).AsCppInt64()  == static_cast<int64_t >(12));
+	//      -> uint8_t
+	EXPECT_THROW(
+		Int32(std::numeric_limits<int32_t>::lowest()).AsCppUInt8(), TypeError);
+	EXPECT_TRUE(Int32(12).AsCppUInt8()  == static_cast<uint8_t >(12));
+	//      -> uint32_t
+	EXPECT_THROW(
+		Int32(std::numeric_limits<int32_t>::lowest()).AsCppUInt32(), TypeError);
+	EXPECT_TRUE(Int32(12).AsCppUInt32() == static_cast<uint32_t>(12));
+	//      -> uint64_t
+	EXPECT_THROW(
+		Int32(std::numeric_limits<int32_t>::lowest()).AsCppUInt64(), TypeError);
+	EXPECT_TRUE(Int32(12).AsCppUInt64() == static_cast<uint64_t>(12));
+	//      -> double
+	EXPECT_TRUE(Int32(12).AsCppDouble() == static_cast<double  >(12));
+
+	// int64_t
+	EXPECT_THROW(
+		Int64(std::numeric_limits<int64_t>::max()).AsCppInt8(), TypeError);
+	EXPECT_TRUE(Int64(12).AsCppInt8()   == static_cast<int8_t  >(12));
+	//      -> int32_t
+	EXPECT_THROW(
+		Int64(std::numeric_limits<int64_t>::max()).AsCppInt32(), TypeError);
+	EXPECT_TRUE(Int64(12).AsCppInt32()  == static_cast<int32_t >(12));
+	//      -> int64_t
+	EXPECT_TRUE(Int64(12).AsCppInt64()  == static_cast<int64_t >(12));
+	//      -> uint8_t
+	EXPECT_THROW(
+		Int64(std::numeric_limits<int64_t>::lowest()).AsCppUInt8(), TypeError);
+	EXPECT_TRUE(Int64(12).AsCppUInt8()  == static_cast<uint8_t >(12));
+	//      -> uint32_t
+	EXPECT_THROW(
+		Int64(std::numeric_limits<int64_t>::lowest()).AsCppUInt32(), TypeError);
+	EXPECT_TRUE(Int64(12).AsCppUInt32() == static_cast<uint32_t>(12));
+	//      -> uint64_t
+	EXPECT_THROW(
+		Int64(std::numeric_limits<int64_t>::lowest()).AsCppUInt64(), TypeError);
+	EXPECT_TRUE(Int64(12).AsCppUInt64() == static_cast<uint64_t>(12));
+	//      -> double
+	EXPECT_TRUE(Int64(12).AsCppDouble() == static_cast<double  >(12));
+
+	// uint8_t
+	EXPECT_THROW(
+		UInt8(std::numeric_limits<uint8_t>::max()).AsCppInt8(), TypeError);
+	EXPECT_TRUE(UInt8(12).AsCppInt8()   == static_cast<int8_t  >(12));
+	//      -> int32_t
+	EXPECT_TRUE(UInt8(12).AsCppInt32()  == static_cast<int32_t >(12));
+	//      -> int64_t
+	EXPECT_TRUE(UInt8(12).AsCppInt64()  == static_cast<int64_t >(12));
+	//      -> uint8_t
+	EXPECT_TRUE(UInt8(12).AsCppUInt8()  == static_cast<uint8_t >(12));
+	//      -> uint32_t
+	EXPECT_TRUE(UInt8(12).AsCppUInt32() == static_cast<uint32_t>(12));
+	//      -> uint64_t
+	EXPECT_TRUE(UInt8(12).AsCppUInt64() == static_cast<uint64_t>(12));
+	//      -> double
+	EXPECT_TRUE(UInt8(12).AsCppDouble() == static_cast<double  >(12));
+
+	// uint16_t
+	EXPECT_THROW(
+		UInt16(std::numeric_limits<uint16_t>::max()).AsCppInt8(), TypeError);
+	EXPECT_TRUE(UInt16(12).AsCppInt8()   == static_cast<int8_t  >(12));
+	//      -> int32_t
+	EXPECT_TRUE(UInt16(12).AsCppInt32()  == static_cast<int32_t >(12));
+	//      -> int64_t
+	EXPECT_TRUE(UInt16(12).AsCppInt64()  == static_cast<int64_t >(12));
+	//      -> uint8_t
+	EXPECT_THROW(
+		UInt16(std::numeric_limits<uint16_t>::max()).AsCppUInt8(), TypeError);
+	EXPECT_TRUE(UInt16(12).AsCppUInt8()  == static_cast<uint8_t >(12));
+	//      -> uint32_t
+	EXPECT_TRUE(UInt16(12).AsCppUInt32() == static_cast<uint32_t>(12));
+	//      -> uint64_t
+	EXPECT_TRUE(UInt16(12).AsCppUInt64() == static_cast<uint64_t>(12));
+	//      -> double
+	EXPECT_TRUE(UInt16(12).AsCppDouble() == static_cast<double  >(12));
+
+	// uint32_t
+	EXPECT_THROW(
+		UInt32(std::numeric_limits<uint32_t>::max()).AsCppInt8(), TypeError);
+	EXPECT_TRUE(UInt32(12).AsCppInt8()   == static_cast<int8_t  >(12));
+	//      -> int32_t
+	EXPECT_THROW(
+		UInt32(std::numeric_limits<uint32_t>::max()).AsCppInt32(), TypeError);
+	EXPECT_TRUE(UInt32(12).AsCppInt32()  == static_cast<int32_t >(12));
+	//      -> int64_t
+	EXPECT_TRUE(UInt32(12).AsCppInt64()  == static_cast<int64_t >(12));
+	//      -> uint8_t
+	EXPECT_THROW(
+		UInt32(std::numeric_limits<uint32_t>::max()).AsCppUInt8(), TypeError);
+	EXPECT_TRUE(UInt32(12).AsCppUInt8()  == static_cast<uint8_t >(12));
+	//      -> uint32_t
+	EXPECT_TRUE(UInt32(12).AsCppUInt32() == static_cast<uint32_t>(12));
+	//      -> uint64_t
+	EXPECT_TRUE(UInt32(12).AsCppUInt64() == static_cast<uint64_t>(12));
+	//      -> double
+	EXPECT_TRUE(UInt32(12).AsCppDouble() == static_cast<double  >(12));
+
+	// uint64_t
+	EXPECT_THROW(
+		UInt64(std::numeric_limits<uint64_t>::max()).AsCppInt8(), TypeError);
+	EXPECT_TRUE(UInt64(12).AsCppInt8()   == static_cast<int8_t  >(12));
+	//      -> int32_t
+	EXPECT_THROW(
+		UInt64(std::numeric_limits<uint64_t>::max()).AsCppInt32(), TypeError);
+	EXPECT_TRUE(UInt64(12).AsCppInt32()  == static_cast<int32_t >(12));
+	//      -> int64_t
+	EXPECT_THROW(
+		UInt64(std::numeric_limits<uint64_t>::max()).AsCppInt64(), TypeError);
+	EXPECT_TRUE(UInt64(12).AsCppInt64()  == static_cast<int64_t >(12));
+	//      -> uint8_t
+	EXPECT_THROW(
+		UInt64(std::numeric_limits<uint64_t>::max()).AsCppUInt8(), TypeError);
+	EXPECT_TRUE(UInt64(12).AsCppUInt8()  == static_cast<uint8_t >(12));
+	//      -> uint32_t
+	EXPECT_THROW(
+		UInt64(std::numeric_limits<uint64_t>::max()).AsCppUInt32(), TypeError);
+	EXPECT_TRUE(UInt64(12).AsCppUInt32() == static_cast<uint32_t>(12));
+	//      -> uint64_t
+	EXPECT_TRUE(UInt64(12).AsCppUInt64() == static_cast<uint64_t>(12));
+	//      -> double
+	EXPECT_TRUE(UInt64(12).AsCppDouble() == static_cast<double  >(12));
+
+	// float
+	EXPECT_THROW(
+		Float(std::numeric_limits<float>::max()).AsCppInt8(), TypeError);
+	EXPECT_THROW(
+		Float(std::numeric_limits<float>::lowest()).AsCppInt8(), TypeError);
+	EXPECT_TRUE(Float(12).AsCppInt8()   == static_cast<int8_t  >(12));
+	//      -> int32_t
+	EXPECT_THROW(
+		Float(std::numeric_limits<float>::max()).AsCppInt32(), TypeError);
+	EXPECT_THROW(
+		Float(std::numeric_limits<float>::lowest()).AsCppInt32(), TypeError);
+	EXPECT_TRUE(Float(12).AsCppInt32()  == static_cast<int32_t >(12));
+	//      -> int64_t
+	EXPECT_THROW(
+		Float(std::numeric_limits<float>::max()).AsCppInt64(), TypeError);
+	EXPECT_THROW(
+		Float(std::numeric_limits<float>::lowest()).AsCppInt64(), TypeError);
+	EXPECT_TRUE(Float(12).AsCppInt64()  == static_cast<int64_t >(12));
+	//      -> uint8_t
+	//      -> int64_t
+	EXPECT_THROW(
+		Float(std::numeric_limits<float>::max()).AsCppUInt8(), TypeError);
+	EXPECT_THROW(
+		Float(std::numeric_limits<float>::lowest()).AsCppUInt8(), TypeError);
+	EXPECT_TRUE(Float(12).AsCppUInt8()  == static_cast<uint8_t >(12));
+	//      -> uint32_t
+	EXPECT_THROW(
+		Float(std::numeric_limits<float>::max()).AsCppUInt32(), TypeError);
+	EXPECT_THROW(
+		Float(std::numeric_limits<float>::lowest()).AsCppUInt32(), TypeError);
+	EXPECT_TRUE(Float(12).AsCppUInt32() == static_cast<uint32_t>(12));
+	//      -> uint64_t
+	EXPECT_THROW(
+		Float(std::numeric_limits<float>::max()).AsCppUInt64(), TypeError);
+	EXPECT_THROW(
+		Float(std::numeric_limits<float>::lowest()).AsCppUInt64(), TypeError);
+	EXPECT_TRUE(Float(12).AsCppUInt64() == static_cast<uint64_t>(12));
+	//      -> double
+	EXPECT_TRUE(Float(12).AsCppDouble() == static_cast<double  >(12));
+
+	// double
+	EXPECT_THROW(
+		Double(std::numeric_limits<double>::max()).AsCppInt8(), TypeError);
+	EXPECT_THROW(
+		Double(std::numeric_limits<double>::lowest()).AsCppInt8(), TypeError);
+	EXPECT_TRUE(Double(12).AsCppInt8()   == static_cast<int8_t  >(12));
+	//      -> int32_t
+	EXPECT_THROW(
+		Double(std::numeric_limits<double>::max()).AsCppInt32(), TypeError);
+	EXPECT_THROW(
+		Double(std::numeric_limits<double>::lowest()).AsCppInt32(), TypeError);
+	EXPECT_TRUE(Double(12).AsCppInt32()  == static_cast<int32_t >(12));
+	//      -> int64_t
+	EXPECT_THROW(
+		Double(std::numeric_limits<double>::max()).AsCppInt64(), TypeError);
+	EXPECT_THROW(
+		Double(std::numeric_limits<double>::lowest()).AsCppInt64(), TypeError);
+	EXPECT_TRUE(Double(12).AsCppInt64()  == static_cast<int64_t >(12));
+	//      -> uint8_t
+	//      -> int64_t
+	EXPECT_THROW(
+		Double(std::numeric_limits<double>::max()).AsCppUInt8(), TypeError);
+	EXPECT_THROW(
+		Double(std::numeric_limits<double>::lowest()).AsCppUInt8(), TypeError);
+	EXPECT_TRUE(Double(12).AsCppUInt8()  == static_cast<uint8_t >(12));
+	//      -> uint32_t
+	EXPECT_THROW(
+		Double(std::numeric_limits<double>::max()).AsCppUInt32(), TypeError);
+	EXPECT_THROW(
+		Double(std::numeric_limits<double>::lowest()).AsCppUInt32(), TypeError);
+	EXPECT_TRUE(Double(12).AsCppUInt32() == static_cast<uint32_t>(12));
+	//      -> uint64_t
+	EXPECT_THROW(
+		Double(std::numeric_limits<double>::max()).AsCppUInt64(), TypeError);
+	EXPECT_THROW(
+		Double(std::numeric_limits<double>::lowest()).AsCppUInt64(), TypeError);
+	EXPECT_TRUE(Double(12).AsCppUInt64() == static_cast<uint64_t>(12));
+	//      -> double
+	EXPECT_TRUE(Double(12).AsCppDouble() == static_cast<double  >(12));
+}
+
+GTEST_TEST(TestNumeric, IsTrue)
+{
+	EXPECT_EQ((Bool(true)).IsTrue(), static_cast<bool>(true));
+	EXPECT_EQ(Bool(false).IsTrue(), static_cast<bool>(false));
 
 	// Integer -> bool
-	EXPECT_EQ(static_cast<bool>(Int8(2)),
+	EXPECT_EQ((Int8(2)).IsTrue(),
 		static_cast<bool>(static_cast<int8_t>(2)));
-	EXPECT_EQ(static_cast<bool>(Int8(1)),
-		static_cast<bool>(static_cast<int8_t>(1)));
-	EXPECT_EQ(static_cast<bool>(Int8(0)),
+	EXPECT_EQ((Int8(0)).IsTrue(),
 		static_cast<bool>(static_cast<int8_t>(0)));
-	EXPECT_EQ(static_cast<bool>(Int16(2)),
+	EXPECT_EQ((Int16(2)).IsTrue(),
 		static_cast<bool>(static_cast<int16_t>(2)));
-	EXPECT_EQ(static_cast<bool>(Int16(1)),
-		static_cast<bool>(static_cast<int16_t>(1)));
-	EXPECT_EQ(static_cast<bool>(Int16(0)),
+	EXPECT_EQ((Int16(0)).IsTrue(),
 		static_cast<bool>(static_cast<int16_t>(0)));
-	EXPECT_EQ(static_cast<bool>(Int32(2)),
+	EXPECT_EQ((Int32(2)).IsTrue(),
 		static_cast<bool>(static_cast<int32_t>(2)));
-	EXPECT_EQ(static_cast<bool>(Int32(1)),
-		static_cast<bool>(static_cast<int32_t>(1)));
-	EXPECT_EQ(static_cast<bool>(Int32(0)),
+	EXPECT_EQ((Int32(0)).IsTrue(),
 		static_cast<bool>(static_cast<int32_t>(0)));
-	EXPECT_EQ(static_cast<bool>(Int64(2)),
+	EXPECT_EQ((Int64(2)).IsTrue(),
 		static_cast<bool>(static_cast<int64_t>(2)));
-	EXPECT_EQ(static_cast<bool>(Int64(1)),
-		static_cast<bool>(static_cast<int64_t>(1)));
-	EXPECT_EQ(static_cast<bool>(Int64(0)),
+	EXPECT_EQ((Int64(0)).IsTrue(),
 		static_cast<bool>(static_cast<int64_t>(0)));
 
-	EXPECT_EQ(static_cast<bool>(UInt8(2)),
+	EXPECT_EQ((UInt8(2)).IsTrue(),
 		static_cast<bool>(static_cast<uint8_t>(2)));
-	EXPECT_EQ(static_cast<bool>(UInt8(1)),
-		static_cast<bool>(static_cast<uint8_t>(1)));
-	EXPECT_EQ(static_cast<bool>(UInt8(0)),
+	EXPECT_EQ((UInt8(0)).IsTrue(),
 		static_cast<bool>(static_cast<uint8_t>(0)));
-	EXPECT_EQ(static_cast<bool>(UInt16(2)),
+	EXPECT_EQ((UInt16(2)).IsTrue(),
 		static_cast<bool>(static_cast<uint16_t>(2)));
-	EXPECT_EQ(static_cast<bool>(UInt16(1)),
-		static_cast<bool>(static_cast<uint16_t>(1)));
-	EXPECT_EQ(static_cast<bool>(UInt16(0)),
+	EXPECT_EQ((UInt16(0)).IsTrue(),
 		static_cast<bool>(static_cast<uint16_t>(0)));
-	EXPECT_EQ(static_cast<bool>(UInt32(2)),
+	EXPECT_EQ((UInt32(2)).IsTrue(),
 		static_cast<bool>(static_cast<uint32_t>(2)));
-	EXPECT_EQ(static_cast<bool>(UInt32(1)),
-		static_cast<bool>(static_cast<uint32_t>(1)));
-	EXPECT_EQ(static_cast<bool>(UInt32(0)),
+	EXPECT_EQ((UInt32(0)).IsTrue(),
 		static_cast<bool>(static_cast<uint32_t>(0)));
-	EXPECT_EQ(static_cast<bool>(UInt64(2)),
+	EXPECT_EQ((UInt64(2)).IsTrue(),
 		static_cast<bool>(static_cast<uint64_t>(2)));
-	EXPECT_EQ(static_cast<bool>(UInt64(1)),
-		static_cast<bool>(static_cast<uint64_t>(1)));
-	EXPECT_EQ(static_cast<bool>(UInt64(0)),
+	EXPECT_EQ((UInt64(0)).IsTrue(),
 		static_cast<bool>(static_cast<uint64_t>(0)));
 
 	// Float -> bool
-	EXPECT_EQ(static_cast<bool>(Float(0.001F)),
+	EXPECT_EQ((Float(0.001F)).IsTrue(),
 		static_cast<bool>(static_cast<float>(0.001F)));
-	EXPECT_EQ(static_cast<bool>(Float(-0.001F)),
+	EXPECT_EQ((Float(-0.001F)).IsTrue(),
 		static_cast<bool>(static_cast<float>(-0.001F)));
-	EXPECT_EQ(static_cast<bool>(Float(0.0F)),
+	EXPECT_EQ((Float(0.0F)).IsTrue(),
 		static_cast<bool>(static_cast<float>(0.0F)));
-	EXPECT_EQ(static_cast<bool>(Float(-0.0F)),
+	EXPECT_EQ((Float(-0.0F)).IsTrue(),
 		static_cast<bool>(static_cast<float>(-0.0F)));
 
 	// Double -> bool
-	EXPECT_EQ(static_cast<bool>(Double(0.001)),
+	EXPECT_EQ((Double(0.001)).IsTrue(),
 		static_cast<bool>(static_cast<double>(0.001)));
-	EXPECT_EQ(static_cast<bool>(Double(-0.001)),
+	EXPECT_EQ((Double(-0.001)).IsTrue(),
 		static_cast<bool>(static_cast<double>(-0.001)));
-	EXPECT_EQ(static_cast<bool>(Double(0.0)),
+	EXPECT_EQ((Double(0.0)).IsTrue(),
 		static_cast<bool>(static_cast<double>(0.0)));
-	EXPECT_EQ(static_cast<bool>(Double(-0.0)),
+	EXPECT_EQ((Double(-0.0)).IsTrue(),
 		static_cast<bool>(static_cast<double>(-0.0)));
 }
 
@@ -230,92 +937,92 @@ GTEST_TEST(TestNumeric, Comparison)
 {
 	// ==
 	// same internal type
-	EXPECT_EQ((Int32(123) == Int32(123)).GetVal(),
+	EXPECT_EQ((Int32(123) == Int32(123)),
 		static_cast<int32_t>(123) == static_cast<int32_t>(123));
-	EXPECT_EQ((Int32(123) == Int32(1234)).GetVal(),
+	EXPECT_EQ((Int32(123) == Int32(1234)),
 		static_cast<int32_t>(123) == static_cast<int32_t>(1234));
 
 	// different internal type
-	EXPECT_EQ((Int32(123) == Bool(true)).GetVal(),
+	EXPECT_EQ((Int32(123) == Bool(true)),
 		static_cast<int32_t>(123) == static_cast<int>(1));
-	EXPECT_EQ((Int32(123) == Double(123.0)).GetVal(),
+	EXPECT_EQ((Int32(123) == Double(123.0)),
 		static_cast<int32_t>(123) == static_cast<double>(123.0));
-	EXPECT_EQ((Int32(123) == Double(1234.0)).GetVal(),
+	EXPECT_EQ((Int32(123) == Double(1234.0)),
 		static_cast<int32_t>(123) == static_cast<double>(1234.0));
 
 	// !=
 	// same internal type
-	EXPECT_EQ((Int32(123) != Int32(123)).GetVal(),
+	EXPECT_EQ((Int32(123) != Int32(123)),
 		static_cast<int32_t>(123) != static_cast<int32_t>(123));
-	EXPECT_EQ((Int32(123) != Int32(1234)).GetVal(),
+	EXPECT_EQ((Int32(123) != Int32(1234)),
 		static_cast<int32_t>(123) != static_cast<int32_t>(1234));
 
 	// different internal type
-	EXPECT_EQ((Int32(123) != Bool(true)).GetVal(),
+	EXPECT_EQ((Int32(123) != Bool(true)),
 		static_cast<int32_t>(123) != static_cast<int>(1));
-	EXPECT_EQ((Int32(123) != Double(123.0)).GetVal(),
+	EXPECT_EQ((Int32(123) != Double(123.0)),
 		static_cast<int32_t>(123) != static_cast<double>(123.0));
-	EXPECT_EQ((Int32(123) != Double(1234.0)).GetVal(),
+	EXPECT_EQ((Int32(123) != Double(1234.0)),
 		static_cast<int32_t>(123) != static_cast<double>(1234.0));
 
 	// <=
 	// same internal type
-	EXPECT_EQ((Int32(1234) <= Int32(123)).GetVal(),
+	EXPECT_EQ((Int32(1234) <= Int32(123)),
 		static_cast<int32_t>(1234) <= static_cast<int32_t>(123));
-	EXPECT_EQ((Int32(123) <= Int32(1234)).GetVal(),
+	EXPECT_EQ((Int32(123) <= Int32(1234)),
 		static_cast<int32_t>(123) <= static_cast<int32_t>(1234));
 
 	// different internal type
-	EXPECT_EQ((Int32(123) <= Bool(true)).GetVal(),
+	EXPECT_EQ((Int32(123) <= Bool(true)),
 		static_cast<int32_t>(123) <= static_cast<int>(1));
-	EXPECT_EQ((Int32(1234) <= Double(123.0)).GetVal(),
+	EXPECT_EQ((Int32(1234) <= Double(123.0)),
 		static_cast<int32_t>(1234) <= static_cast<double>(123.0));
-	EXPECT_EQ((Int32(123) <= Double(1234.0)).GetVal(),
+	EXPECT_EQ((Int32(123) <= Double(1234.0)),
 		static_cast<int32_t>(123) <= static_cast<double>(1234.0));
 
 	// >=
 	// same internal type
-	EXPECT_EQ((Int32(123) >= Int32(123)).GetVal(),
+	EXPECT_EQ((Int32(123) >= Int32(123)),
 		static_cast<int32_t>(123) >= static_cast<int32_t>(123));
-	EXPECT_EQ((Int32(123) >= Int32(1234)).GetVal(),
+	EXPECT_EQ((Int32(123) >= Int32(1234)),
 		static_cast<int32_t>(123) >= static_cast<int32_t>(1234));
 
 	// different internal type
-	EXPECT_EQ((Int32(123) >= Bool(true)).GetVal(),
+	EXPECT_EQ((Int32(123) >= Bool(true)),
 		static_cast<int32_t>(123) >= static_cast<int>(1));
-	EXPECT_EQ((Int32(123) >= Double(123.0)).GetVal(),
+	EXPECT_EQ((Int32(123) >= Double(123.0)),
 		static_cast<int32_t>(123) >= static_cast<double>(123.0));
-	EXPECT_EQ((Int32(123) >= Double(1234.0)).GetVal(),
+	EXPECT_EQ((Int32(123) >= Double(1234.0)),
 		static_cast<int32_t>(123) >= static_cast<double>(1234.0));
 
 	// <
 	// same internal type
-	EXPECT_EQ((Int32(123) < Int32(123)).GetVal(),
+	EXPECT_EQ((Int32(123) < Int32(123)),
 		static_cast<int32_t>(123) < static_cast<int32_t>(123));
-	EXPECT_EQ((Int32(123) < Int32(1234)).GetVal(),
+	EXPECT_EQ((Int32(123) < Int32(1234)),
 		static_cast<int32_t>(123) < static_cast<int32_t>(1234));
 
 	// different internal type
-	EXPECT_EQ((Int32(123) < Bool(true)).GetVal(),
+	EXPECT_EQ((Int32(123) < Bool(true)),
 		static_cast<int32_t>(123) < static_cast<int>(1));
-	EXPECT_EQ((Int32(123) < Double(123.0)).GetVal(),
+	EXPECT_EQ((Int32(123) < Double(123.0)),
 		static_cast<int32_t>(123) < static_cast<double>(123.0));
-	EXPECT_EQ((Int32(123) < Double(1234.0)).GetVal(),
+	EXPECT_EQ((Int32(123) < Double(1234.0)),
 		static_cast<int32_t>(123) < static_cast<double>(1234.0));
 
 	// >
 	// same internal type
-	EXPECT_EQ((Int32(1234) > Int32(123)).GetVal(),
+	EXPECT_EQ((Int32(1234) > Int32(123)),
 		static_cast<int32_t>(1234) > static_cast<int32_t>(123));
-	EXPECT_EQ((Int32(123) > Int32(1234)).GetVal(),
+	EXPECT_EQ((Int32(123) > Int32(1234)),
 		static_cast<int32_t>(123) > static_cast<int32_t>(1234));
 
 	// different internal type
-	EXPECT_EQ((Int32(123) > Bool(true)).GetVal(),
+	EXPECT_EQ((Int32(123) > Bool(true)),
 		static_cast<int32_t>(123) > static_cast<int>(1));
-	EXPECT_EQ((Int32(1234) > Double(123.0)).GetVal(),
+	EXPECT_EQ((Int32(1234) > Double(123.0)),
 		static_cast<int32_t>(1234) > static_cast<double>(123.0));
-	EXPECT_EQ((Int32(123) > Double(1234.0)).GetVal(),
+	EXPECT_EQ((Int32(123) > Double(1234.0)),
 		static_cast<int32_t>(123) > static_cast<double>(1234.0));
 }
 

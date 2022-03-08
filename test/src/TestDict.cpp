@@ -88,6 +88,40 @@ GTEST_TEST(TestDict, CategoryName)
 	EXPECT_EQ(Dict().GetCategoryName(), std::string("Dict"));
 }
 
+GTEST_TEST(TestDict, Setters)
+{
+	Dict dc1;
+	EXPECT_NO_THROW(Dict().Set(Dict()));
+	EXPECT_NO_THROW(Dict().Set(dc1));
+
+	Null null1;
+	EXPECT_THROW(Dict().Set(Null()), TypeError);
+	EXPECT_THROW(Dict().Set(null1), TypeError);
+
+	EXPECT_THROW(Dict().Set(static_cast<bool >(true)), TypeError);
+	EXPECT_THROW(Dict().Set(static_cast<uint8_t >(1)), TypeError);
+	EXPECT_THROW(Dict().Set(static_cast< int8_t >(1)), TypeError);
+	EXPECT_THROW(Dict().Set(static_cast<uint32_t>(1)), TypeError);
+	EXPECT_THROW(Dict().Set(static_cast< int32_t>(1)), TypeError);
+	EXPECT_THROW(Dict().Set(static_cast<uint64_t>(1)), TypeError);
+	EXPECT_THROW(Dict().Set(static_cast< int64_t>(1)), TypeError);
+	EXPECT_THROW(Dict().Set(static_cast<double>(1.0)), TypeError);
+}
+
+GTEST_TEST(TestDict, Getters)
+{
+	EXPECT_FALSE(Dict().IsTrue());
+	EXPECT_TRUE( Dict({{Null(), Null()}}).IsTrue());
+
+	EXPECT_THROW(Dict().AsCppUInt8() ,  TypeError);
+	EXPECT_THROW(Dict().AsCppInt8()  ,  TypeError);
+	EXPECT_THROW(Dict().AsCppUInt32(),  TypeError);
+	EXPECT_THROW(Dict().AsCppInt32() ,  TypeError);
+	EXPECT_THROW(Dict().AsCppUInt64(),  TypeError);
+	EXPECT_THROW(Dict().AsCppInt64() ,  TypeError);
+	EXPECT_THROW(Dict().AsCppDouble() , TypeError);
+}
+
 GTEST_TEST(TestDict, Compare)
 {
 	const Dict testDc_001122 = Dict({

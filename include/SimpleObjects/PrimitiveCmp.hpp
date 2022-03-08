@@ -53,7 +53,43 @@ inline bool PrimitiveCmpLt(_RLhsType lhs, _RLhsType rhs)
 	return lhs < rhs;
 }
 
+// bool
+/* B  : B  */
+/* B  : 8  */ template<>
+inline bool PrimitiveCmpLt(bool lhs, uint8_t rhs)
+{ return static_cast<uint8_t>(lhs) < (rhs); }
+/* B  : 16 */ template<>
+inline bool PrimitiveCmpLt(bool lhs, uint16_t rhs)
+{ return static_cast<uint16_t>(lhs) < (rhs); }
+/* B  : 32 */ template<>
+inline bool PrimitiveCmpLt(bool lhs, uint32_t rhs)
+{ return static_cast<uint32_t>(lhs) < (rhs); }
+/* B  : 64 */ template<>
+inline bool PrimitiveCmpLt(bool lhs, uint64_t rhs)
+{ return static_cast<uint64_t>(lhs) < (rhs); }
+/* B  : 8  */ template<>
+inline bool PrimitiveCmpLt(bool lhs, int8_t rhs)
+{ return static_cast<int8_t>(lhs) < (rhs); }
+/* B  : 16 */ template<>
+inline bool PrimitiveCmpLt(bool lhs, int16_t rhs)
+{ return static_cast<int16_t>(lhs) < (rhs); }
+/* B  : 32 */ template<>
+inline bool PrimitiveCmpLt(bool lhs, int32_t rhs)
+{ return static_cast<int32_t>(lhs) < (rhs); }
+/* B  : 64 */ template<>
+inline bool PrimitiveCmpLt(bool lhs, int64_t rhs)
+{ return static_cast<int64_t>(lhs) < (rhs); }
+/* B  : F  */ template<>
+inline bool PrimitiveCmpLt(bool lhs, float rhs)
+{ return static_cast<float>(lhs) < (rhs); }
+/* B  : D  */ template<>
+inline bool PrimitiveCmpLt(bool lhs, double rhs)
+{ return static_cast<double>(lhs) < (rhs); }
+
 // uint8_t
+/* 8  : B  */ template<>
+inline bool PrimitiveCmpLt(uint8_t lhs, bool rhs)
+{ return (lhs) < static_cast<uint8_t>(rhs); }
 /* 8  : 8  */
 /* 8  : 16 */ template<>
 inline bool PrimitiveCmpLt(uint8_t lhs, uint16_t rhs)
@@ -88,6 +124,9 @@ inline bool PrimitiveCmpLt(uint8_t lhs, double rhs)
 { return static_cast<double>(lhs) < (rhs); }
 
 // uint16_t
+/* 16 : B  */ template<>
+inline bool PrimitiveCmpLt(uint16_t lhs, bool rhs)
+{ return (lhs) < static_cast<uint16_t>(rhs); }
 /* 16 : 8  */ template<>
 inline bool PrimitiveCmpLt(uint16_t lhs, uint8_t rhs)
 { return (lhs) < static_cast<uint16_t>(rhs); }
@@ -122,6 +161,9 @@ inline bool PrimitiveCmpLt(uint16_t lhs, double rhs)
 { return static_cast<double>(lhs) < (rhs); }
 
 // uint32_t
+/* 32 : B  */ template<>
+inline bool PrimitiveCmpLt(uint32_t lhs, bool rhs)
+{ return (lhs) < static_cast<uint32_t>(rhs); }
 /* 32 : 8  */ template<>
 inline bool PrimitiveCmpLt(uint32_t lhs, uint8_t rhs)
 { return (lhs) < static_cast<uint32_t>(rhs); }
@@ -156,6 +198,9 @@ inline bool PrimitiveCmpLt(uint32_t lhs, double rhs)
 { return static_cast<double>(lhs) < (rhs); }
 
 // uint64_t
+/* 64 : B  */ template<>
+inline bool PrimitiveCmpLt(uint64_t lhs, bool rhs)
+{ return (lhs) < static_cast<uint64_t>(rhs); }
 /* 64 : 8  */ template<>
 inline bool PrimitiveCmpLt(uint64_t lhs, uint8_t rhs)
 { return (lhs) < static_cast<uint64_t>(rhs); }
@@ -190,6 +235,9 @@ inline bool PrimitiveCmpLt(uint64_t lhs, double rhs)
 { return static_cast<double>(lhs) < (rhs); }
 
 // int8_t
+/* 8  : B  */ template<>
+inline bool PrimitiveCmpLt(int8_t lhs, bool rhs)
+{ return (lhs) < static_cast<int8_t>(rhs); }
 /* 8  : 8  */ template<>
 inline bool PrimitiveCmpLt(int8_t lhs, uint8_t rhs)
 { return lhs < 0 ?
@@ -224,6 +272,9 @@ inline bool PrimitiveCmpLt(int8_t lhs, double rhs)
 { return static_cast<double>(lhs) < (rhs); }
 
 // int16_t
+/* 16 : B  */ template<>
+inline bool PrimitiveCmpLt(int16_t lhs, bool rhs)
+{ return (lhs) < static_cast<int16_t>(rhs); }
 /* 16 : 8  */ template<>
 inline bool PrimitiveCmpLt(int16_t lhs, uint8_t rhs)
 { return lhs < 0 ?
@@ -258,6 +309,9 @@ inline bool PrimitiveCmpLt(int16_t lhs, double rhs)
 { return static_cast<double>(lhs) < (rhs); }
 
 // int32_t
+/* 32 : B  */ template<>
+inline bool PrimitiveCmpLt(int32_t lhs, bool rhs)
+{ return (lhs) < static_cast<int32_t>(rhs); }
 /* 32 : 8  */ template<>
 inline bool PrimitiveCmpLt(int32_t lhs, uint8_t rhs)
 { return lhs < 0 ?
@@ -292,6 +346,9 @@ inline bool PrimitiveCmpLt(int32_t lhs, double rhs)
 { return static_cast<double>(lhs) < (rhs); }
 
 // int64_t
+/* 64 : B  */ template<>
+inline bool PrimitiveCmpLt(int64_t lhs, bool rhs)
+{ return (lhs) < static_cast<int64_t>(rhs); }
 /* 64 : 8  */ template<>
 inline bool PrimitiveCmpLt(int64_t lhs, uint8_t rhs)
 { return lhs < 0 ?
@@ -326,6 +383,9 @@ inline bool PrimitiveCmpLt(int64_t lhs, double rhs)
 { return static_cast<double>(lhs) < (rhs); }
 
 // float
+/* F  : B  */ template<>
+inline bool PrimitiveCmpLt(float lhs, bool rhs)
+{ return (lhs) < static_cast<float>(rhs); }
 /* F  : 8  */ template<>
 inline bool PrimitiveCmpLt(float lhs, uint8_t rhs)
 { return (lhs) < static_cast<float>(rhs); }
@@ -355,6 +415,9 @@ inline bool PrimitiveCmpLt(float lhs, double rhs)
 { return static_cast<double>(lhs) < (rhs); }
 
 // double
+/* D  : B  */ template<>
+inline bool PrimitiveCmpLt(double lhs, bool rhs)
+{ return (lhs) < static_cast<double>(rhs); }
 /* D  : 8  */ template<>
 inline bool PrimitiveCmpLt(double lhs, uint8_t rhs)
 { return (lhs) < static_cast<double>(rhs); }
@@ -393,7 +456,43 @@ inline bool PrimitiveCmpGt(_RLhsType lhs, _RLhsType rhs)
 	return lhs > rhs;
 }
 
+// bool
+/* B  : B  */
+/* B  : 8  */ template<>
+inline bool PrimitiveCmpGt(bool lhs, uint8_t rhs)
+{ return static_cast<uint8_t>(lhs) > (rhs); }
+/* B  : 16 */ template<>
+inline bool PrimitiveCmpGt(bool lhs, uint16_t rhs)
+{ return static_cast<uint16_t>(lhs) > (rhs); }
+/* B  : 32 */ template<>
+inline bool PrimitiveCmpGt(bool lhs, uint32_t rhs)
+{ return static_cast<uint32_t>(lhs) > (rhs); }
+/* B  : 64 */ template<>
+inline bool PrimitiveCmpGt(bool lhs, uint64_t rhs)
+{ return static_cast<uint64_t>(lhs) > (rhs); }
+/* B  : 8  */ template<>
+inline bool PrimitiveCmpGt(bool lhs, int8_t rhs)
+{ return static_cast<int8_t>(lhs) > (rhs); }
+/* B  : 16 */ template<>
+inline bool PrimitiveCmpGt(bool lhs, int16_t rhs)
+{ return static_cast<int16_t>(lhs) > (rhs); }
+/* B  : 32 */ template<>
+inline bool PrimitiveCmpGt(bool lhs, int32_t rhs)
+{ return static_cast<int32_t>(lhs) > (rhs); }
+/* B  : 64 */ template<>
+inline bool PrimitiveCmpGt(bool lhs, int64_t rhs)
+{ return static_cast<int64_t>(lhs) > (rhs); }
+/* B  : F  */ template<>
+inline bool PrimitiveCmpGt(bool lhs, float rhs)
+{ return static_cast<float>(lhs) > (rhs); }
+/* B  : D  */ template<>
+inline bool PrimitiveCmpGt(bool lhs, double rhs)
+{ return static_cast<double>(lhs) > (rhs); }
+
 // uint8_t
+/* 8  : B  */ template<>
+inline bool PrimitiveCmpGt(uint8_t lhs, bool rhs)
+{ return (lhs) > static_cast<uint8_t>(rhs); }
 /* 8  : 8  */
 /* 8  : 16 */ template<>
 inline bool PrimitiveCmpGt(uint8_t lhs, uint16_t rhs)
@@ -428,6 +527,9 @@ inline bool PrimitiveCmpGt(uint8_t lhs, double rhs)
 { return static_cast<double>(lhs) > (rhs); }
 
 // uint16_t
+/* 16 : B  */ template<>
+inline bool PrimitiveCmpGt(uint16_t lhs, bool rhs)
+{ return (lhs) > static_cast<uint16_t>(rhs); }
 /* 16 : 8  */ template<>
 inline bool PrimitiveCmpGt(uint16_t lhs, uint8_t rhs)
 { return (lhs) > static_cast<uint16_t>(rhs); }
@@ -462,6 +564,9 @@ inline bool PrimitiveCmpGt(uint16_t lhs, double rhs)
 { return static_cast<double>(lhs) > (rhs); }
 
 // uint32_t
+/* 32 : B  */ template<>
+inline bool PrimitiveCmpGt(uint32_t lhs, bool rhs)
+{ return (lhs) > static_cast<uint32_t>(rhs); }
 /* 32 : 8  */ template<>
 inline bool PrimitiveCmpGt(uint32_t lhs, uint8_t rhs)
 { return (lhs) > static_cast<uint32_t>(rhs); }
@@ -496,6 +601,9 @@ inline bool PrimitiveCmpGt(uint32_t lhs, double rhs)
 { return static_cast<double>(lhs) > (rhs); }
 
 // uint64_t
+/* 64 : B  */ template<>
+inline bool PrimitiveCmpGt(uint64_t lhs, bool rhs)
+{ return (lhs) > static_cast<uint64_t>(rhs); }
 /* 64 : 8  */ template<>
 inline bool PrimitiveCmpGt(uint64_t lhs, uint8_t rhs)
 { return (lhs) > static_cast<uint64_t>(rhs); }
@@ -530,6 +638,9 @@ inline bool PrimitiveCmpGt(uint64_t lhs, double rhs)
 { return static_cast<double>(lhs) > (rhs); }
 
 // int8_t
+/* 8  : B  */ template<>
+inline bool PrimitiveCmpGt(int8_t lhs, bool rhs)
+{ return (lhs) > static_cast<int8_t>(rhs); }
 /* 8  : 8  */ template<>
 inline bool PrimitiveCmpGt(int8_t lhs, uint8_t rhs)
 { return lhs < 0 ?
@@ -564,6 +675,9 @@ inline bool PrimitiveCmpGt(int8_t lhs, double rhs)
 { return static_cast<double>(lhs) > (rhs); }
 
 // int16_t
+/* 16 : B  */ template<>
+inline bool PrimitiveCmpGt(int16_t lhs, bool rhs)
+{ return (lhs) > static_cast<int16_t>(rhs); }
 /* 16 : 8  */ template<>
 inline bool PrimitiveCmpGt(int16_t lhs, uint8_t rhs)
 { return lhs < 0 ?
@@ -598,6 +712,9 @@ inline bool PrimitiveCmpGt(int16_t lhs, double rhs)
 { return static_cast<double>(lhs) > (rhs); }
 
 // int32_t
+/* 32 : B  */ template<>
+inline bool PrimitiveCmpGt(int32_t lhs, bool rhs)
+{ return (lhs) > static_cast<int32_t>(rhs); }
 /* 32 : 8  */ template<>
 inline bool PrimitiveCmpGt(int32_t lhs, uint8_t rhs)
 { return lhs < 0 ?
@@ -632,6 +749,9 @@ inline bool PrimitiveCmpGt(int32_t lhs, double rhs)
 { return static_cast<double>(lhs) > (rhs); }
 
 // int64_t
+/* 64 : B  */ template<>
+inline bool PrimitiveCmpGt(int64_t lhs, bool rhs)
+{ return (lhs) > static_cast<int64_t>(rhs); }
 /* 64 : 8  */ template<>
 inline bool PrimitiveCmpGt(int64_t lhs, uint8_t rhs)
 { return lhs < 0 ?
@@ -666,6 +786,9 @@ inline bool PrimitiveCmpGt(int64_t lhs, double rhs)
 { return static_cast<double>(lhs) > (rhs); }
 
 // float
+/* F  : B  */ template<>
+inline bool PrimitiveCmpGt(float lhs, bool rhs)
+{ return (lhs) > static_cast<float>(rhs); }
 /* F  : 8  */ template<>
 inline bool PrimitiveCmpGt(float lhs, uint8_t rhs)
 { return (lhs) > static_cast<float>(rhs); }
@@ -695,6 +818,9 @@ inline bool PrimitiveCmpGt(float lhs, double rhs)
 { return static_cast<double>(lhs) > (rhs); }
 
 // double
+/* D  : B  */ template<>
+inline bool PrimitiveCmpGt(double lhs, bool rhs)
+{ return (lhs) > static_cast<double>(rhs); }
 /* D  : 8  */ template<>
 inline bool PrimitiveCmpGt(double lhs, uint8_t rhs)
 { return (lhs) > static_cast<double>(rhs); }

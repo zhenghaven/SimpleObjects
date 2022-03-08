@@ -272,3 +272,61 @@ GTEST_TEST(TestObject, Compare)
 		(void)(Object(Dict()) >=
 		static_cast<const BaseObj&>(Bool(false))), UnsupportedOperation);
 }
+
+GTEST_TEST(TestObject, Setters)
+{
+	String str1;
+	EXPECT_NO_THROW(Object(String()).Set(String()));
+	EXPECT_NO_THROW(Object(String()).Set(str1));
+
+	Null null1;
+	EXPECT_THROW(Object(String()).Set(Null()), TypeError);
+	EXPECT_THROW(Object(String()).Set(null1), TypeError);
+
+	Object b   = Bool();
+	Object i8  = Int8();
+	Object i32 = Int32();
+	Object i64 = Int64();
+	Object u8  = UInt8();
+	Object u32 = UInt32();
+	Object u64 = UInt64();
+	Object d   = Double();
+
+	EXPECT_NO_THROW(b.Set(std::numeric_limits<bool>::max()));
+	EXPECT_TRUE(b == Object(Bool(std::numeric_limits<bool>::max())));
+	EXPECT_NO_THROW(i8.Set(std::numeric_limits<int8_t>::lowest()));
+	EXPECT_TRUE(i8 == Object(Int8(std::numeric_limits<int8_t>::lowest())));
+	EXPECT_NO_THROW(i32.Set(std::numeric_limits<int32_t>::lowest()));
+	EXPECT_TRUE(i32 == Object(Int32(std::numeric_limits<int32_t>::lowest())));
+	EXPECT_NO_THROW(i64.Set(std::numeric_limits<int64_t>::lowest()));
+	EXPECT_TRUE(i64 == Object(Int64(std::numeric_limits<int64_t>::lowest())));
+	EXPECT_NO_THROW(u8.Set(std::numeric_limits<uint8_t>::max()));
+	EXPECT_TRUE(u8 == Object(UInt8(std::numeric_limits<uint8_t>::max())));
+	EXPECT_NO_THROW(u32.Set(std::numeric_limits<uint32_t>::max()));
+	EXPECT_TRUE(u32 == Object(UInt32(std::numeric_limits<uint32_t>::max())));
+	EXPECT_NO_THROW(u64.Set(std::numeric_limits<uint64_t>::max()));
+	EXPECT_TRUE(u64 == Object(UInt64(std::numeric_limits<uint64_t>::max())));
+	EXPECT_NO_THROW(d.Set(std::numeric_limits<double>::max()));
+	EXPECT_TRUE(d == Object(Double(std::numeric_limits<double>::max())));
+}
+
+GTEST_TEST(TestObject, Getters)
+{
+	EXPECT_FALSE(Object(String()).IsTrue());
+	EXPECT_TRUE( Object(String("T")).IsTrue());
+
+	Object i8  = Int8(std::numeric_limits<int8_t>::lowest());
+	EXPECT_TRUE(i8.AsCppInt8() == std::numeric_limits<int8_t>::lowest());
+	Object i32 = Int32(std::numeric_limits<int32_t>::lowest());
+	EXPECT_TRUE(i32.AsCppInt32() == std::numeric_limits<int32_t>::lowest());
+	Object i64 = Int64(std::numeric_limits<int64_t>::lowest());
+	EXPECT_TRUE(i64.AsCppInt64() == std::numeric_limits<int64_t>::lowest());
+	Object u8  = UInt8(std::numeric_limits<uint8_t>::max());
+	EXPECT_TRUE(u8.AsCppUInt8() == std::numeric_limits<uint8_t>::max());
+	Object u32 = UInt32(std::numeric_limits<uint32_t>::max());
+	EXPECT_TRUE(u32.AsCppUInt32() == std::numeric_limits<uint32_t>::max());
+	Object u64 = UInt64(std::numeric_limits<uint64_t>::max());
+	EXPECT_TRUE(u64.AsCppUInt64() == std::numeric_limits<uint64_t>::max());
+	Object d   = Double(std::numeric_limits<double>::max());
+	EXPECT_TRUE(d.AsCppDouble() == std::numeric_limits<double>::max());
+}

@@ -489,6 +489,48 @@ GTEST_TEST(TestStaticDict, CategoryName)
 	EXPECT_EQ(TestStaticDict2().GetCategoryName(), std::string("StaticDict"));
 }
 
+GTEST_TEST(TestStaticDict, Setters)
+{
+	TestStaticDict1 dc1_1;
+	TestStaticDict1 dc1_2;
+	TestStaticDict2 dc2_1;
+	TestStaticDict2 dc2_2;
+	EXPECT_NO_THROW(dc1_1.Set(TestStaticDict1()));
+	EXPECT_NO_THROW(dc1_1.Set(dc1_2));
+	EXPECT_NO_THROW(dc2_1.Set(TestStaticDict2()));
+	EXPECT_NO_THROW(dc2_1.Set(dc2_2));
+
+	EXPECT_THROW(dc1_1.Set(TestStaticDict2()), TypeError);
+	EXPECT_THROW(dc1_1.Set(dc2_1), TypeError);
+	EXPECT_THROW(dc2_1.Set(TestStaticDict1()), TypeError);
+	EXPECT_THROW(dc2_1.Set(dc1_1), TypeError);
+
+	EXPECT_THROW(dc2_1.Set(static_cast<bool >(true)), TypeError);
+	EXPECT_THROW(dc2_1.Set(static_cast<uint8_t >(1)), TypeError);
+	EXPECT_THROW(dc2_1.Set(static_cast< int8_t >(1)), TypeError);
+	EXPECT_THROW(dc2_1.Set(static_cast<uint32_t>(1)), TypeError);
+	EXPECT_THROW(dc2_1.Set(static_cast< int32_t>(1)), TypeError);
+	EXPECT_THROW(dc2_1.Set(static_cast<uint64_t>(1)), TypeError);
+	EXPECT_THROW(dc2_1.Set(static_cast< int64_t>(1)), TypeError);
+	EXPECT_THROW(dc2_1.Set(static_cast<double>(1.0)), TypeError);
+}
+
+GTEST_TEST(TestStaticDict, Getters)
+{
+	TestStaticDict1 dc1_1;
+	TestStaticDict2 dc2_1;
+	EXPECT_TRUE(dc1_1.IsTrue());
+	EXPECT_TRUE(dc2_1.IsTrue());
+
+	EXPECT_THROW(dc2_1.AsCppUInt8() ,  TypeError);
+	EXPECT_THROW(dc2_1.AsCppInt8()  ,  TypeError);
+	EXPECT_THROW(dc2_1.AsCppUInt32(),  TypeError);
+	EXPECT_THROW(dc2_1.AsCppInt32() ,  TypeError);
+	EXPECT_THROW(dc2_1.AsCppUInt64(),  TypeError);
+	EXPECT_THROW(dc2_1.AsCppInt64() ,  TypeError);
+	EXPECT_THROW(dc2_1.AsCppDouble() , TypeError);
+}
+
 GTEST_TEST(TestStaticDict, Compare)
 {
 	TestStaticDict2 dict1;

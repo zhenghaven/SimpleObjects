@@ -80,6 +80,40 @@ GTEST_TEST(TestList, CategoryName)
 	EXPECT_EQ(List().GetCategoryName(), std::string("List"));
 }
 
+GTEST_TEST(TestList, Setters)
+{
+	List ls1;
+	EXPECT_NO_THROW(List().Set(List()));
+	EXPECT_NO_THROW(List().Set(ls1));
+
+	Null null1;
+	EXPECT_THROW(List().Set(Null()), TypeError);
+	EXPECT_THROW(List().Set(null1), TypeError);
+
+	EXPECT_THROW(List().Set(static_cast<bool >(true)), TypeError);
+	EXPECT_THROW(List().Set(static_cast<uint8_t >(1)), TypeError);
+	EXPECT_THROW(List().Set(static_cast< int8_t >(1)), TypeError);
+	EXPECT_THROW(List().Set(static_cast<uint32_t>(1)), TypeError);
+	EXPECT_THROW(List().Set(static_cast< int32_t>(1)), TypeError);
+	EXPECT_THROW(List().Set(static_cast<uint64_t>(1)), TypeError);
+	EXPECT_THROW(List().Set(static_cast< int64_t>(1)), TypeError);
+	EXPECT_THROW(List().Set(static_cast<double>(1.0)), TypeError);
+}
+
+GTEST_TEST(TestList, Getters)
+{
+	EXPECT_FALSE(List().IsTrue());
+	EXPECT_TRUE( List({Null()}).IsTrue());
+
+	EXPECT_THROW(List().AsCppUInt8() ,  TypeError);
+	EXPECT_THROW(List().AsCppInt8()  ,  TypeError);
+	EXPECT_THROW(List().AsCppUInt32(),  TypeError);
+	EXPECT_THROW(List().AsCppInt32() ,  TypeError);
+	EXPECT_THROW(List().AsCppUInt64(),  TypeError);
+	EXPECT_THROW(List().AsCppInt64() ,  TypeError);
+	EXPECT_THROW(List().AsCppDouble() , TypeError);
+}
+
 GTEST_TEST(TestList, Compare)
 {
 	const List testLs_12345 =

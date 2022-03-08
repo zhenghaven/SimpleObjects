@@ -61,9 +61,42 @@ public:
 		return 0;
 	}
 
+	using BaseBase::Set;
+
+	virtual void Set(const BaseBase& other) override
+	{
+		try
+		{
+			const Self& casted = dynamic_cast<const Self&>(other);
+			*this = casted;
+		}
+		catch(const std::bad_cast&)
+		{
+			throw TypeError("Null", this->GetCategoryName());
+		}
+	}
+
+	virtual void Set(BaseBase&& other) override
+	{
+		try
+		{
+			Self&& casted = dynamic_cast<Self&&>(other);
+			*this = std::forward<Self>(casted);
+		}
+		catch(const std::bad_cast&)
+		{
+			throw TypeError("Null", this->GetCategoryName());
+		}
+	}
+
 	virtual bool IsNull() const override
 	{
 		return true;
+	}
+
+	virtual bool IsTrue() const override
+	{
+		return false;
 	}
 
 	virtual NullBase& AsNull() override

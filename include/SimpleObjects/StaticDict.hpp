@@ -499,6 +499,8 @@ public:
 		return std::get<idx>(m_data).second;
 	}
 
+	// ========== operators ==========
+
 	// overrides Base::operator==
 	virtual bool operator==(const Base& rhs) const override
 	{
@@ -543,6 +545,48 @@ public:
 	bool operator>(const Self& rhs) const = delete;
 	bool operator<=(const Self& rhs) const = delete;
 	bool operator>=(const Self& rhs) const = delete;
+
+	// ========== Overrides BaseObject ==========
+
+	virtual ObjCategory GetCategory() const override
+	{
+		return sk_cat();
+	}
+
+	using BaseBase::Set;
+
+	virtual void Set(const BaseBase& other) override
+	{
+		try
+		{
+			const Self& casted = dynamic_cast<const Self&>(other);
+			*this = casted;
+		}
+		catch(const std::bad_cast&)
+		{
+			throw TypeError("StaticDict", this->GetCategoryName());
+		}
+	}
+
+	virtual void Set(BaseBase&& other) override
+	{
+		try
+		{
+			Self&& casted = dynamic_cast<Self&&>(other);
+			*this = std::forward<Self>(casted);
+		}
+		catch(const std::bad_cast&)
+		{
+			throw TypeError("StaticDict", this->GetCategoryName());
+		}
+	}
+
+	virtual bool IsTrue() const override
+	{
+		return sk_size > 0;
+	}
+
+	// ========== Overrides StaticDictBaseObject ==========
 
 	using Base::begin;
 	virtual iterator begin() override
@@ -644,6 +688,8 @@ public:
 		return m_refmap.find(key) != m_refmap.cend();
 	}
 
+	// ========== Interface copy/Move ==========
+
 	using Base::Copy;
 	virtual std::unique_ptr<Base> Copy(const Base* /*unused*/) const override
 	{
@@ -656,10 +702,7 @@ public:
 		return MoveImpl();
 	}
 
-	virtual ObjCategory GetCategory() const override
-	{
-		return sk_cat();
-	}
+	// ========== To string ==========
 
 	virtual std::string DebugString() const override
 	{

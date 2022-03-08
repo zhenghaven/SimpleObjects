@@ -9,6 +9,7 @@
 
 #include <tuple>
 #include <type_traits>
+#include <limits>
 
 #include "Exception.hpp"
 #include "NumericTypeInfer.hpp"
@@ -31,6 +32,7 @@ struct NumericUtils
 
 	static constexpr NumericType sk_numType();
 	static constexpr const char* sk_numTypeName();
+
 }; // struct NumericUtils
 
 namespace Internal
@@ -60,6 +62,40 @@ struct NumCompareGt {
 	}
 
 }; // struct NumCompareGt
+
+template<typename _DstValType, typename _SrcValType>
+struct NumericBinOp;
+
+template<typename _ValType>
+struct NumericBinOp<_ValType, _ValType>
+{
+	static void Set(_ValType& dst, const _ValType& src)
+	{
+		dst = src;
+	}
+}; // struct NumericBinOp
+
+template<typename _DstValType, typename _SrcValType>
+struct NumericBinOp
+{
+	static void Set(_DstValType& dst, const _SrcValType& src)
+	{
+		// if (src < DstType.Lowest) or (DstType.Max < src)
+		//    throw
+		// else
+		//    cast
+		if (PrimitiveCmpLt(src, std::numeric_limits<_DstValType>::lowest()) ||
+			PrimitiveCmpLt(std::numeric_limits<_DstValType>::max(), src))
+		{
+			throw TypeError(NumericUtils<_DstValType>::sk_numTypeName(),
+				NumericUtils<_SrcValType>::sk_numTypeName());
+		}
+		else
+		{
+			dst = static_cast<_DstValType>(src);
+		}
+	}
+}; // struct NumericBinOp
 
 } // namespace Internal
 
@@ -114,12 +150,72 @@ public:
 
 	virtual ~Numeric() = default;
 
-	operator bool() const
+	// operator const InternalType&() const
+	// {
+	// 	return m_data;
+	// }
+
+	// operator InternalType&()
+	// {
+	// 	return m_data;
+	// }
+
+	const InternalType& GetVal() const
 	{
-		return static_cast<bool>(m_data);
+		return m_data;
 	}
 
-	// ========== Assignment and Move ==========
+	template<typename _RetType, typename _Op>
+	std::tuple<bool, _RetType> GenericBinaryOp(const Base& rhs, _Op op) const;
+
+	template<typename _RetType, typename _Op>
+	_RetType GenericBinaryOpThrow(
+		const std::string& opName, const Base& rhs, _Op op) const
+	{
+		bool isSupported = false;
+		_RetType res;
+
+		std::tie(isSupported, res) = GenericBinaryOp<_RetType>(rhs, op);
+		if (!isSupported)
+		{
+			throw UnsupportedOperation(opName, GetNumTypeName(), rhs.GetNumTypeName());
+		}
+
+		return res;
+	}
+
+	// ========== operators ==========
+
+	// overrides Base::operator==
+	virtual bool operator==(const Base& rhs) const override
+	{
+		return GenericBinaryOpThrow<bool>("=", rhs, Internal::NumCompareEq());
+	}
+
+	using BaseBaseBase::operator==;
+
+	using Base::operator!=;
+
+	// overrides Base::operator<
+	virtual bool operator<(const Base& rhs) const override
+	{
+		return GenericBinaryOpThrow<bool>("<", rhs, Internal::NumCompareLt());
+	}
+
+	using BaseBaseBase::operator<;
+
+	// overrides Base::operator>
+	virtual bool operator>(const Base& rhs) const override
+	{
+		return GenericBinaryOpThrow<bool>(">", rhs, Internal::NumCompareGt());
+	}
+
+	using BaseBaseBase::operator>;
+
+	using Base::operator<=;
+	using Base::operator>=;
+
+	//     ========== Assignment and Move ==========
 
 	Self& operator=(const InternalType& rhs)
 	{
@@ -149,16 +245,16 @@ public:
 		return *this;
 	}
 
-	// ========== operators for Numeric ==========
-	// ==, !=, <=, >=, <, >,
-	// &, |, ^, <<, >>, ~,
-	// +=, -=, *=, /=, %=, &=, |=, ^=
-	// ++, --, -
+	//     ========== operators for Numeric ==========
+	//     ==, !=, <=, >=, <, >,
+	//     &, |, ^, <<, >>, ~,
+	//     +=, -=, *=, /=, %=, &=, |=, ^=
+	//     ++, --, -
 
 	template<typename _RhsValType, typename _RhsStringType>
-	SelfBool operator==(const Numeric<_RhsValType, _RhsStringType>& rhs) const
+	bool operator==(const Numeric<_RhsValType, _RhsStringType>& rhs) const
 	{
-		return SelfBool(
+		return (
 			Internal::
 				BoolToInt<InternalType, _RhsValType>::Convert(m_data) ==
 			Internal::
@@ -166,9 +262,9 @@ public:
 	}
 
 	template<typename _RhsValType, typename _RhsStringType>
-	SelfBool operator!=(const Numeric<_RhsValType, _RhsStringType>& rhs) const
+	bool operator!=(const Numeric<_RhsValType, _RhsStringType>& rhs) const
 	{
-		return SelfBool(
+		return (
 			Internal::
 				BoolToInt<InternalType, _RhsValType>::Convert(m_data) !=
 			Internal::
@@ -176,43 +272,29 @@ public:
 	}
 
 	template<typename _RhsValType, typename _RhsStringType>
-	SelfBool operator<=(const Numeric<_RhsValType, _RhsStringType>& rhs) const
+	bool operator<=(const Numeric<_RhsValType, _RhsStringType>& rhs) const
 	{
-		return SelfBool(
-			Internal::
-				BoolToInt<InternalType, _RhsValType>::Convert(m_data) <=
-			Internal::
-				BoolToInt<_RhsValType, InternalType>::Convert(rhs.m_data));
+		return !(this->operator>(rhs));
 	}
 
 	template<typename _RhsValType, typename _RhsStringType>
-	SelfBool operator>=(const Numeric<_RhsValType, _RhsStringType>& rhs) const
+	bool operator>=(const Numeric<_RhsValType, _RhsStringType>& rhs) const
 	{
-		return SelfBool(
-			Internal::
-				BoolToInt<InternalType, _RhsValType>::Convert(m_data) >=
-			Internal::
-				BoolToInt<_RhsValType, InternalType>::Convert(rhs.m_data));
+		return !(this->operator<(rhs));
 	}
 
 	template<typename _RhsValType, typename _RhsStringType>
-	SelfBool operator<(const Numeric<_RhsValType, _RhsStringType>& rhs) const
+	bool operator<(const Numeric<_RhsValType, _RhsStringType>& rhs) const
 	{
 		using namespace Internal;
-		return SelfBool(
-			PrimitiveCmpLt(
-				BoolToInt<InternalType, _RhsValType>::Convert(m_data),
-				BoolToInt<_RhsValType, InternalType>::Convert(rhs.m_data)));
+		return (PrimitiveCmpLt((m_data), (rhs.m_data)));
 	}
 
 	template<typename _RhsValType, typename _RhsStringType>
-	SelfBool operator>(const Numeric<_RhsValType, _RhsStringType>& rhs) const
+	bool operator>(const Numeric<_RhsValType, _RhsStringType>& rhs) const
 	{
 		using namespace Internal;
-		return SelfBool(
-			PrimitiveCmpGt(
-				BoolToInt<InternalType, _RhsValType>::Convert(m_data),
-				BoolToInt<_RhsValType, InternalType>::Convert(rhs.m_data)));
+		return (PrimitiveCmpGt((m_data), (rhs.m_data)));
 	}
 
 	template<typename _RhsValType, typename _RhsStringType>
@@ -357,6 +439,132 @@ public:
 		return Self(-m_data);
 	}
 
+	// ========== Overrides BaseObject ==========
+
+	virtual void Set(const BaseBaseBase& other) override
+	{
+		try
+		{
+			const Self& casted = dynamic_cast<const Self&>(other);
+			*this = casted;
+		}
+		catch(const std::bad_cast&)
+		{
+			throw TypeError(
+				NumericUtils<InternalType>::sk_numTypeName(),
+				this->GetCategoryName());
+		}
+	}
+
+	virtual void Set(BaseBaseBase&& other) override
+	{
+		try
+		{
+			Self&& casted = dynamic_cast<Self&&>(other);
+			*this = std::forward<Self>(casted);
+		}
+		catch(const std::bad_cast&)
+		{
+			throw TypeError(
+				NumericUtils<InternalType>::sk_numTypeName(),
+				this->GetCategoryName());
+		}
+	}
+
+	virtual void Set(bool val) override
+	{
+		Internal::NumericBinOp<InternalType, bool>::Set(m_data, val);
+	}
+
+	virtual void Set(uint8_t val) override
+	{
+		Internal::NumericBinOp<InternalType, uint8_t>::Set(m_data, val);
+	}
+
+	virtual void Set(int8_t val) override
+	{
+		Internal::NumericBinOp<InternalType, int8_t>::Set(m_data, val);
+	}
+
+	virtual void Set(uint32_t val) override
+	{
+		Internal::NumericBinOp<InternalType, uint32_t>::Set(m_data, val);
+	}
+
+	virtual void Set(int32_t val) override
+	{
+		Internal::NumericBinOp<InternalType, int32_t>::Set(m_data, val);
+	}
+
+	virtual void Set(uint64_t val) override
+	{
+		Internal::NumericBinOp<InternalType, uint64_t>::Set(m_data, val);
+	}
+
+	virtual void Set(int64_t val) override
+	{
+		Internal::NumericBinOp<InternalType, int64_t>::Set(m_data, val);
+	}
+
+	virtual void Set(double val) override
+	{
+		Internal::NumericBinOp<InternalType, double>::Set(m_data, val);
+	}
+
+	virtual bool IsTrue() const override
+	{
+		return static_cast<bool>(m_data);
+	}
+
+	virtual uint8_t AsCppUInt8() const override
+	{
+		uint8_t tmp;
+		Internal::NumericBinOp<uint8_t, InternalType>::Set(tmp, m_data);
+		return tmp;
+	}
+
+	virtual int8_t AsCppInt8() const override
+	{
+		int8_t tmp;
+		Internal::NumericBinOp<int8_t, InternalType>::Set(tmp, m_data);
+		return tmp;
+	}
+
+	virtual uint32_t AsCppUInt32() const override
+	{
+		uint32_t tmp;
+		Internal::NumericBinOp<uint32_t, InternalType>::Set(tmp, m_data);
+		return tmp;
+	}
+
+	virtual int32_t AsCppInt32() const override
+	{
+		int32_t tmp;
+		Internal::NumericBinOp<int32_t, InternalType>::Set(tmp, m_data);
+		return tmp;
+	}
+
+	virtual uint64_t AsCppUInt64() const override
+	{
+		uint64_t tmp;
+		Internal::NumericBinOp<uint64_t, InternalType>::Set(tmp, m_data);
+		return tmp;
+	}
+
+	virtual int64_t AsCppInt64() const override
+	{
+		int64_t tmp;
+		Internal::NumericBinOp<int64_t, InternalType>::Set(tmp, m_data);
+		return tmp;
+	}
+
+	virtual double AsCppDouble() const override
+	{
+		double tmp;
+		Internal::NumericBinOp<double, InternalType>::Set(tmp, m_data);
+		return tmp;
+	}
+
 	virtual ObjCategory GetCategory() const override
 	{
 		return sk_cat();
@@ -367,39 +575,14 @@ public:
 		return NumericUtils<InternalType>::sk_catName();
 	}
 
-	// overrides Base::operator==
-	virtual bool operator==(const Base& rhs) const override
-	{
-		return GenericBinaryOpThrow<bool>("=", rhs, Internal::NumCompareEq());
-	}
-
-	using BaseBaseBase::operator==;
-
-	using Base::operator!=;
-
-	// overrides Base::operator<
-	virtual bool operator<(const Base& rhs) const override
-	{
-		return GenericBinaryOpThrow<bool>("<", rhs, Internal::NumCompareLt());
-	}
-
-	using BaseBaseBase::operator<;
-
-	// overrides Base::operator>
-	virtual bool operator>(const Base& rhs) const override
-	{
-		return GenericBinaryOpThrow<bool>(">", rhs, Internal::NumCompareGt());
-	}
-
-	using BaseBaseBase::operator>;
-
-	using Base::operator<=;
-	using Base::operator>=;
+	// ========== Overrides HashableBaseObject ==========
 
 	virtual std::size_t Hash() const override
 	{
 		return std::hash<InternalType>()(m_data);
 	}
+
+	// ========== Overrides NumericBaseObject ==========
 
 	virtual NumericType GetNumType() const override
 	{
@@ -411,29 +594,7 @@ public:
 		return NumericUtils<InternalType>::sk_numTypeName();
 	}
 
-	const InternalType& GetVal() const
-	{
-		return m_data;
-	}
-
-	template<typename _RetType, typename _Op>
-	std::tuple<bool, _RetType> GenericBinaryOp(const Base& rhs, _Op op) const;
-
-	template<typename _RetType, typename _Op>
-	_RetType GenericBinaryOpThrow(
-		const std::string& opName, const Base& rhs, _Op op) const
-	{
-		bool isSupported = false;
-		_RetType res;
-
-		std::tie(isSupported, res) = GenericBinaryOp<_RetType>(rhs, op);
-		if (!isSupported)
-		{
-			throw UnsupportedOperation(opName, GetNumTypeName(), rhs.GetNumTypeName());
-		}
-
-		return res;
-	}
+	// ========== Interface copy/Move ==========
 
 	using Base::Copy;
 	virtual std::unique_ptr<Base> Copy(const Base* /*unused*/) const override
@@ -446,6 +607,8 @@ public:
 	{
 		return MoveImpl();
 	}
+
+	// ========== To string ==========
 
 	virtual std::string DebugString() const override
 	{

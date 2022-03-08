@@ -168,9 +168,106 @@ public:
 	// String(objs)
 	// String::CppStr
 
+	// ========== Setters ==========
+
+	virtual void Set(const Self& other) = 0;
+
+	virtual void Set(Self&& other) = 0;
+
+	virtual void Set(bool val)
+	{
+		throw TypeError(this->GetCategoryName(), "bool");
+	}
+
+	virtual void Set(uint8_t val)
+	{
+		throw TypeError(this->GetCategoryName(), "uint8_t");
+	}
+
+	virtual void Set(int8_t val)
+	{
+		throw TypeError(this->GetCategoryName(), "int8_t");
+	}
+
+	virtual void Set(uint32_t val)
+	{
+		throw TypeError(this->GetCategoryName(), "uint32_t");
+	}
+
+	virtual void Set(int32_t val)
+	{
+		throw TypeError(this->GetCategoryName(), "int32_t");
+	}
+
+	virtual void Set(uint64_t val)
+	{
+		throw TypeError(this->GetCategoryName(), "uint64_t");
+	}
+
+	virtual void Set(int64_t val)
+	{
+		throw TypeError(this->GetCategoryName(), "int64_t");
+	}
+
+	virtual void Set(double val)
+	{
+		throw TypeError(this->GetCategoryName(), "double");
+	}
+
+	// ========== Getters ==========
+
 	virtual bool IsNull() const
 	{
 		return false;
+	}
+
+	// operator bool() const
+	// {
+	// 	return this->AsCppBool();
+	// }
+
+	virtual bool IsTrue() const = 0;
+
+	virtual uint8_t AsCppUInt8() const
+	{
+		throw TypeError(
+			"Numeric no larger than uint8_t", this->GetCategoryName());
+	}
+
+	virtual int8_t AsCppInt8() const
+	{
+		throw TypeError(
+			"Numeric no larger than int8_t", this->GetCategoryName());
+	}
+
+	virtual uint32_t AsCppUInt32() const
+	{
+		throw TypeError(
+			"Numeric no larger than uint32_t", this->GetCategoryName());
+	}
+
+	virtual int32_t AsCppInt32() const
+	{
+		throw TypeError(
+			"Numeric no larger than int32_t", this->GetCategoryName());
+	}
+
+	virtual uint64_t AsCppUInt64() const
+	{
+		throw TypeError(
+			"Numeric no larger than uint64_t", this->GetCategoryName());
+	}
+
+	virtual int64_t AsCppInt64() const
+	{
+		throw TypeError(
+			"Numeric no larger than int64_t", this->GetCategoryName());
+	}
+
+	virtual double AsCppDouble() const
+	{
+		throw TypeError(
+			"Numeric", this->GetCategoryName());
 	}
 
 	virtual NullBase& AsNull()

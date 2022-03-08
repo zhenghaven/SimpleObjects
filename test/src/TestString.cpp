@@ -141,6 +141,40 @@ GTEST_TEST(TestString, Miscs)
 	EXPECT_EQ(mStr.size(), 0);
 }
 
+GTEST_TEST(TestString, Setters)
+{
+	String str1;
+	EXPECT_NO_THROW(String().Set(String()));
+	EXPECT_NO_THROW(String().Set(str1));
+
+	Null null1;
+	EXPECT_THROW(String().Set(Null()), TypeError);
+	EXPECT_THROW(String().Set(null1), TypeError);
+
+	EXPECT_THROW(String().Set(static_cast<bool >(true)), TypeError);
+	EXPECT_THROW(String().Set(static_cast<uint8_t >(1)), TypeError);
+	EXPECT_THROW(String().Set(static_cast< int8_t >(1)), TypeError);
+	EXPECT_THROW(String().Set(static_cast<uint32_t>(1)), TypeError);
+	EXPECT_THROW(String().Set(static_cast< int32_t>(1)), TypeError);
+	EXPECT_THROW(String().Set(static_cast<uint64_t>(1)), TypeError);
+	EXPECT_THROW(String().Set(static_cast< int64_t>(1)), TypeError);
+	EXPECT_THROW(String().Set(static_cast<double>(1.0)), TypeError);
+}
+
+GTEST_TEST(TestString, Getters)
+{
+	EXPECT_FALSE(String().IsTrue());
+	EXPECT_TRUE( String("T").IsTrue());
+
+	EXPECT_THROW(String().AsCppUInt8() ,  TypeError);
+	EXPECT_THROW(String().AsCppInt8()  ,  TypeError);
+	EXPECT_THROW(String().AsCppUInt32(),  TypeError);
+	EXPECT_THROW(String().AsCppInt32() ,  TypeError);
+	EXPECT_THROW(String().AsCppUInt64(),  TypeError);
+	EXPECT_THROW(String().AsCppInt64() ,  TypeError);
+	EXPECT_THROW(String().AsCppDouble() , TypeError);
+}
+
 GTEST_TEST(TestString, Hash)
 {
 	EXPECT_EQ(String("test string1").Hash(),

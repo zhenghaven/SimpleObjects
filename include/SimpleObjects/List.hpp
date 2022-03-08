@@ -91,10 +91,12 @@ public:
 		return *this;
 	}
 
-	virtual ObjCategory GetCategory() const override
+	const ContainerType& GetVal() const
 	{
-		return sk_cat();
+		return m_data;
 	}
+
+	// ========== operators ==========
 
 	// overrides Base::operator==
 	virtual bool operator==(const Base& rhs) const override
@@ -176,6 +178,48 @@ public:
 	{
 		return m_data >= rhs.m_data;
 	}
+
+	// ========== Overrides BaseObject ==========
+
+	virtual ObjCategory GetCategory() const override
+	{
+		return sk_cat();
+	}
+
+	using BaseBase::Set;
+
+	virtual void Set(const BaseBase& other) override
+	{
+		try
+		{
+			const Self& casted = dynamic_cast<const Self&>(other);
+			*this = casted;
+		}
+		catch(const std::bad_cast&)
+		{
+			throw TypeError("List", this->GetCategoryName());
+		}
+	}
+
+	virtual void Set(BaseBase&& other) override
+	{
+		try
+		{
+			Self&& casted = dynamic_cast<Self&&>(other);
+			*this = std::forward<Self>(casted);
+		}
+		catch(const std::bad_cast&)
+		{
+			throw TypeError("List", this->GetCategoryName());
+		}
+	}
+
+	virtual bool IsTrue() const override
+	{
+		return m_data.size() > 0;
+	}
+
+	// ========== Overrides ListBaseObject ==========
 
 	virtual size_t size() const override
 	{
@@ -290,6 +334,8 @@ public:
 		m_data.erase(m_data.begin() + idx);
 	}
 
+	// ========== Interface copy/Move ==========
+
 	using Base::Copy;
 	virtual std::unique_ptr<Base> Copy(const Base* /*unused*/) const override
 	{
@@ -302,10 +348,7 @@ public:
 		return MoveImpl();
 	}
 
-	const ContainerType& GetVal() const
-	{
-		return m_data;
-	}
+	// ========== To string ==========
 
 	virtual std::string DebugString() const override
 	{
