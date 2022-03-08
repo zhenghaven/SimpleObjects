@@ -80,20 +80,45 @@ struct NumericBinOp
 {
 	static void Set(_DstValType& dst, const _SrcValType& src)
 	{
-		// if (src < DstType.Lowest) or (DstType.Max < src)
-		//    throw
+		using namespace Internal;
+
+		// // Check if a "check" is needed
+		// if (DstType.Lowest <= SrcType.Lowest) and (SrcType.Max <= DstType.Max)
+		//    Src's possible range is within Dst's range => no need to check
 		// else
-		//    cast
-		if (PrimitiveCmpLt(src, std::numeric_limits<_DstValType>::lowest()) ||
-			PrimitiveCmpLt(std::numeric_limits<_DstValType>::max(), src))
+		//    Src's value might fall outside of Dst's range => need to check
+		static constexpr bool isCheckNeed = (
+			!(
+				Compare<_DstValType, _SrcValType>::LessEqual(
+					std::numeric_limits<_DstValType>::lowest(),
+					std::numeric_limits<_SrcValType>::lowest()) &&
+				Compare<_SrcValType, _DstValType>::LessEqual(
+					std::numeric_limits<_SrcValType>::max(),
+					std::numeric_limits<_DstValType>::max())
+			));
+
+		if (isCheckNeed)
 		{
-			throw TypeError(NumericUtils<_DstValType>::sk_numTypeName(),
-				NumericUtils<_SrcValType>::sk_numTypeName());
+			// // ==> to check `src`:
+			// if (src < DstType.Lowest) or (DstType.Max < src)
+			//    throw
+			const bool isOutRange = (
+					(Compare<_SrcValType, _DstValType>::Less(
+						src,
+						std::numeric_limits<_DstValType>::lowest())) ||
+					(Compare<_DstValType, _SrcValType>::Less(
+						std::numeric_limits<_DstValType>::max(),
+						src))
+				);
+			if (isOutRange)
+			{
+				throw TypeError(NumericUtils<_DstValType>::sk_numTypeName(),
+					NumericUtils<_SrcValType>::sk_numTypeName());
+			}
 		}
-		else
-		{
-			dst = static_cast<_DstValType>(src);
-		}
+
+		// value range should have passed the check at this point
+		dst = static_cast<_DstValType>(src);
 	}
 }; // struct NumericBinOp
 
@@ -287,14 +312,16 @@ public:
 	bool operator<(const Numeric<_RhsValType, _RhsStringType>& rhs) const
 	{
 		using namespace Internal;
-		return (PrimitiveCmpLt((m_data), (rhs.m_data)));
+		return (Compare<InternalType, _RhsValType>::Less(
+			(m_data), (rhs.m_data)));
 	}
 
 	template<typename _RhsValType, typename _RhsStringType>
 	bool operator>(const Numeric<_RhsValType, _RhsStringType>& rhs) const
 	{
 		using namespace Internal;
-		return (PrimitiveCmpGt((m_data), (rhs.m_data)));
+		return (Compare<InternalType, _RhsValType>::Greater(
+			(m_data), (rhs.m_data)));
 	}
 
 	template<typename _RhsValType, typename _RhsStringType>
