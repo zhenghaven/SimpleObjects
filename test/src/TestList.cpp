@@ -80,6 +80,40 @@ GTEST_TEST(TestList, CategoryName)
 	EXPECT_EQ(List().GetCategoryName(), std::string("List"));
 }
 
+GTEST_TEST(TestList, Setters)
+{
+	List ls1;
+	EXPECT_NO_THROW(List().Set(List()));
+	EXPECT_NO_THROW(List().Set(ls1));
+
+	Null null1;
+	EXPECT_THROW(List().Set(Null()), TypeError);
+	EXPECT_THROW(List().Set(null1), TypeError);
+
+	EXPECT_THROW(List().Set(static_cast<bool >(true)), TypeError);
+	EXPECT_THROW(List().Set(static_cast<uint8_t >(1)), TypeError);
+	EXPECT_THROW(List().Set(static_cast< int8_t >(1)), TypeError);
+	EXPECT_THROW(List().Set(static_cast<uint32_t>(1)), TypeError);
+	EXPECT_THROW(List().Set(static_cast< int32_t>(1)), TypeError);
+	EXPECT_THROW(List().Set(static_cast<uint64_t>(1)), TypeError);
+	EXPECT_THROW(List().Set(static_cast< int64_t>(1)), TypeError);
+	EXPECT_THROW(List().Set(static_cast<double>(1.0)), TypeError);
+}
+
+GTEST_TEST(TestList, Getters)
+{
+	EXPECT_FALSE(List().IsTrue());
+	EXPECT_TRUE( List({Null()}).IsTrue());
+
+	EXPECT_THROW(List().AsCppUInt8() ,  TypeError);
+	EXPECT_THROW(List().AsCppInt8()  ,  TypeError);
+	EXPECT_THROW(List().AsCppUInt32(),  TypeError);
+	EXPECT_THROW(List().AsCppInt32() ,  TypeError);
+	EXPECT_THROW(List().AsCppUInt64(),  TypeError);
+	EXPECT_THROW(List().AsCppInt64() ,  TypeError);
+	EXPECT_THROW(List().AsCppDouble() , TypeError);
+}
+
 GTEST_TEST(TestList, Compare)
 {
 	const List testLs_12345 =
@@ -90,29 +124,134 @@ GTEST_TEST(TestList, Compare)
 		List({String("Test String"), Bool(true)});
 	const List testLs_12000 =
 		List({String("Test String"), Bool(true), Int64(12000)});
+
+	// Self
 	// ==
+	EXPECT_FALSE(testLs_12345 == testLs_true);
+	EXPECT_FALSE(testLs_12345 == testLs_12000);
+	EXPECT_TRUE(testLs_12345 == testLs_12345_2);
+
+	// !=
 	EXPECT_TRUE(testLs_12345 != testLs_true);
 	EXPECT_TRUE(testLs_12345 != testLs_12000);
 	EXPECT_FALSE(testLs_12345 != testLs_12345_2);
-	EXPECT_TRUE(testLs_12345 != static_cast<const ListBaseObj&>(testLs_true));
-	EXPECT_TRUE(testLs_12345 != static_cast<const ListBaseObj&>(testLs_12000));
-	EXPECT_FALSE(testLs_12345 != static_cast<const ListBaseObj&>(testLs_12345_2));
 
-	// == diff obj
-	EXPECT_TRUE(List() != Null());
-	EXPECT_TRUE(List() != String());
+	// <
+	EXPECT_TRUE(
+		List({Int64(1), Int64(2), Int64(3)}) <
+		List({Int64(3), Int64(2)}));
 
-	// List vs List
-	EXPECT_THROW((void)(List() <  List()), UnsupportedOperation);
-	EXPECT_THROW((void)(List() >  List()), UnsupportedOperation);
-	EXPECT_THROW((void)(List() <= List()), UnsupportedOperation);
-	EXPECT_THROW((void)(List() >= List()), UnsupportedOperation);
+	// >
+	EXPECT_TRUE(
+		List({Int64(3), Int64(2)}) >
+		List({Int64(1), Int64(2), Int64(3)}));
 
-	// < diff obj
-	EXPECT_THROW((void)(List() < String()), UnsupportedOperation);
+	// <=
+	EXPECT_TRUE(
+		List({Int64(1), Int64(2), Int64(3)}) <=
+		List({Int64(3), Int64(2)}));
 
-	// > diff obj
-	EXPECT_THROW((void)(List() < String()), UnsupportedOperation);
+	// >=
+	EXPECT_TRUE(
+		List({Int64(3), Int64(2)}) >=
+		List({Int64(1), Int64(2), Int64(3)}));
+
+	// Base
+	// ==
+	EXPECT_FALSE(
+		testLs_12345 ==
+		static_cast<const ListBaseObj&>(testLs_true));
+	EXPECT_FALSE(
+		testLs_12345 ==
+		static_cast<const ListBaseObj&>(testLs_12000));
+	EXPECT_TRUE(
+		testLs_12345 ==
+		static_cast<const ListBaseObj&>(testLs_12345_2));
+
+	// !=
+	EXPECT_TRUE(
+		testLs_12345 !=
+		static_cast<const ListBaseObj&>(testLs_true));
+	EXPECT_TRUE(
+		testLs_12345 !=
+		static_cast<const ListBaseObj&>(testLs_12000));
+	EXPECT_FALSE(
+		testLs_12345 !=
+		static_cast<const ListBaseObj&>(testLs_12345_2));
+
+	// <
+	EXPECT_TRUE(
+		List({Int64(1), Int64(2), Int64(3)}) <
+		static_cast<const ListBaseObj&>(List({Int64(3), Int64(2)})));
+
+	// >
+	EXPECT_TRUE(
+		List({Int64(3), Int64(2)}) >
+		static_cast<const ListBaseObj&>(List({Int64(1), Int64(2), Int64(3)})));
+
+	// <=
+	EXPECT_TRUE(
+		List({Int64(1), Int64(2), Int64(3)}) <=
+		static_cast<const ListBaseObj&>(List({Int64(3), Int64(2)})));
+
+	// >=
+	EXPECT_TRUE(
+		List({Int64(3), Int64(2)}) >=
+		static_cast<const ListBaseObj&>(List({Int64(1), Int64(2), Int64(3)})));
+
+
+	// BaseBase => BaseObj
+	// ==
+	EXPECT_FALSE(
+		testLs_12345 ==
+		static_cast<const BaseObj&>(testLs_true));
+	EXPECT_FALSE(
+		testLs_12345 ==
+		static_cast<const BaseObj&>(testLs_12000));
+	EXPECT_TRUE(
+		testLs_12345 ==
+		static_cast<const BaseObj&>(testLs_12345_2));
+
+	// !=
+	EXPECT_TRUE(
+		testLs_12345 !=
+		static_cast<const BaseObj&>(testLs_true));
+	EXPECT_TRUE(
+		testLs_12345 !=
+		static_cast<const BaseObj&>(testLs_12000));
+	EXPECT_FALSE(
+		testLs_12345 !=
+		static_cast<const BaseObj&>(testLs_12345_2));
+	EXPECT_TRUE(
+		List() !=
+		static_cast<const BaseObj&>(Null()));
+	EXPECT_TRUE(
+		List() !=
+		static_cast<const BaseObj&>(String()));
+
+	// <
+	EXPECT_TRUE(
+		List({Int64(1), Int64(2), Int64(3)}) <
+		static_cast<const BaseObj&>(List({Int64(3), Int64(2)})));
+	EXPECT_THROW(
+		(void)(List() < String()), UnsupportedOperation);
+
+	// >
+	EXPECT_TRUE(
+		List({Int64(3), Int64(2)}) >
+		static_cast<const BaseObj&>(List({Int64(1), Int64(2), Int64(3)})));
+	EXPECT_THROW(
+		(void)(List() > String()), UnsupportedOperation);
+
+	// <=
+	EXPECT_TRUE(
+		List({Int64(1), Int64(2), Int64(3)}) <=
+		static_cast<const BaseObj&>(List({Int64(3), Int64(2)})));
+
+	// >=
+	EXPECT_TRUE(
+		List({Int64(3), Int64(2)}) >=
+		static_cast<const BaseObj&>(List({Int64(1), Int64(2), Int64(3)})));
 }
 
 GTEST_TEST(TestList, Len)
@@ -264,16 +403,18 @@ GTEST_TEST(TestList, Miscs)
 	// Cast
 	const auto kList = List();
 	EXPECT_NO_THROW(kList.AsList());
-	EXPECT_THROW(kList.AsNull(), TypeError);
-	EXPECT_THROW(kList.AsNumeric(), TypeError);
-	EXPECT_THROW(kList.AsString(), TypeError);
-	EXPECT_THROW(kList.AsDict(), TypeError);
+	EXPECT_THROW(kList.AsNull(),       TypeError);
+	EXPECT_THROW(kList.AsNumeric(),    TypeError);
+	EXPECT_THROW(kList.AsString(),     TypeError);
+	EXPECT_THROW(kList.AsDict(),       TypeError);
+	EXPECT_THROW(kList.AsStaticDict(), TypeError);
 
 	EXPECT_NO_THROW(List().AsList());
-	EXPECT_THROW(List().AsNull(), TypeError);
-	EXPECT_THROW(List().AsNumeric(), TypeError);
-	EXPECT_THROW(List().AsString(), TypeError);
-	EXPECT_THROW(List().AsDict(), TypeError);
+	EXPECT_THROW(List().AsNull(),       TypeError);
+	EXPECT_THROW(List().AsNumeric(),    TypeError);
+	EXPECT_THROW(List().AsString(),     TypeError);
+	EXPECT_THROW(List().AsDict(),       TypeError);
+	EXPECT_THROW(List().AsStaticDict(), TypeError);
 
 	// Copy
 	static_assert(std::is_same<

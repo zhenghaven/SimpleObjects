@@ -8,6 +8,7 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <functional>
 
 #include "Null.hpp"
 #include "Numeric.hpp"
@@ -18,6 +19,9 @@
 #include "Object.hpp"
 #include "HashableObject.hpp"
 
+#include "ConstSequence.hpp"
+#include "StaticDict.hpp"
+
 #include "ToStringImpl.hpp"
 
 #ifndef SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE
@@ -26,6 +30,14 @@ namespace SimpleObjects
 namespace SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE
 #endif
 {
+
+// ========== Basic Type Controll ==========
+
+template<typename _KeyType, typename _ValType>
+using MapType = std::unordered_map<_KeyType, _ValType>;
+
+template<typename _ValType>
+using VecType = std::vector<_ValType>;
 
 // ========== Convenient types of Null ==========
 
@@ -68,11 +80,11 @@ using HashableObject = HashableObjectImpl<std::string>;
 
 // ========== Convenient types of List ==========
 
-using List = ListCat<std::vector<Object>, std::string>;
+using List = ListCat<VecType<Object>, std::string>;
 
 // ========== Convenient types of Dict ==========
 
-using Dict = DictCat<std::unordered_map<HashableObject, Object>, std::string>;
+using Dict = DictCat<MapType<HashableObject, Object>, std::string>;
 
 // ========== Convenient types of base classes ==========
 
@@ -83,5 +95,30 @@ using NumericBaseObj = NumericBaseObject<std::string>;
 using StringBaseObj = StringBaseObject<char, std::string>;
 using ListBaseObj = ListBaseObject<Object, std::string>;
 using DictBaseObj = DictBaseObject<HashableObject, Object, std::string>;
+using StaticDictBaseObj = StaticDictBaseObject<
+	HashableBaseObj,
+	BaseObj,
+	HashableReferenceWrapper,
+	std::reference_wrapper,
+	std::string>;
+
+// ========== Convenient types of static Dict ==========
+
+template<typename _ValType, _ValType ..._data>
+using FromStrSeq = Internal::FromDataSeqImpl<String, _ValType, _data...>;
+template<typename _StrSeq>
+using StrKey = typename _StrSeq::template ToOther<FromStrSeq>::type;
+template<int64_t _Val>
+using Int64Key = StaticPrimitiveValue<Int64, _Val>;
+
+template<typename _Tp>
+using StaticDict = StaticDictImpl<
+	_Tp,
+	HashableBaseObj,
+	BaseObj,
+	HashableReferenceWrapper,
+	std::reference_wrapper,
+	MapType,
+	std::string>;
 
 }//namespace SimpleObjects

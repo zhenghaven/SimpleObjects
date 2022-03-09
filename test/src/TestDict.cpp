@@ -88,6 +88,40 @@ GTEST_TEST(TestDict, CategoryName)
 	EXPECT_EQ(Dict().GetCategoryName(), std::string("Dict"));
 }
 
+GTEST_TEST(TestDict, Setters)
+{
+	Dict dc1;
+	EXPECT_NO_THROW(Dict().Set(Dict()));
+	EXPECT_NO_THROW(Dict().Set(dc1));
+
+	Null null1;
+	EXPECT_THROW(Dict().Set(Null()), TypeError);
+	EXPECT_THROW(Dict().Set(null1), TypeError);
+
+	EXPECT_THROW(Dict().Set(static_cast<bool >(true)), TypeError);
+	EXPECT_THROW(Dict().Set(static_cast<uint8_t >(1)), TypeError);
+	EXPECT_THROW(Dict().Set(static_cast< int8_t >(1)), TypeError);
+	EXPECT_THROW(Dict().Set(static_cast<uint32_t>(1)), TypeError);
+	EXPECT_THROW(Dict().Set(static_cast< int32_t>(1)), TypeError);
+	EXPECT_THROW(Dict().Set(static_cast<uint64_t>(1)), TypeError);
+	EXPECT_THROW(Dict().Set(static_cast< int64_t>(1)), TypeError);
+	EXPECT_THROW(Dict().Set(static_cast<double>(1.0)), TypeError);
+}
+
+GTEST_TEST(TestDict, Getters)
+{
+	EXPECT_FALSE(Dict().IsTrue());
+	EXPECT_TRUE( Dict({{Null(), Null()}}).IsTrue());
+
+	EXPECT_THROW(Dict().AsCppUInt8() ,  TypeError);
+	EXPECT_THROW(Dict().AsCppInt8()  ,  TypeError);
+	EXPECT_THROW(Dict().AsCppUInt32(),  TypeError);
+	EXPECT_THROW(Dict().AsCppInt32() ,  TypeError);
+	EXPECT_THROW(Dict().AsCppUInt64(),  TypeError);
+	EXPECT_THROW(Dict().AsCppInt64() ,  TypeError);
+	EXPECT_THROW(Dict().AsCppDouble() , TypeError);
+}
+
 GTEST_TEST(TestDict, Compare)
 {
 	const Dict testDc_001122 = Dict({
@@ -121,20 +155,17 @@ GTEST_TEST(TestDict, Compare)
 		static_cast<const DictBaseObj&>(testDc_001122_cp));
 
 	// == diff obj
-	EXPECT_TRUE(Dict() != Null());
-	EXPECT_TRUE(Dict() != String());
+	EXPECT_TRUE(Dict() != static_cast<const BaseObj&>(Null()));
+	EXPECT_TRUE(Dict() != static_cast<const BaseObj&>(String()));
 
 	// <
-	EXPECT_THROW((void)(Dict() <  Dict()), UnsupportedOperation);
-	EXPECT_THROW((void)(Dict() >  Dict()), UnsupportedOperation);
-	EXPECT_THROW((void)(Dict() <= Dict()), UnsupportedOperation);
-	EXPECT_THROW((void)(Dict() >= Dict()), UnsupportedOperation);
+	EXPECT_THROW((void)(Dict() <  static_cast<const BaseObj&>(Dict())), UnsupportedOperation);
+	EXPECT_THROW((void)(Dict() >  static_cast<const BaseObj&>(Dict())), UnsupportedOperation);
+	EXPECT_THROW((void)(Dict() <= static_cast<const BaseObj&>(Dict())), UnsupportedOperation);
+	EXPECT_THROW((void)(Dict() >= static_cast<const BaseObj&>(Dict())), UnsupportedOperation);
 
 	// < diff obj
 	EXPECT_THROW((void)(Dict() < String()), UnsupportedOperation);
-
-	// >
-	EXPECT_THROW((void)(Dict() > Dict()), UnsupportedOperation);
 
 	// > diff obj
 	EXPECT_THROW((void)(Dict() < String()), UnsupportedOperation);
@@ -263,34 +294,38 @@ GTEST_TEST(TestDict, Insert)
 	// InsertOnly
 	//    Successful insert
 	EXPECT_THROW(testDc.at(Int64(1)), std::out_of_range);
-	EXPECT_NO_THROW(
+	auto subTest1 = [&]()
+	{
 		auto res = testDc.InsertOnly(Int64(1), String("test val 1"));
-		EXPECT_EQ(res.first->first, Int64(1));
-		EXPECT_EQ(res.first->second, String("test val 1"));
-		EXPECT_EQ(&*res.first, &*testDc.find(Int64(1)));
-		EXPECT_EQ(res.second, true);
-	);
-	EXPECT_EQ(testDc.at(Int64(1)), String("test val 1"));
+		EXPECT_TRUE(res.first->first.AsNumeric() == Int64(1));
+		EXPECT_TRUE(res.first->second.AsString() == String("test val 1"));
+		EXPECT_TRUE(&*res.first == &*testDc.find(Int64(1)));
+		EXPECT_TRUE(res.second == true);
+	};
+	EXPECT_NO_THROW(subTest1(););
+	EXPECT_TRUE(testDc.at(Int64(1)).AsString() == String("test val 1"));
 	//    Unsuccessful insert
-	EXPECT_NO_THROW(
+	auto subTest2 = [&]()
+	{
 		auto res = testDc.InsertOnly(Int64(1), String("test val 1_1"));
-		EXPECT_EQ(res.first->first, Int64(1));
-		EXPECT_EQ(res.first->second, String("test val 1"));
-		EXPECT_EQ(&*res.first, &*testDc.find(Int64(1)));
-		EXPECT_EQ(res.second, false);
-	);
+		EXPECT_TRUE(res.first->first.AsNumeric() == Int64(1));
+		EXPECT_TRUE(res.first->second.AsString() == String("test val 1"));
+		EXPECT_TRUE(&*res.first == &*testDc.find(Int64(1)));
+		EXPECT_TRUE(res.second == false);
+	};
+	EXPECT_NO_THROW(subTest2(););
 
 	// InsertOrAssign
 	//    Insert
 	EXPECT_THROW(testDc.at(String("2")), std::out_of_range);
 	EXPECT_NO_THROW(
 		testDc.InsertOrAssign(String("2"), String("test val 2")));
-	EXPECT_EQ(testDc.at(String("2")), String("test val 2"));
+	EXPECT_TRUE(testDc.at(String("2")).AsString() == String("test val 2"));
 
 	//    Assign
 	EXPECT_NO_THROW(
 		testDc.InsertOrAssign(String("2"), String("test val 2_1")));
-	EXPECT_EQ(testDc.at(String("2")), String("test val 2_1"));
+	EXPECT_TRUE(testDc.at(String("2")).AsString() == String("test val 2_1"));
 }
 
 GTEST_TEST(TestDict, Remove)
@@ -301,7 +336,7 @@ GTEST_TEST(TestDict, Remove)
 		{ String("2"), String("test val 2") },
 	};
 
-	EXPECT_EQ(testDc.at(String("2")), String("test val 2"));
+	EXPECT_TRUE(testDc.at(String("2")).AsString() == String("test val 2"));
 	EXPECT_NO_THROW(
 		testDc.Remove(String("2")));
 	EXPECT_THROW(testDc.at(String("2")), std::out_of_range);
@@ -315,16 +350,18 @@ GTEST_TEST(TestDict, Miscs)
 	// Cast
 	const auto kDict = Dict();
 	EXPECT_NO_THROW(kDict.AsDict());
-	EXPECT_THROW(kDict.AsNull(), TypeError);
-	EXPECT_THROW(kDict.AsNumeric(), TypeError);
-	EXPECT_THROW(kDict.AsString(), TypeError);
-	EXPECT_THROW(kDict.AsList(), TypeError);
+	EXPECT_THROW(kDict.AsNull(),       TypeError);
+	EXPECT_THROW(kDict.AsNumeric(),    TypeError);
+	EXPECT_THROW(kDict.AsString(),     TypeError);
+	EXPECT_THROW(kDict.AsList(),       TypeError);
+	EXPECT_THROW(kDict.AsStaticDict(), TypeError);
 
 	EXPECT_NO_THROW(Dict().AsDict());
-	EXPECT_THROW(Dict().AsNull(), TypeError);
-	EXPECT_THROW(Dict().AsNumeric(), TypeError);
-	EXPECT_THROW(Dict().AsString(), TypeError);
-	EXPECT_THROW(Dict().AsList(), TypeError);
+	EXPECT_THROW(Dict().AsNull(),       TypeError);
+	EXPECT_THROW(Dict().AsNumeric(),    TypeError);
+	EXPECT_THROW(Dict().AsString(),     TypeError);
+	EXPECT_THROW(Dict().AsList(),       TypeError);
+	EXPECT_THROW(Dict().AsStaticDict(), TypeError);
 
 	// Copy
 	static_assert(std::is_same<

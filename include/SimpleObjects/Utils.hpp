@@ -123,6 +123,177 @@ inline const _ToType& DownCast(const _FromType& from)
 #endif
 }
 
+/**
+ * @brief Expands (unfold) the tuple's value and call the callback function
+ *        with all values in order
+ *
+ * @tparam _RetType
+ * @tparam _I
+ * @tparam _Tp
+ */
+template<typename _RetType, size_t _I, typename _Tp>
+struct TupleUnpackCallImpl;
+
+template<typename _RetType, size_t _I, typename _Tp>
+struct TupleUnpackCallImpl
+{
+	template<typename _CallbackFunc, typename... _ItemTypes>
+	static _RetType UnpackCall(
+		_Tp&& tp,
+		_CallbackFunc callback,
+		_ItemTypes&& ...items)
+	{
+		return TupleUnpackCallImpl<
+			_RetType,
+			_I - 1,
+			_Tp
+			>::UnpackCall(
+			std::forward<_Tp>(tp),
+			callback,
+			std::get<_I>(std::forward<_Tp>(tp)),
+			std::forward<_ItemTypes>(items)...
+		);
+	}
+
+	template<typename _CallbackFunc, typename... _ItemTypes>
+	static _RetType UnpackCall(
+		_Tp& tp,
+		_CallbackFunc callback,
+		_ItemTypes&& ...items)
+	{
+		return TupleUnpackCallImpl<
+			_RetType,
+			_I - 1,
+			_Tp
+			>::UnpackCall(
+			tp,
+			callback,
+			std::get<_I>(tp),
+			std::forward<_ItemTypes>(items)...
+		);
+	}
+}; // struct TupleUnpackCallImpl
+
+template<typename _RetType, typename _Tp>
+struct TupleUnpackCallImpl<_RetType, 0, _Tp>
+{
+	template<typename _CallbackFunc, typename... _ItemTypes>
+	static _RetType UnpackCall(
+		_Tp&& tp,
+		_CallbackFunc callback,
+		_ItemTypes&& ...items)
+	{
+		return callback(
+			std::get<0>(std::forward<_Tp>(tp)),
+			std::forward<_ItemTypes>(items)...
+		);
+	}
+
+	template<typename _CallbackFunc, typename... _ItemTypes>
+	static _RetType UnpackCall(
+		_Tp& tp,
+		_CallbackFunc callback,
+		_ItemTypes&& ...items)
+	{
+		return callback(
+			std::get<0>(tp),
+			std::forward<_ItemTypes>(items)...
+		);
+	}
+}; // struct TupleUnpackCallImpl
+
+template<typename _RetType, typename _Tp>
+struct TupleUnpackCall
+{
+	template<typename _CallbackFunc>
+	static _RetType UnpackCall(_Tp&& tp, _CallbackFunc callback)
+	{
+		return TupleUnpackCallImpl<
+			_RetType,
+			std::tuple_size<_Tp>::value - 1,
+			_Tp>::UnpackCall(
+			std::forward<_Tp>(tp),
+			callback
+		);
+	}
+
+	template<typename _CallbackFunc>
+	static _RetType UnpackCall(_Tp& tp, _CallbackFunc callback)
+	{
+		return TupleUnpackCallImpl<
+			_RetType,
+			std::tuple_size<_Tp>::value - 1,
+			_Tp>::UnpackCall(
+			tp,
+			callback
+		);
+	}
+}; // struct TupleUnpackCall
+
+/**
+ * @brief Perform some binary operation between two tuple instance.
+ *        The operation is performed in the order of
+ *        (Tp1[0] x Tp2[0]) ... (Tp1[i] x Tp2[i]) ... (Tp1[n] x Tp2[n])
+ *        NOTE: Pre-condition: tuple_size<Tp1>::value == tuple_size<Tp2>::value
+ *
+ * @tparam _RetType
+ * @tparam _I
+ * @tparam _Tp1
+ * @tparam _Tp2
+ */
+template<size_t _I>
+struct TupleOperationImpl;
+
+template<size_t _I>
+struct TupleOperationImpl
+{
+	template<typename _Tp1, typename _Tp2, typename _CallbackType>
+	static void BinOp(_Tp1&& tp1, _Tp2&& tp2, _CallbackType&& callback)
+	{
+		TupleOperationImpl<_I - 1>::BinOp(
+			std::forward<_Tp1>(tp1),
+			std::forward<_Tp2>(tp2),
+			std::forward<_CallbackType>(callback));
+		callback(
+			std::get<_I>(std::forward<_Tp1>(tp1)),
+			std::get<_I>(std::forward<_Tp2>(tp2)));
+	}
+}; // struct TupleOperationImpl
+
+template<>
+struct TupleOperationImpl<0>
+{
+	template<typename _Tp1, typename _Tp2, typename _CallbackType>
+	static void BinOp(_Tp1&& tp1, _Tp2&& tp2, _CallbackType&& callback)
+	{
+		callback(
+			std::get<0>(std::forward<_Tp1>(tp1)),
+			std::get<0>(std::forward<_Tp2>(tp2)));
+	}
+}; // struct TupleOperationImpl
+
+struct TupleOperation
+{
+	template<typename _Tp1, typename _Tp2, typename _CallbackType>
+	static void BinOp(_Tp1&& tp1, _Tp2&& tp2, _CallbackType&& callback)
+	{ // ^ perfect forwarding
+		using _Tp1Raw = typename std::remove_cv<
+			typename std::remove_reference<_Tp1>::type>::type;
+		using _Tp2Raw = typename std::remove_cv<
+			typename std::remove_reference<_Tp2>::type>::type;
+		static constexpr size_t tp1Size = std::tuple_size<_Tp1Raw>::value;
+		static constexpr size_t tp2Size = std::tuple_size<_Tp2Raw>::value;
+		static_assert(tp1Size == tp2Size && tp1Size > 0,
+			"Two tuples must have the same size, "
+			"and they must have at least 1 item");
+
+		TupleOperationImpl<tp1Size - 1>::BinOp(
+			std::forward<_Tp1>(tp1),
+			std::forward<_Tp2>(tp2),
+			std::forward<_CallbackType>(callback));
+	}
+}; // struct TupleOperation
+
 } // namespace Internal
 
 } // namespace SimpleObjects

@@ -32,6 +32,13 @@ public: // Static member:
 	using Self = StringCat<ContainerType, ToStringType>;
 	using Base = StringBaseObject<
 		typename ContainerType::value_type, ToStringType>;
+	using BaseBase = typename Base::Base;
+	using BaseBaseBase = typename BaseBase::Base;
+
+	static_assert(std::is_same<BaseBase, HashableBaseObject<_ToStringType> >::value,
+		"Expecting Base::Base to be HashableBaseObject class");
+	static_assert(std::is_same<BaseBaseBase, BaseObject<_ToStringType> >::value,
+		"Expecting Base::Base::Base to be BaseObject class");
 
 	typedef typename ContainerType::traits_type          traits_type;
 	typedef typename ContainerType::allocator_type       allocator_type;
@@ -66,6 +73,14 @@ public:
 		m_data()
 	{}
 
+	StringCat(const ContainerType& str):
+		m_data(str)
+	{}
+
+	StringCat(ContainerType&& str):
+		m_data(std::forward<ContainerType>(str))
+	{}
+
 	StringCat(const_pointer str) :
 		m_data(str)
 	{}
@@ -98,71 +113,59 @@ public:
 		return *this;
 	}
 
+	// ========== Overrides BaseObject ==========
+
 	virtual ObjCategory GetCategory() const override
 	{
 		return sk_cat();
 	}
 
-	virtual bool operator==(const Base& rhs) const override
+	using BaseBaseBase::Set;
+
+	virtual void Set(const BaseBaseBase& other) override
 	{
-		auto ptr = m_data.data();
-		return rhs.Equal(0, rhs.size(), ptr, ptr + size());
+		try
+		{
+			const Self& casted = dynamic_cast<const Self&>(other);
+			*this = casted;
+		}
+		catch(const std::bad_cast&)
+		{
+			throw TypeError("String", this->GetCategoryName());
+		}
 	}
 
-	virtual bool operator>(const Base& rhs) const override
+	virtual void Set(BaseBaseBase&& other) override
 	{
-		auto ptr = m_data.data();
-		// rhs < this ==> this > rhs
-		return rhs.LessThan(0, rhs.size(), ptr, ptr + size());
+		try
+		{
+			Self&& casted = dynamic_cast<Self&&>(other);
+			*this = std::forward<Self>(casted);
+		}
+		catch(const std::bad_cast&)
+		{
+			throw TypeError("String", this->GetCategoryName());
+		}
 	}
 
-	virtual bool operator<(const Base& rhs) const override
+	virtual bool IsTrue() const override
 	{
-		auto ptr = m_data.data();
-		// rhs > this ==> this < rhs
-		return rhs.GreaterThan(0, rhs.size(), ptr, ptr + size());
+		return m_data.size() > 0;
 	}
 
-	virtual bool operator==(const Self& rhs) const
-	{
-		return m_data == rhs.m_data;
-	}
-	virtual bool operator!=(const Self& rhs) const
-	{
-		return m_data != rhs.m_data;
-	}
-	virtual bool operator<(const Self& rhs) const
-	{
-		return m_data < rhs.m_data;
-	}
-	virtual bool operator>(const Self& rhs) const
-	{
-		return m_data > rhs.m_data;
-	}
-	virtual bool operator<=(const Self& rhs) const
-	{
-		return m_data <= rhs.m_data;
-	}
-	virtual bool operator>=(const Self& rhs) const
-	{
-		return m_data >= rhs.m_data;
-	}
+	// ========== Overrides HashableBaseObject ==========
 
 	virtual std::size_t Hash() const override
 	{
 		return std::hash<ContainerType>()(m_data);
 	}
 
+	// ========== Overrides StringBaseObject ==========
+
 	virtual size_t size() const override
 	{
 		return m_data.size();
 	}
-	using Base::operator==;
-	using Base::operator!=;
-	using Base::operator<;
-	using Base::operator>;
-	using Base::operator<=;
-	using Base::operator>=;
 
 	using Base::begin;
 	using Base::end;
@@ -279,11 +282,6 @@ public:
 		return m_data.c_str();
 	}
 
-	const ContainerType& GetVal() const
-	{
-		return m_data;
-	}
-
 	virtual bool LessThan(size_t pos1, size_t count1,
 		const_pointer begin, const_pointer end) const override
 	{
@@ -308,6 +306,74 @@ public:
 			std::equal(&m_data[pos1], &m_data[pos1 + count1], begin);
 	}
 
+	// ========== operators ==========
+
+	// overrides Base::operator==
+	virtual bool operator==(const Base& rhs) const override
+	{
+		auto ptr = m_data.data();
+		return rhs.Equal(0, rhs.size(), ptr, ptr + size());
+	}
+
+	using BaseBaseBase::operator==;
+
+	using Base::operator!=;
+
+	// overrides Base::operator<
+	virtual bool operator<(const Base& rhs) const override
+	{
+		auto ptr = m_data.data();
+		// rhs > this ==> this < rhs
+		return rhs.GreaterThan(0, rhs.size(), ptr, ptr + size());
+	}
+
+	using BaseBaseBase::operator<;
+
+	// overrides Base::operator>
+	virtual bool operator>(const Base& rhs) const override
+	{
+		auto ptr = m_data.data();
+		// rhs < this ==> this > rhs
+		return rhs.LessThan(0, rhs.size(), ptr, ptr + size());
+	}
+
+	using BaseBaseBase::operator>;
+
+	using Base::operator<=;
+	using Base::operator>=;
+
+	virtual bool operator==(const Self& rhs) const
+	{
+		return m_data == rhs.m_data;
+	}
+	virtual bool operator!=(const Self& rhs) const
+	{
+		return m_data != rhs.m_data;
+	}
+	virtual bool operator<(const Self& rhs) const
+	{
+		return m_data < rhs.m_data;
+	}
+	virtual bool operator>(const Self& rhs) const
+	{
+		return m_data > rhs.m_data;
+	}
+	virtual bool operator<=(const Self& rhs) const
+	{
+		return m_data <= rhs.m_data;
+	}
+	virtual bool operator>=(const Self& rhs) const
+	{
+		return m_data >= rhs.m_data;
+	}
+
+	const ContainerType& GetVal() const
+	{
+		return m_data;
+	}
+
+	// ========== Interface copy/Move ==========
+
 	using Base::Copy;
 	virtual std::unique_ptr<Base> Copy(const Base* /*unused*/) const override
 	{
@@ -319,6 +385,8 @@ public:
 	{
 		return MoveImpl();
 	}
+
+	// ========== To string ==========
 
 	virtual std::string DebugString() const override
 	{

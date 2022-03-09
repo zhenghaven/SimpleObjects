@@ -16,712 +16,352 @@ namespace SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE
 namespace Internal
 {
 
-/**
- * @brief Compare for `less than` (i.e., `<`) for C++ primitive types;
- *        this is used to address the "sign/unsigned mismatch issue"
- *
- * @tparam _LhsType The type of the left hand side value
- * @tparam _RhsType The type of the right hand side value
- * @param lhs The left hand side value
- * @param rhs The right hand side value
- * @return true if lhs < rhs, otherwise, false
- */
-template<typename _LhsType, typename _RhsType>
-bool PrimitiveCmpLt(_LhsType lhs, _RhsType rhs);
+template<typename _T>
+struct IsPrimitiveType;
 
-/**
- * @brief Compare for `greater than` (i.e., `>`) for C++ primitive types;
- *        this is used to address the "sign/unsigned mismatch issue"
- *
- * @tparam _LhsType The type of the left hand side value
- * @tparam _RhsType The type of the right hand side value
- * @param lhs The left hand side value
- * @param rhs The right hand side value
- * @return true if lhs > rhs, otherwise, false
- */
-template<typename _LhsType, typename _RhsType>
-bool PrimitiveCmpGt(_LhsType lhs, _RhsType rhs);
+template<typename _T> struct IsPrimitiveType : std::false_type {};
 
-//==================== Implementations ====================
+template<> struct IsPrimitiveType<bool    > : std::true_type {};
+template<> struct IsPrimitiveType<int8_t  > : std::true_type {};
+template<> struct IsPrimitiveType<int16_t > : std::true_type {};
+template<> struct IsPrimitiveType<int32_t > : std::true_type {};
+template<> struct IsPrimitiveType<int64_t > : std::true_type {};
+template<> struct IsPrimitiveType<uint8_t > : std::true_type {};
+template<> struct IsPrimitiveType<uint16_t> : std::true_type {};
+template<> struct IsPrimitiveType<uint32_t> : std::true_type {};
+template<> struct IsPrimitiveType<uint64_t> : std::true_type {};
+template<> struct IsPrimitiveType<float   > : std::true_type {};
+template<> struct IsPrimitiveType<double  > : std::true_type {};
 
-//========== PrimitiveCmpLt ==========
+static_assert(IsPrimitiveType<bool    >::value, "Implementation Error");
+static_assert(IsPrimitiveType<int8_t  >::value, "Implementation Error");
+static_assert(IsPrimitiveType<int16_t >::value, "Implementation Error");
+static_assert(IsPrimitiveType<int32_t >::value, "Implementation Error");
+static_assert(IsPrimitiveType<int64_t >::value, "Implementation Error");
+static_assert(IsPrimitiveType<uint8_t >::value, "Implementation Error");
+static_assert(IsPrimitiveType<uint16_t>::value, "Implementation Error");
+static_assert(IsPrimitiveType<uint32_t>::value, "Implementation Error");
+static_assert(IsPrimitiveType<uint64_t>::value, "Implementation Error");
+static_assert(IsPrimitiveType<float   >::value, "Implementation Error");
+static_assert(IsPrimitiveType<double  >::value, "Implementation Error");
 
-// LHS is same as RHS
-template<typename _RLhsType>
-inline bool PrimitiveCmpLt(_RLhsType lhs, _RLhsType rhs)
+template<bool _IsTSigned, bool _IsUSigned>
+struct cmp_impl;
+
+template<>
+struct cmp_impl<true, true>
 {
-	return lhs < rhs;
+	template<typename T, typename U>
+	static constexpr bool cmp_less(T t, U u) noexcept
+	{ return t < u; }
+}; // struct cmp_impl
+
+template<>
+struct cmp_impl<false, false>
+{
+	template<typename T, typename U>
+	static constexpr bool cmp_less(T t, U u) noexcept
+	{ return t < u; }
+}; // struct cmp_impl
+
+template<>
+struct cmp_impl<true, false>
+{
+	template<typename T, typename U>
+	static constexpr bool cmp_less(T t, U u) noexcept
+	{
+		using UT = typename std::make_unsigned<T>::type;
+		return (t < 0 ? true : UT(t) < u);
+	}
+}; // struct cmp_impl
+
+template<>
+struct cmp_impl<false, true>
+{
+	template<typename T, typename U>
+	static constexpr bool cmp_less(T t, U u) noexcept
+	{
+		using UU = typename std::make_unsigned<U>::type;
+		return (u < 0 ? false : t < UU(u));
+	}
+}; // struct cmp_impl
+
+/**
+ * @brief A comparison that is safe against lossy integer conversion.
+ *        source: https://en.cppreference.com/w/cpp/utility/intcmp
+ *        Even though this is provided in C++20, we still need to support
+ *        older versions
+ *
+ * @tparam T
+ * @tparam U
+ * @param t
+ * @param u
+ * @return
+ */
+template<typename T, typename U>
+inline constexpr bool cmp_less(T t, U u) noexcept
+{
+	static_assert(IsPrimitiveType<T>::value, "Expecting a primitive type");
+	static_assert(IsPrimitiveType<U>::value, "Expecting a primitive type");
+
+	return cmp_impl<std::is_signed<T>::value,
+		std::is_signed<U>::value>::cmp_less(t, u);
 }
 
-// uint8_t
-/* 8  : 8  */
-/* 8  : 16 */ template<>
-inline bool PrimitiveCmpLt(uint8_t lhs, uint16_t rhs)
-{ return static_cast<uint16_t>(lhs) < (rhs); }
-/* 8  : 32 */ template<>
-inline bool PrimitiveCmpLt(uint8_t lhs, uint32_t rhs)
-{ return static_cast<uint32_t>(lhs) < (rhs); }
-/* 8  : 64 */ template<>
-inline bool PrimitiveCmpLt(uint8_t lhs, uint64_t rhs)
-{ return static_cast<uint64_t>(lhs) < (rhs); }
-/* 8  : 8  */ template<>
-inline bool PrimitiveCmpLt(uint8_t lhs, int8_t rhs)
-{ return rhs < 0 ?
-		false : (lhs) < static_cast<uint8_t>(rhs); }
-/* 8  : 16 */ template<>
-inline bool PrimitiveCmpLt(uint8_t lhs, int16_t rhs)
-{ return rhs < 0 ?
-		false : static_cast<uint16_t>(lhs) < static_cast<uint16_t>(rhs); }
-/* 8  : 32 */ template<>
-inline bool PrimitiveCmpLt(uint8_t lhs, int32_t rhs)
-{ return rhs < 0 ?
-		false : static_cast<uint32_t>(lhs) < static_cast<uint32_t>(rhs); }
-/* 8  : 64 */ template<>
-inline bool PrimitiveCmpLt(uint8_t lhs, int64_t rhs)
-{ return rhs < 0 ?
-		false : static_cast<uint64_t>(lhs) < static_cast<uint64_t>(rhs); }
-/* 8  : F  */ template<>
-inline bool PrimitiveCmpLt(uint8_t lhs, float rhs)
-{ return static_cast<float>(lhs) < (rhs); }
-/* 8  : D  */ template<>
-inline bool PrimitiveCmpLt(uint8_t lhs, double rhs)
-{ return static_cast<double>(lhs) < (rhs); }
-
-// uint16_t
-/* 16 : 8  */ template<>
-inline bool PrimitiveCmpLt(uint16_t lhs, uint8_t rhs)
-{ return (lhs) < static_cast<uint16_t>(rhs); }
-/* 16 : 16 */
-/* 16 : 32 */ template<>
-inline bool PrimitiveCmpLt(uint16_t lhs, uint32_t rhs)
-{ return static_cast<uint32_t>(lhs) < (rhs); }
-/* 16 : 64 */ template<>
-inline bool PrimitiveCmpLt(uint16_t lhs, uint64_t rhs)
-{ return static_cast<uint64_t>(lhs) < (rhs); }
-/* 16 : 8  */ template<>
-inline bool PrimitiveCmpLt(uint16_t lhs, int8_t rhs)
-{ return rhs < 0 ?
-		false : static_cast<uint16_t>(lhs) < static_cast<uint16_t>(rhs); }
-/* 16 : 16 */ template<>
-inline bool PrimitiveCmpLt(uint16_t lhs, int16_t rhs)
-{ return rhs < 0 ?
-		false : static_cast<uint16_t>(lhs) < static_cast<uint16_t>(rhs); }
-/* 16 : 32 */ template<>
-inline bool PrimitiveCmpLt(uint16_t lhs, int32_t rhs)
-{ return rhs < 0 ?
-		false : static_cast<uint32_t>(lhs) < static_cast<uint32_t>(rhs); }
-/* 16 : 64 */ template<>
-inline bool PrimitiveCmpLt(uint16_t lhs, int64_t rhs)
-{ return rhs < 0 ?
-		false : static_cast<uint64_t>(lhs) < static_cast<uint64_t>(rhs); }
-/* 16 : F  */ template<>
-inline bool PrimitiveCmpLt(uint16_t lhs, float rhs)
-{ return static_cast<float>(lhs) < (rhs); }
-/* 16 : D  */ template<>
-inline bool PrimitiveCmpLt(uint16_t lhs, double rhs)
-{ return static_cast<double>(lhs) < (rhs); }
-
-// uint32_t
-/* 32 : 8  */ template<>
-inline bool PrimitiveCmpLt(uint32_t lhs, uint8_t rhs)
-{ return (lhs) < static_cast<uint32_t>(rhs); }
-/* 32 : 16 */ template<>
-inline bool PrimitiveCmpLt(uint32_t lhs, uint16_t rhs)
-{ return (lhs) < static_cast<uint32_t>(rhs); }
-/* 32 : 32 */
-/* 32 : 64 */ template<>
-inline bool PrimitiveCmpLt(uint32_t lhs, uint64_t rhs)
-{ return static_cast<uint64_t>(lhs) < (rhs); }
-/* 32 : 8  */ template<>
-inline bool PrimitiveCmpLt(uint32_t lhs, int8_t rhs)
-{ return rhs < 0 ?
-		false : static_cast<uint32_t>(lhs) < static_cast<uint32_t>(rhs); }
-/* 32 : 16 */ template<>
-inline bool PrimitiveCmpLt(uint32_t lhs, int16_t rhs)
-{ return rhs < 0 ?
-		false : static_cast<uint32_t>(lhs) < static_cast<uint32_t>(rhs); }
-/* 32 : 32 */ template<>
-inline bool PrimitiveCmpLt(uint32_t lhs, int32_t rhs)
-{ return rhs < 0 ?
-		false : static_cast<uint32_t>(lhs) < static_cast<uint32_t>(rhs); }
-/* 32 : 64 */ template<>
-inline bool PrimitiveCmpLt(uint32_t lhs, int64_t rhs)
-{ return rhs < 0 ?
-		false : static_cast<uint64_t>(lhs) < static_cast<uint64_t>(rhs); }
-/* 32 : F  */ template<>
-inline bool PrimitiveCmpLt(uint32_t lhs, float rhs)
-{ return static_cast<float>(lhs) < (rhs); }
-/* 32 : D  */ template<>
-inline bool PrimitiveCmpLt(uint32_t lhs, double rhs)
-{ return static_cast<double>(lhs) < (rhs); }
-
-// uint64_t
-/* 64 : 8  */ template<>
-inline bool PrimitiveCmpLt(uint64_t lhs, uint8_t rhs)
-{ return (lhs) < static_cast<uint64_t>(rhs); }
-/* 64 : 16 */ template<>
-inline bool PrimitiveCmpLt(uint64_t lhs, uint16_t rhs)
-{ return (lhs) < static_cast<uint64_t>(rhs); }
-/* 64 : 32 */ template<>
-inline bool PrimitiveCmpLt(uint64_t lhs, uint32_t rhs)
-{ return (lhs) < static_cast<uint64_t>(rhs); }
-/* 64 : 64 */
-/* 64 : 8  */ template<>
-inline bool PrimitiveCmpLt(uint64_t lhs, int8_t rhs)
-{ return rhs < 0 ?
-		false : static_cast<uint64_t>(lhs) < static_cast<uint64_t>(rhs); }
-/* 64 : 16 */ template<>
-inline bool PrimitiveCmpLt(uint64_t lhs, int16_t rhs)
-{ return rhs < 0 ?
-		false : static_cast<uint64_t>(lhs) < static_cast<uint64_t>(rhs); }
-/* 64 : 32 */ template<>
-inline bool PrimitiveCmpLt(uint64_t lhs, int32_t rhs)
-{ return rhs < 0 ?
-		false : static_cast<uint64_t>(lhs) < static_cast<uint64_t>(rhs); }
-/* 64 : 64 */ template<>
-inline bool PrimitiveCmpLt(uint64_t lhs, int64_t rhs)
-{ return rhs < 0 ?
-		false : static_cast<uint64_t>(lhs) < static_cast<uint64_t>(rhs); }
-/* 64 : F  */ template<>
-inline bool PrimitiveCmpLt(uint64_t lhs, float rhs)
-{ return static_cast<float>(lhs) < (rhs); }
-/* 64 : D  */ template<>
-inline bool PrimitiveCmpLt(uint64_t lhs, double rhs)
-{ return static_cast<double>(lhs) < (rhs); }
-
-// int8_t
-/* 8  : 8  */ template<>
-inline bool PrimitiveCmpLt(int8_t lhs, uint8_t rhs)
-{ return lhs < 0 ?
-		true : static_cast<uint8_t>(lhs) < (rhs); }
-/* 8  : 16 */ template<>
-inline bool PrimitiveCmpLt(int8_t lhs, uint16_t rhs)
-{ return lhs < 0 ?
-		true : static_cast<uint16_t>(lhs) < (rhs); }
-/* 8  : 32 */ template<>
-inline bool PrimitiveCmpLt(int8_t lhs, uint32_t rhs)
-{ return lhs < 0 ?
-		true : static_cast<uint32_t>(lhs) < (rhs); }
-/* 8  : 64 */ template<>
-inline bool PrimitiveCmpLt(int8_t lhs, uint64_t rhs)
-{ return lhs < 0 ?
-		true : static_cast<uint64_t>(lhs) < (rhs); }
-/* 8  : 8  */
-/* 8  : 16 */ template<>
-inline bool PrimitiveCmpLt(int8_t lhs, int16_t rhs)
-{ return static_cast<int16_t>(lhs) < (rhs); }
-/* 8  : 32 */ template<>
-inline bool PrimitiveCmpLt(int8_t lhs, int32_t rhs)
-{ return static_cast<int32_t>(lhs) < (rhs); }
-/* 8  : 64 */ template<>
-inline bool PrimitiveCmpLt(int8_t lhs, int64_t rhs)
-{ return static_cast<int64_t>(lhs) < (rhs); }
-/* 8  : F  */ template<>
-inline bool PrimitiveCmpLt(int8_t lhs, float rhs)
-{ return static_cast<float>(lhs) < (rhs); }
-/* 8  : D  */ template<>
-inline bool PrimitiveCmpLt(int8_t lhs, double rhs)
-{ return static_cast<double>(lhs) < (rhs); }
-
-// int16_t
-/* 16 : 8  */ template<>
-inline bool PrimitiveCmpLt(int16_t lhs, uint8_t rhs)
-{ return lhs < 0 ?
-		true : static_cast<uint16_t>(lhs) < static_cast<uint16_t>(rhs); }
-/* 16 : 16 */ template<>
-inline bool PrimitiveCmpLt(int16_t lhs, uint16_t rhs)
-{ return lhs < 0 ?
-		true : static_cast<uint16_t>(lhs) < static_cast<uint16_t>(rhs); }
-/* 16 : 32 */ template<>
-inline bool PrimitiveCmpLt(int16_t lhs, uint32_t rhs)
-{ return lhs < 0 ?
-		true : static_cast<uint32_t>(lhs) < static_cast<uint32_t>(rhs); }
-/* 16 : 64 */ template<>
-inline bool PrimitiveCmpLt(int16_t lhs, uint64_t rhs)
-{ return lhs < 0 ?
-		true : static_cast<uint64_t>(lhs) < static_cast<uint64_t>(rhs); }
-/* 16 : 8  */ template<>
-inline bool PrimitiveCmpLt(int16_t lhs, int8_t rhs)
-{ return (lhs) < static_cast<int16_t>(rhs); }
-/* 16 : 16 */
-/* 16 : 32 */ template<>
-inline bool PrimitiveCmpLt(int16_t lhs, int32_t rhs)
-{ return static_cast<int32_t>(lhs) < (rhs); }
-/* 16 : 64 */ template<>
-inline bool PrimitiveCmpLt(int16_t lhs, int64_t rhs)
-{ return static_cast<int64_t>(lhs) < (rhs); }
-/* 16 : F  */ template<>
-inline bool PrimitiveCmpLt(int16_t lhs, float rhs)
-{ return static_cast<float>(lhs) < (rhs); }
-/* 16 : D  */ template<>
-inline bool PrimitiveCmpLt(int16_t lhs, double rhs)
-{ return static_cast<double>(lhs) < (rhs); }
-
-// int32_t
-/* 32 : 8  */ template<>
-inline bool PrimitiveCmpLt(int32_t lhs, uint8_t rhs)
-{ return lhs < 0 ?
-		true : static_cast<uint32_t>(lhs) < static_cast<uint32_t>(rhs); }
-/* 32 : 16 */ template<>
-inline bool PrimitiveCmpLt(int32_t lhs, uint16_t rhs)
-{ return lhs < 0 ?
-		true : static_cast<uint32_t>(lhs) < static_cast<uint32_t>(rhs); }
-/* 32 : 32 */ template<>
-inline bool PrimitiveCmpLt(int32_t lhs, uint32_t rhs)
-{ return lhs < 0 ?
-		true : static_cast<uint32_t>(lhs) < static_cast<uint32_t>(rhs); }
-/* 32 : 64 */ template<>
-inline bool PrimitiveCmpLt(int32_t lhs, uint64_t rhs)
-{ return lhs < 0 ?
-		true : static_cast<uint64_t>(lhs) < static_cast<uint64_t>(rhs); }
-/* 32 : 8  */ template<>
-inline bool PrimitiveCmpLt(int32_t lhs, int8_t rhs)
-{ return (lhs) < static_cast<int32_t>(rhs); }
-/* 32 : 16 */ template<>
-inline bool PrimitiveCmpLt(int32_t lhs, int16_t rhs)
-{ return (lhs) < static_cast<int32_t>(rhs); }
-/* 32 : 32 */
-/* 32 : 64 */ template<>
-inline bool PrimitiveCmpLt(int32_t lhs, int64_t rhs)
-{ return static_cast<int64_t>(lhs) < (rhs); }
-/* 32 : F  */ template<>
-inline bool PrimitiveCmpLt(int32_t lhs, float rhs)
-{ return static_cast<float>(lhs) < (rhs); }
-/* 32 : D  */ template<>
-inline bool PrimitiveCmpLt(int32_t lhs, double rhs)
-{ return static_cast<double>(lhs) < (rhs); }
-
-// int64_t
-/* 64 : 8  */ template<>
-inline bool PrimitiveCmpLt(int64_t lhs, uint8_t rhs)
-{ return lhs < 0 ?
-		true : static_cast<uint64_t>(lhs) < static_cast<uint64_t>(rhs); }
-/* 64 : 16 */ template<>
-inline bool PrimitiveCmpLt(int64_t lhs, uint16_t rhs)
-{ return lhs < 0 ?
-		true : static_cast<uint64_t>(lhs) < static_cast<uint64_t>(rhs); }
-/* 64 : 32 */ template<>
-inline bool PrimitiveCmpLt(int64_t lhs, uint32_t rhs)
-{ return lhs < 0 ?
-		true : static_cast<uint64_t>(lhs) < static_cast<uint64_t>(rhs); }
-/* 64 : 64 */ template<>
-inline bool PrimitiveCmpLt(int64_t lhs, uint64_t rhs)
-{ return lhs < 0 ?
-		true : static_cast<uint64_t>(lhs) < static_cast<uint64_t>(rhs); }
-/* 64 : 8  */ template<>
-inline bool PrimitiveCmpLt(int64_t lhs, int8_t rhs)
-{ return (lhs) < static_cast<int64_t>(rhs); }
-/* 64 : 16 */ template<>
-inline bool PrimitiveCmpLt(int64_t lhs, int16_t rhs)
-{ return (lhs) < static_cast<int64_t>(rhs); }
-/* 64 : 32 */ template<>
-inline bool PrimitiveCmpLt(int64_t lhs, int32_t rhs)
-{ return (lhs) < static_cast<int64_t>(rhs); }
-/* 64 : 64 */
-/* 64 : F  */ template<>
-inline bool PrimitiveCmpLt(int64_t lhs, float rhs)
-{ return static_cast<float>(lhs) < (rhs); }
-/* 64 : D  */ template<>
-inline bool PrimitiveCmpLt(int64_t lhs, double rhs)
-{ return static_cast<double>(lhs) < (rhs); }
-
-// float
-/* F  : 8  */ template<>
-inline bool PrimitiveCmpLt(float lhs, uint8_t rhs)
-{ return (lhs) < static_cast<float>(rhs); }
-/* F  : 16 */ template<>
-inline bool PrimitiveCmpLt(float lhs, uint16_t rhs)
-{ return (lhs) < static_cast<float>(rhs); }
-/* F  : 32 */ template<>
-inline bool PrimitiveCmpLt(float lhs, uint32_t rhs)
-{ return (lhs) < static_cast<float>(rhs); }
-/* F  : 64 */ template<>
-inline bool PrimitiveCmpLt(float lhs, uint64_t rhs)
-{ return (lhs) < static_cast<float>(rhs); }
-/* F  : 8  */ template<>
-inline bool PrimitiveCmpLt(float lhs, int8_t rhs)
-{ return (lhs) < static_cast<float>(rhs); }
-/* F  : 16 */ template<>
-inline bool PrimitiveCmpLt(float lhs, int16_t rhs)
-{ return (lhs) < static_cast<float>(rhs); }
-/* F  : 32 */ template<>
-inline bool PrimitiveCmpLt(float lhs, int32_t rhs)
-{ return (lhs) < static_cast<float>(rhs); }
-/* F  : 64 */ template<>
-inline bool PrimitiveCmpLt(float lhs, int64_t rhs)
-{ return (lhs) < static_cast<float>(rhs); }
-/* F  : D  */ template<>
-inline bool PrimitiveCmpLt(float lhs, double rhs)
-{ return static_cast<double>(lhs) < (rhs); }
-
-// double
-/* D  : 8  */ template<>
-inline bool PrimitiveCmpLt(double lhs, uint8_t rhs)
-{ return (lhs) < static_cast<double>(rhs); }
-/* D  : 16 */ template<>
-inline bool PrimitiveCmpLt(double lhs, uint16_t rhs)
-{ return (lhs) < static_cast<double>(rhs); }
-/* D  : 32 */ template<>
-inline bool PrimitiveCmpLt(double lhs, uint32_t rhs)
-{ return (lhs) < static_cast<double>(rhs); }
-/* D  : 64 */ template<>
-inline bool PrimitiveCmpLt(double lhs, uint64_t rhs)
-{ return (lhs) < static_cast<double>(rhs); }
-/* D  : 8  */ template<>
-inline bool PrimitiveCmpLt(double lhs, int8_t rhs)
-{ return (lhs) < static_cast<double>(rhs); }
-/* D  : 16 */ template<>
-inline bool PrimitiveCmpLt(double lhs, int16_t rhs)
-{ return (lhs) < static_cast<double>(rhs); }
-/* D  : 32 */ template<>
-inline bool PrimitiveCmpLt(double lhs, int32_t rhs)
-{ return (lhs) < static_cast<double>(rhs); }
-/* D  : 64 */ template<>
-inline bool PrimitiveCmpLt(double lhs, int64_t rhs)
-{ return (lhs) < static_cast<double>(rhs); }
-/* D  : F  */ template<>
-inline bool PrimitiveCmpLt(double lhs, float rhs)
-{ return (lhs) < static_cast<double>(rhs); }
-
-
-//========== PrimitiveCmpGt ==========
-
-// LHS is same as RHS
-template<typename _RLhsType>
-inline bool PrimitiveCmpGt(_RLhsType lhs, _RLhsType rhs)
+/**
+ * @brief A comparison that is safe against lossy integer conversion.
+ *        source: https://en.cppreference.com/w/cpp/utility/intcmp
+ *        Even though this is provided in C++20, we still need to support
+ *        older versions
+ *
+ * @tparam T
+ * @tparam U
+ * @param t
+ * @param u
+ * @return
+ */
+template<typename T, typename U>
+inline constexpr bool cmp_greater(T t, U u) noexcept
 {
-	return lhs > rhs;
+	return cmp_less(u, t);
 }
 
-// uint8_t
-/* 8  : 8  */
-/* 8  : 16 */ template<>
-inline bool PrimitiveCmpGt(uint8_t lhs, uint16_t rhs)
-{ return static_cast<uint16_t>(lhs) > (rhs); }
-/* 8  : 32 */ template<>
-inline bool PrimitiveCmpGt(uint8_t lhs, uint32_t rhs)
-{ return static_cast<uint32_t>(lhs) > (rhs); }
-/* 8  : 64 */ template<>
-inline bool PrimitiveCmpGt(uint8_t lhs, uint64_t rhs)
-{ return static_cast<uint64_t>(lhs) > (rhs); }
-/* 8  : 8  */ template<>
-inline bool PrimitiveCmpGt(uint8_t lhs, int8_t rhs)
-{ return rhs < 0 ?
-		true : (lhs) > static_cast<uint8_t>(rhs); }
-/* 8  : 16 */ template<>
-inline bool PrimitiveCmpGt(uint8_t lhs, int16_t rhs)
-{ return rhs < 0 ?
-		true : static_cast<uint16_t>(lhs) > static_cast<uint16_t>(rhs); }
-/* 8  : 32 */ template<>
-inline bool PrimitiveCmpGt(uint8_t lhs, int32_t rhs)
-{ return rhs < 0 ?
-		true : static_cast<uint32_t>(lhs) > static_cast<uint32_t>(rhs); }
-/* 8  : 64 */ template<>
-inline bool PrimitiveCmpGt(uint8_t lhs, int64_t rhs)
-{ return rhs < 0 ?
-		true : static_cast<uint64_t>(lhs) > static_cast<uint64_t>(rhs); }
-/* 8  : F  */ template<>
-inline bool PrimitiveCmpGt(uint8_t lhs, float rhs)
-{ return static_cast<float>(lhs) > (rhs); }
-/* 8  : D  */ template<>
-inline bool PrimitiveCmpGt(uint8_t lhs, double rhs)
-{ return static_cast<double>(lhs) > (rhs); }
+/**
+ * @brief Comparison for custom class types. Implementation is not given.
+ *        The user should provide their own implementation using template
+ *        specialization
+ *
+ * @tparam _LhsType
+ * @tparam _RhsType
+ */
+template<typename _LhsType, typename _RhsType>
+struct CustomCompare;
 
-// uint16_t
-/* 16 : 8  */ template<>
-inline bool PrimitiveCmpGt(uint16_t lhs, uint8_t rhs)
-{ return (lhs) > static_cast<uint16_t>(rhs); }
-/* 16 : 16 */
-/* 16 : 32 */ template<>
-inline bool PrimitiveCmpGt(uint16_t lhs, uint32_t rhs)
-{ return static_cast<uint32_t>(lhs) > (rhs); }
-/* 16 : 64 */ template<>
-inline bool PrimitiveCmpGt(uint16_t lhs, uint64_t rhs)
-{ return static_cast<uint64_t>(lhs) > (rhs); }
-/* 16 : 8  */ template<>
-inline bool PrimitiveCmpGt(uint16_t lhs, int8_t rhs)
-{ return rhs < 0 ?
-		true : static_cast<uint16_t>(lhs) > static_cast<uint16_t>(rhs); }
-/* 16 : 16 */ template<>
-inline bool PrimitiveCmpGt(uint16_t lhs, int16_t rhs)
-{ return rhs < 0 ?
-		true : static_cast<uint16_t>(lhs) > static_cast<uint16_t>(rhs); }
-/* 16 : 32 */ template<>
-inline bool PrimitiveCmpGt(uint16_t lhs, int32_t rhs)
-{ return rhs < 0 ?
-		true : static_cast<uint32_t>(lhs) > static_cast<uint32_t>(rhs); }
-/* 16 : 64 */ template<>
-inline bool PrimitiveCmpGt(uint16_t lhs, int64_t rhs)
-{ return rhs < 0 ?
-		true : static_cast<uint64_t>(lhs) > static_cast<uint64_t>(rhs); }
-/* 16 : F  */ template<>
-inline bool PrimitiveCmpGt(uint16_t lhs, float rhs)
-{ return static_cast<float>(lhs) > (rhs); }
-/* 16 : D  */ template<>
-inline bool PrimitiveCmpGt(uint16_t lhs, double rhs)
-{ return static_cast<double>(lhs) > (rhs); }
+template<bool _IsBothPrimitive, typename _LhsType, typename _RhsType>
+struct CompareImpl;
 
-// uint32_t
-/* 32 : 8  */ template<>
-inline bool PrimitiveCmpGt(uint32_t lhs, uint8_t rhs)
-{ return (lhs) > static_cast<uint32_t>(rhs); }
-/* 32 : 16 */ template<>
-inline bool PrimitiveCmpGt(uint32_t lhs, uint16_t rhs)
-{ return (lhs) > static_cast<uint32_t>(rhs); }
-/* 32 : 32 */
-/* 32 : 64 */ template<>
-inline bool PrimitiveCmpGt(uint32_t lhs, uint64_t rhs)
-{ return static_cast<uint64_t>(lhs) > (rhs); }
-/* 32 : 8  */ template<>
-inline bool PrimitiveCmpGt(uint32_t lhs, int8_t rhs)
-{ return rhs < 0 ?
-		true : static_cast<uint32_t>(lhs) > static_cast<uint32_t>(rhs); }
-/* 32 : 16 */ template<>
-inline bool PrimitiveCmpGt(uint32_t lhs, int16_t rhs)
-{ return rhs < 0 ?
-		true : static_cast<uint32_t>(lhs) > static_cast<uint32_t>(rhs); }
-/* 32 : 32 */ template<>
-inline bool PrimitiveCmpGt(uint32_t lhs, int32_t rhs)
-{ return rhs < 0 ?
-		true : static_cast<uint32_t>(lhs) > static_cast<uint32_t>(rhs); }
-/* 32 : 64 */ template<>
-inline bool PrimitiveCmpGt(uint32_t lhs, int64_t rhs)
-{ return rhs < 0 ?
-		true : static_cast<uint64_t>(lhs) > static_cast<uint64_t>(rhs); }
-/* 32 : F  */ template<>
-inline bool PrimitiveCmpGt(uint32_t lhs, float rhs)
-{ return static_cast<float>(lhs) > (rhs); }
-/* 32 : D  */ template<>
-inline bool PrimitiveCmpGt(uint32_t lhs, double rhs)
-{ return static_cast<double>(lhs) > (rhs); }
+template<typename _LhsType, typename _RhsType>
+struct CompareImpl<true, _LhsType, _RhsType>
+{
+	static constexpr bool Less(_LhsType lhs, _RhsType rhs)
+	{
+		return cmp_less(lhs, rhs);
+	}
 
-// uint64_t
-/* 64 : 8  */ template<>
-inline bool PrimitiveCmpGt(uint64_t lhs, uint8_t rhs)
-{ return (lhs) > static_cast<uint64_t>(rhs); }
-/* 64 : 16 */ template<>
-inline bool PrimitiveCmpGt(uint64_t lhs, uint16_t rhs)
-{ return (lhs) > static_cast<uint64_t>(rhs); }
-/* 64 : 32 */ template<>
-inline bool PrimitiveCmpGt(uint64_t lhs, uint32_t rhs)
-{ return (lhs) > static_cast<uint64_t>(rhs); }
-/* 64 : 64 */
-/* 64 : 8  */ template<>
-inline bool PrimitiveCmpGt(uint64_t lhs, int8_t rhs)
-{ return rhs < 0 ?
-		true : static_cast<uint64_t>(lhs) > static_cast<uint64_t>(rhs); }
-/* 64 : 16 */ template<>
-inline bool PrimitiveCmpGt(uint64_t lhs, int16_t rhs)
-{ return rhs < 0 ?
-		true : static_cast<uint64_t>(lhs) > static_cast<uint64_t>(rhs); }
-/* 64 : 32 */ template<>
-inline bool PrimitiveCmpGt(uint64_t lhs, int32_t rhs)
-{ return rhs < 0 ?
-		true : static_cast<uint64_t>(lhs) > static_cast<uint64_t>(rhs); }
-/* 64 : 64 */ template<>
-inline bool PrimitiveCmpGt(uint64_t lhs, int64_t rhs)
-{ return rhs < 0 ?
-		true : static_cast<uint64_t>(lhs) > static_cast<uint64_t>(rhs); }
-/* 64 : F  */ template<>
-inline bool PrimitiveCmpGt(uint64_t lhs, float rhs)
-{ return static_cast<float>(lhs) > (rhs); }
-/* 64 : D  */ template<>
-inline bool PrimitiveCmpGt(uint64_t lhs, double rhs)
-{ return static_cast<double>(lhs) > (rhs); }
+	static constexpr bool Greater(_LhsType lhs, _RhsType rhs)
+	{
+		return cmp_greater(lhs, rhs);
+	}
+}; // struct CompareImpl
 
-// int8_t
-/* 8  : 8  */ template<>
-inline bool PrimitiveCmpGt(int8_t lhs, uint8_t rhs)
-{ return lhs < 0 ?
-		false : static_cast<uint8_t>(lhs) > (rhs); }
-/* 8  : 16 */ template<>
-inline bool PrimitiveCmpGt(int8_t lhs, uint16_t rhs)
-{ return lhs < 0 ?
-		false : static_cast<uint16_t>(lhs) > (rhs); }
-/* 8  : 32 */ template<>
-inline bool PrimitiveCmpGt(int8_t lhs, uint32_t rhs)
-{ return lhs < 0 ?
-		false : static_cast<uint32_t>(lhs) > (rhs); }
-/* 8  : 64 */ template<>
-inline bool PrimitiveCmpGt(int8_t lhs, uint64_t rhs)
-{ return lhs < 0 ?
-		false : static_cast<uint64_t>(lhs) > (rhs); }
-/* 8  : 8  */
-/* 8  : 16 */ template<>
-inline bool PrimitiveCmpGt(int8_t lhs, int16_t rhs)
-{ return static_cast<int16_t>(lhs) > (rhs); }
-/* 8  : 32 */ template<>
-inline bool PrimitiveCmpGt(int8_t lhs, int32_t rhs)
-{ return static_cast<int32_t>(lhs) > (rhs); }
-/* 8  : 64 */ template<>
-inline bool PrimitiveCmpGt(int8_t lhs, int64_t rhs)
-{ return static_cast<int64_t>(lhs) > (rhs); }
-/* 8  : F  */ template<>
-inline bool PrimitiveCmpGt(int8_t lhs, float rhs)
-{ return static_cast<float>(lhs) > (rhs); }
-/* 8  : D  */ template<>
-inline bool PrimitiveCmpGt(int8_t lhs, double rhs)
-{ return static_cast<double>(lhs) > (rhs); }
+template<typename _LhsType, typename _RhsType>
+struct CompareImpl<false, _LhsType, _RhsType>
+{
+	static constexpr bool Less(const _LhsType& lhs, const _RhsType& rhs)
+	{
+		return CustomCompare<_LhsType, _RhsType>::Less(lhs, rhs);
+	}
 
-// int16_t
-/* 16 : 8  */ template<>
-inline bool PrimitiveCmpGt(int16_t lhs, uint8_t rhs)
-{ return lhs < 0 ?
-		false : static_cast<uint16_t>(lhs) > static_cast<uint16_t>(rhs); }
-/* 16 : 16 */ template<>
-inline bool PrimitiveCmpGt(int16_t lhs, uint16_t rhs)
-{ return lhs < 0 ?
-		false : static_cast<uint16_t>(lhs) > static_cast<uint16_t>(rhs); }
-/* 16 : 32 */ template<>
-inline bool PrimitiveCmpGt(int16_t lhs, uint32_t rhs)
-{ return lhs < 0 ?
-		false : static_cast<uint32_t>(lhs) > static_cast<uint32_t>(rhs); }
-/* 16 : 64 */ template<>
-inline bool PrimitiveCmpGt(int16_t lhs, uint64_t rhs)
-{ return lhs < 0 ?
-		false : static_cast<uint64_t>(lhs) > static_cast<uint64_t>(rhs); }
-/* 16 : 8  */ template<>
-inline bool PrimitiveCmpGt(int16_t lhs, int8_t rhs)
-{ return (lhs) > static_cast<int16_t>(rhs); }
-/* 16 : 16 */
-/* 16 : 32 */ template<>
-inline bool PrimitiveCmpGt(int16_t lhs, int32_t rhs)
-{ return static_cast<int32_t>(lhs) > (rhs); }
-/* 16 : 64 */ template<>
-inline bool PrimitiveCmpGt(int16_t lhs, int64_t rhs)
-{ return static_cast<int64_t>(lhs) > (rhs); }
-/* 16 : F  */ template<>
-inline bool PrimitiveCmpGt(int16_t lhs, float rhs)
-{ return static_cast<float>(lhs) > (rhs); }
-/* 16 : D  */ template<>
-inline bool PrimitiveCmpGt(int16_t lhs, double rhs)
-{ return static_cast<double>(lhs) > (rhs); }
+	static constexpr bool Greater(const _LhsType& lhs, const _RhsType& rhs)
+	{
+		return CustomCompare<_LhsType, _RhsType>::Greater(lhs, rhs);
+	}
+}; // struct CompareImpl
 
-// int32_t
-/* 32 : 8  */ template<>
-inline bool PrimitiveCmpGt(int32_t lhs, uint8_t rhs)
-{ return lhs < 0 ?
-		false : static_cast<uint32_t>(lhs) > static_cast<uint32_t>(rhs); }
-/* 32 : 16 */ template<>
-inline bool PrimitiveCmpGt(int32_t lhs, uint16_t rhs)
-{ return lhs < 0 ?
-		false : static_cast<uint32_t>(lhs) > static_cast<uint32_t>(rhs); }
-/* 32 : 32 */ template<>
-inline bool PrimitiveCmpGt(int32_t lhs, uint32_t rhs)
-{ return lhs < 0 ?
-		false : static_cast<uint32_t>(lhs) > static_cast<uint32_t>(rhs); }
-/* 32 : 64 */ template<>
-inline bool PrimitiveCmpGt(int32_t lhs, uint64_t rhs)
-{ return lhs < 0 ?
-		false : static_cast<uint64_t>(lhs) > static_cast<uint64_t>(rhs); }
-/* 32 : 8  */ template<>
-inline bool PrimitiveCmpGt(int32_t lhs, int8_t rhs)
-{ return (lhs) > static_cast<int32_t>(rhs); }
-/* 32 : 16 */ template<>
-inline bool PrimitiveCmpGt(int32_t lhs, int16_t rhs)
-{ return (lhs) > static_cast<int32_t>(rhs); }
-/* 32 : 32 */
-/* 32 : 64 */ template<>
-inline bool PrimitiveCmpGt(int32_t lhs, int64_t rhs)
-{ return static_cast<int64_t>(lhs) > (rhs); }
-/* 32 : F  */ template<>
-inline bool PrimitiveCmpGt(int32_t lhs, float rhs)
-{ return static_cast<float>(lhs) > (rhs); }
-/* 32 : D  */ template<>
-inline bool PrimitiveCmpGt(int32_t lhs, double rhs)
-{ return static_cast<double>(lhs) > (rhs); }
+template<typename _LhsType, typename _RhsType>
+struct CompareFilterDouble;
 
-// int64_t
-/* 64 : 8  */ template<>
-inline bool PrimitiveCmpGt(int64_t lhs, uint8_t rhs)
-{ return lhs < 0 ?
-		false : static_cast<uint64_t>(lhs) > static_cast<uint64_t>(rhs); }
-/* 64 : 16 */ template<>
-inline bool PrimitiveCmpGt(int64_t lhs, uint16_t rhs)
-{ return lhs < 0 ?
-		false : static_cast<uint64_t>(lhs) > static_cast<uint64_t>(rhs); }
-/* 64 : 32 */ template<>
-inline bool PrimitiveCmpGt(int64_t lhs, uint32_t rhs)
-{ return lhs < 0 ?
-		false : static_cast<uint64_t>(lhs) > static_cast<uint64_t>(rhs); }
-/* 64 : 64 */ template<>
-inline bool PrimitiveCmpGt(int64_t lhs, uint64_t rhs)
-{ return lhs < 0 ?
-		false : static_cast<uint64_t>(lhs) > static_cast<uint64_t>(rhs); }
-/* 64 : 8  */ template<>
-inline bool PrimitiveCmpGt(int64_t lhs, int8_t rhs)
-{ return (lhs) > static_cast<int64_t>(rhs); }
-/* 64 : 16 */ template<>
-inline bool PrimitiveCmpGt(int64_t lhs, int16_t rhs)
-{ return (lhs) > static_cast<int64_t>(rhs); }
-/* 64 : 32 */ template<>
-inline bool PrimitiveCmpGt(int64_t lhs, int32_t rhs)
-{ return (lhs) > static_cast<int64_t>(rhs); }
-/* 64 : 64 */
-/* 64 : F  */ template<>
-inline bool PrimitiveCmpGt(int64_t lhs, float rhs)
-{ return static_cast<float>(lhs) > (rhs); }
-/* 64 : D  */ template<>
-inline bool PrimitiveCmpGt(int64_t lhs, double rhs)
-{ return static_cast<double>(lhs) > (rhs); }
+template<typename _LhsType, typename _RhsType>
+struct CompareFilterDouble
+{ // next to impl
 
-// float
-/* F  : 8  */ template<>
-inline bool PrimitiveCmpGt(float lhs, uint8_t rhs)
-{ return (lhs) > static_cast<float>(rhs); }
-/* F  : 16 */ template<>
-inline bool PrimitiveCmpGt(float lhs, uint16_t rhs)
-{ return (lhs) > static_cast<float>(rhs); }
-/* F  : 32 */ template<>
-inline bool PrimitiveCmpGt(float lhs, uint32_t rhs)
-{ return (lhs) > static_cast<float>(rhs); }
-/* F  : 64 */ template<>
-inline bool PrimitiveCmpGt(float lhs, uint64_t rhs)
-{ return (lhs) > static_cast<float>(rhs); }
-/* F  : 8  */ template<>
-inline bool PrimitiveCmpGt(float lhs, int8_t rhs)
-{ return (lhs) > static_cast<float>(rhs); }
-/* F  : 16 */ template<>
-inline bool PrimitiveCmpGt(float lhs, int16_t rhs)
-{ return (lhs) > static_cast<float>(rhs); }
-/* F  : 32 */ template<>
-inline bool PrimitiveCmpGt(float lhs, int32_t rhs)
-{ return (lhs) > static_cast<float>(rhs); }
-/* F  : 64 */ template<>
-inline bool PrimitiveCmpGt(float lhs, int64_t rhs)
-{ return (lhs) > static_cast<float>(rhs); }
-/* F  : D  */ template<>
-inline bool PrimitiveCmpGt(float lhs, double rhs)
-{ return static_cast<double>(lhs) > (rhs); }
+	static constexpr bool sk_isBothPrimitive = (
+		IsPrimitiveType<_LhsType>::value &&
+		IsPrimitiveType<_RhsType>::value);
 
-// double
-/* D  : 8  */ template<>
-inline bool PrimitiveCmpGt(double lhs, uint8_t rhs)
-{ return (lhs) > static_cast<double>(rhs); }
-/* D  : 16 */ template<>
-inline bool PrimitiveCmpGt(double lhs, uint16_t rhs)
-{ return (lhs) > static_cast<double>(rhs); }
-/* D  : 32 */ template<>
-inline bool PrimitiveCmpGt(double lhs, uint32_t rhs)
-{ return (lhs) > static_cast<double>(rhs); }
-/* D  : 64 */ template<>
-inline bool PrimitiveCmpGt(double lhs, uint64_t rhs)
-{ return (lhs) > static_cast<double>(rhs); }
-/* D  : 8  */ template<>
-inline bool PrimitiveCmpGt(double lhs, int8_t rhs)
-{ return (lhs) > static_cast<double>(rhs); }
-/* D  : 16 */ template<>
-inline bool PrimitiveCmpGt(double lhs, int16_t rhs)
-{ return (lhs) > static_cast<double>(rhs); }
-/* D  : 32 */ template<>
-inline bool PrimitiveCmpGt(double lhs, int32_t rhs)
-{ return (lhs) > static_cast<double>(rhs); }
-/* D  : 64 */ template<>
-inline bool PrimitiveCmpGt(double lhs, int64_t rhs)
-{ return (lhs) > static_cast<double>(rhs); }
-/* D  : F  */ template<>
-inline bool PrimitiveCmpGt(double lhs, float rhs)
-{ return (lhs) > static_cast<double>(rhs); }
+	static constexpr bool Less(const _LhsType& lhs, const _RhsType& rhs)
+	{
+		return CompareImpl<
+			sk_isBothPrimitive, _LhsType, _RhsType>::Less(lhs, rhs);
+	}
+
+	static constexpr bool Greater(const _LhsType& lhs, const _RhsType& rhs)
+	{
+		return CompareImpl<
+			sk_isBothPrimitive, _LhsType, _RhsType>::Greater(lhs, rhs);
+	}
+}; // struct CompareFilterDouble
+
+template<typename _RhsType>
+struct CompareFilterDouble<double, _RhsType>
+{
+	static constexpr bool Less(double lhs, const _RhsType& rhs)
+	{ return lhs < rhs; }
+	static constexpr bool Greater(double lhs, const _RhsType& rhs)
+	{ return lhs > rhs; }
+}; // struct CompareFilterDouble
+
+template<typename _LhsType>
+struct CompareFilterDouble<_LhsType, double>
+{
+	static constexpr bool Less(const _LhsType& lhs, double rhs)
+	{ return lhs < rhs; }
+	static constexpr bool Greater(const _LhsType& lhs, double rhs)
+	{ return lhs > rhs; }
+}; // struct CompareFilterDouble
+
+template<typename _LhsType, typename _RhsType>
+struct CompareFilterFloat;
+
+template<typename _LhsType, typename _RhsType>
+struct CompareFilterFloat
+{ // next to filter double
+	static constexpr bool Less(const _LhsType& lhs, const _RhsType& rhs)
+	{
+		return CompareFilterDouble<_LhsType, _RhsType>::Less(lhs, rhs);
+	}
+	static constexpr bool Greater(const _LhsType& lhs, const _RhsType& rhs)
+	{
+		return CompareFilterDouble<_LhsType, _RhsType>::Greater(lhs, rhs);
+	}
+}; // struct CompareFilterFloat
+
+template<typename _RhsType>
+struct CompareFilterFloat<float, _RhsType>
+{
+	static constexpr bool Less(float lhs, const _RhsType& rhs)
+	{ return lhs < rhs; }
+	static constexpr bool Greater(float lhs, const _RhsType& rhs)
+	{ return lhs > rhs; }
+}; // struct CompareFilterFloat
+
+template<typename _LhsType>
+struct CompareFilterFloat<_LhsType, float>
+{
+	static constexpr bool Less(const _LhsType& lhs, float rhs)
+	{ return lhs < rhs; }
+	static constexpr bool Greater(const _LhsType& lhs, float rhs)
+	{ return lhs > rhs; }
+}; // struct CompareFilterFloat
+
+template<typename _LhsType, typename _RhsType>
+struct CompareFilterBool;
+
+template<typename _LhsType, typename _RhsType>
+struct CompareFilterBool
+{ // next to filter float
+	static constexpr bool Less(const _LhsType& lhs, const _RhsType& rhs)
+	{
+		return CompareFilterFloat<_LhsType, _RhsType>::Less(lhs, rhs);
+	}
+	static constexpr bool Greater(const _LhsType& lhs, const _RhsType& rhs)
+	{
+		return CompareFilterFloat<_LhsType, _RhsType>::Greater(lhs, rhs);
+	}
+}; // struct CompareFilterBool
+
+template<typename _RhsType>
+struct CompareFilterBool<bool, _RhsType>
+{
+	static constexpr bool Less(bool lhs, const _RhsType& rhs)
+	{ return static_cast<_RhsType>(lhs) < rhs; }
+	static constexpr bool Greater(bool lhs, const _RhsType& rhs)
+	{ return static_cast<_RhsType>(lhs) > rhs; }
+}; // struct CompareFilterBool
+
+template<typename _LhsType>
+struct CompareFilterBool<_LhsType, bool>
+{
+	static constexpr bool Less(const _LhsType& lhs, bool rhs)
+	{ return lhs < static_cast<_LhsType>(rhs); }
+	static constexpr bool Greater(const _LhsType& lhs, bool rhs)
+	{ return lhs > static_cast<_LhsType>(rhs); }
+}; // struct CompareFilterBool
+
+template<typename _LhsType, typename _RhsType>
+struct CompareFilterSame;
+
+template<typename _LhsType, typename _RhsType>
+struct CompareFilterSame
+{ // next to filter bool
+	static constexpr bool Less(const _LhsType& lhs, const _RhsType& rhs)
+	{
+		return CompareFilterBool<_LhsType, _RhsType>::Less(lhs, rhs);
+	}
+	static constexpr bool Greater(const _LhsType& lhs, const _RhsType& rhs)
+	{
+		return CompareFilterBool<_LhsType, _RhsType>::Greater(lhs, rhs);
+	}
+}; // struct CompareFilterSame
+
+template<typename _Type>
+struct CompareFilterSame<_Type, _Type>
+{
+	static constexpr bool Less(const _Type& lhs, const _Type& rhs)
+	{ return lhs < rhs; }
+	static constexpr bool Greater(const _Type& lhs, const _Type& rhs)
+	{ return lhs > rhs; }
+}; // struct CompareFilterSame
+
+template<typename _LhsType, typename _RhsType>
+struct Compare;
+
+template<typename _LhsType, typename _RhsType>
+struct Compare
+{
+	static constexpr bool Less(const _LhsType& lhs, const _RhsType& rhs)
+	{
+		return CompareFilterSame<_LhsType, _RhsType>::Less(lhs, rhs);
+	}
+
+	static constexpr bool Greater(const _LhsType& lhs, const _RhsType& rhs)
+	{
+		return CompareFilterSame<_LhsType, _RhsType>::Greater(lhs, rhs);
+	}
+
+	static constexpr bool LessEqual(const _LhsType& lhs, const _RhsType& rhs)
+	{
+		return !Greater(lhs, rhs);
+	}
+
+	static constexpr bool GreaterEqual(const _LhsType& lhs, const _RhsType& rhs)
+	{
+		return !Less(lhs, rhs);
+	}
+}; // struct Compare
+
+static_assert(!(static_cast<uint32_t>(10) > static_cast<int32_t>(-20)),
+	"Implementation Error");
+static_assert(Compare<uint32_t, int32_t>::Greater(
+	static_cast<uint32_t>(10), static_cast<int32_t>(-20)),
+	"Implementation Error");
+static_assert(!(static_cast<int32_t>(-20) < static_cast<uint32_t>(10)),
+	"Implementation Error");
+static_assert(Compare<int32_t, uint32_t>::Less(
+	static_cast<int32_t>(-20), static_cast<uint32_t>(10)),
+	"Implementation Error");
+
+static_assert(!(static_cast<uint32_t>(10) >= static_cast<int32_t>(-20)),
+	"Implementation Error");
+static_assert(Compare<uint32_t, int32_t>::GreaterEqual(
+	static_cast<uint32_t>(10), static_cast<int32_t>(-20)),
+	"Implementation Error");
+static_assert(!(static_cast<int32_t>(-20) <= static_cast<uint32_t>(10)),
+	"Implementation Error");
+static_assert(Compare<int32_t, uint32_t>::LessEqual(
+	static_cast<int32_t>(-20), static_cast<uint32_t>(10)),
+	"Implementation Error");
+
+static_assert((static_cast<uint32_t>(10) >= static_cast<double>(-20)),
+	"Implementation Error");
+static_assert(Compare<uint32_t, double>::GreaterEqual(
+	static_cast<uint32_t>(10), static_cast<double>(-20)),
+	"Implementation Error");
+static_assert((static_cast<double>(-20) <= static_cast<uint32_t>(10)),
+	"Implementation Error");
+static_assert(Compare<double, uint32_t>::LessEqual(
+	static_cast<double>(-20), static_cast<uint32_t>(10)),
+	"Implementation Error");
 
 } // namespace Internal
 } // namespace SimpleObjects

@@ -23,6 +23,12 @@ public: // Static member:
 	using ToStringType = _ToStringType;
 	using Self = NullImpl<_ToStringType>;
 	using Base = HashableBaseObject<_ToStringType>;
+	using BaseBase = typename Base::Base;
+
+	static_assert(std::is_same<BaseBase, BaseObject<_ToStringType> >::value,
+		"Expecting Base::Base to be BaseObject class");
+
+	using NullBase = typename BaseBase::NullBase;
 
 	static constexpr ObjCategory sk_cat()
 	{
@@ -55,20 +61,94 @@ public:
 		return 0;
 	}
 
+	using BaseBase::Set;
+
+	virtual void Set(const BaseBase& other) override
+	{
+		try
+		{
+			const Self& casted = dynamic_cast<const Self&>(other);
+			*this = casted;
+		}
+		catch(const std::bad_cast&)
+		{
+			throw TypeError("Null", this->GetCategoryName());
+		}
+	}
+
+	virtual void Set(BaseBase&& other) override
+	{
+		try
+		{
+			Self&& casted = dynamic_cast<Self&&>(other);
+			*this = std::forward<Self>(casted);
+		}
+		catch(const std::bad_cast&)
+		{
+			throw TypeError("Null", this->GetCategoryName());
+		}
+	}
+
 	virtual bool IsNull() const override
 	{
 		return true;
 	}
 
-	virtual Self& AsNull() override
+	virtual bool IsTrue() const override
 	{
-		return *this;
+		return false;
 	}
 
-	virtual const Self& AsNull() const override
+	virtual NullBase& AsNull() override
 	{
-		return *this;
+		return Internal::AsChildType<
+				std::is_same<Self, NullBase>::value, Self, NullBase
+			>::AsChild(*this, "Null", this->GetCategoryName());
 	}
+
+	virtual const NullBase& AsNull() const override
+	{
+		return Internal::AsChildType<
+				std::is_same<Self, NullBase>::value, Self, NullBase
+			>::AsChild(*this, "Null", this->GetCategoryName());
+	}
+
+	virtual bool operator==(const Self& rhs) const
+	{
+		return true;
+	}
+
+	virtual bool operator!=(const Self& rhs) const
+	{
+		return false;
+	}
+
+	bool operator<(const Self& rhs) const = delete;
+	bool operator>(const Self& rhs) const = delete;
+	bool operator<=(const Self& rhs) const = delete;
+	bool operator>=(const Self& rhs) const = delete;
+
+	virtual bool operator==(const BaseBase& rhs) const override
+	{
+		return rhs.IsNull();
+	}
+
+	using BaseBase::operator!=;
+
+	virtual bool operator<(const BaseBase& rhs) const override
+	{
+		throw UnsupportedOperation("<",
+			this->GetCategoryName(), rhs.GetCategoryName());
+	}
+
+	virtual bool operator>(const BaseBase& rhs) const override
+	{
+		throw UnsupportedOperation(">",
+			this->GetCategoryName(), rhs.GetCategoryName());
+	}
+
+	using BaseBase::operator<=;
+	using BaseBase::operator>=;
 
 	using Base::Copy;
 	virtual std::unique_ptr<Base> Copy(const Base* /*unused*/) const override

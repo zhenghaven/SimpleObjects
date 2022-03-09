@@ -38,6 +38,9 @@ GTEST_TEST(TestString, Construction)
 		base.reset(new String());
 		base.reset();
 	});
+	EXPECT_EQ(String(std::string("test1")).GetVal(), "test1");
+	std::string testStr2 = "test2";
+	EXPECT_EQ(String(testStr2).GetVal(), testStr2);
 
 	// from const char*
 	EXPECT_EQ(String("test string").GetVal(), std::string("test string"));
@@ -84,16 +87,18 @@ GTEST_TEST(TestString, Miscs)
 	// Cast
 	const auto kStr = String();
 	EXPECT_NO_THROW(kStr.AsString());
-	EXPECT_THROW(kStr.AsNull(), TypeError);
-	EXPECT_THROW(kStr.AsNumeric(), TypeError);
-	EXPECT_THROW(kStr.AsList(), TypeError);
-	EXPECT_THROW(kStr.AsDict(), TypeError);
+	EXPECT_THROW(kStr.AsNull(),       TypeError);
+	EXPECT_THROW(kStr.AsNumeric(),    TypeError);
+	EXPECT_THROW(kStr.AsList(),       TypeError);
+	EXPECT_THROW(kStr.AsDict(),       TypeError);
+	EXPECT_THROW(kStr.AsStaticDict(), TypeError);
 
 	EXPECT_NO_THROW(String().AsString());
-	EXPECT_THROW(String().AsNull(), TypeError);
-	EXPECT_THROW(String().AsNumeric(), TypeError);
-	EXPECT_THROW(String().AsList(), TypeError);
-	EXPECT_THROW(String().AsDict(), TypeError);
+	EXPECT_THROW(String().AsNull(),       TypeError);
+	EXPECT_THROW(String().AsNumeric(),    TypeError);
+	EXPECT_THROW(String().AsList(),       TypeError);
+	EXPECT_THROW(String().AsDict(),       TypeError);
+	EXPECT_THROW(String().AsStaticDict(), TypeError);
 
 	// Copy
 	static_assert(std::is_same<
@@ -134,6 +139,40 @@ GTEST_TEST(TestString, Miscs)
 	mStr = String("Test");
 	EXPECT_EQ(*mStr.Move(String::Base::Base::Base::sk_null), String("Test"));
 	EXPECT_EQ(mStr.size(), 0);
+}
+
+GTEST_TEST(TestString, Setters)
+{
+	String str1;
+	EXPECT_NO_THROW(String().Set(String()));
+	EXPECT_NO_THROW(String().Set(str1));
+
+	Null null1;
+	EXPECT_THROW(String().Set(Null()), TypeError);
+	EXPECT_THROW(String().Set(null1), TypeError);
+
+	EXPECT_THROW(String().Set(static_cast<bool >(true)), TypeError);
+	EXPECT_THROW(String().Set(static_cast<uint8_t >(1)), TypeError);
+	EXPECT_THROW(String().Set(static_cast< int8_t >(1)), TypeError);
+	EXPECT_THROW(String().Set(static_cast<uint32_t>(1)), TypeError);
+	EXPECT_THROW(String().Set(static_cast< int32_t>(1)), TypeError);
+	EXPECT_THROW(String().Set(static_cast<uint64_t>(1)), TypeError);
+	EXPECT_THROW(String().Set(static_cast< int64_t>(1)), TypeError);
+	EXPECT_THROW(String().Set(static_cast<double>(1.0)), TypeError);
+}
+
+GTEST_TEST(TestString, Getters)
+{
+	EXPECT_FALSE(String().IsTrue());
+	EXPECT_TRUE( String("T").IsTrue());
+
+	EXPECT_THROW(String().AsCppUInt8() ,  TypeError);
+	EXPECT_THROW(String().AsCppInt8()  ,  TypeError);
+	EXPECT_THROW(String().AsCppUInt32(),  TypeError);
+	EXPECT_THROW(String().AsCppInt32() ,  TypeError);
+	EXPECT_THROW(String().AsCppUInt64(),  TypeError);
+	EXPECT_THROW(String().AsCppInt64() ,  TypeError);
+	EXPECT_THROW(String().AsCppDouble() , TypeError);
 }
 
 GTEST_TEST(TestString, Hash)

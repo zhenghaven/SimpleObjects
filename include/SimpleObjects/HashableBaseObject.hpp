@@ -64,11 +64,44 @@ public:
 
 }; // class HashableBaseObject
 
+template<typename _T>
+class HashableReferenceWrapper : public std::reference_wrapper<_T>
+{
+public: // static members:
+
+	using Base = std::reference_wrapper<_T>;
+	using Self = HashableReferenceWrapper<_T>;
+
+public:
+
+	using Base::Base;
+
+	// LCOV_EXCL_START
+	/**
+	 * @brief Destroy the Hashable Reference Wrapper object
+	 *
+	 */
+	virtual ~HashableReferenceWrapper() = default;
+	// LCOV_EXCL_STOP
+
+	bool operator==(const Self& rhs) const
+	{
+		return this->get() == rhs.get();
+	}
+
+	bool operator<(const Self& rhs) const
+	{
+		return this->get() < rhs.get();
+	}
+
+}; // class HashableReferenceWrapper
+
 }//namespace SimpleObjects
 
 // ========== Hash ==========
 namespace std
 {
+	// ========== HashableBaseObject ==========
 	template<typename _ToStringType>
 #ifndef SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE
 	struct hash<SimpleObjects::HashableBaseObject<_ToStringType> >
@@ -90,5 +123,34 @@ namespace std
 		{
 			return obj.Hash();
 		}
-	};
+	}; // struct hash
+
+	// ========== HashableReferenceWrapper ==========
+	template<typename _T>
+#ifndef SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE
+	struct hash<
+		SimpleObjects::HashableReferenceWrapper<_T> >
+	{
+		using _ArgType = SimpleObjects::HashableReferenceWrapper<_T>;
+#else
+	struct hash<
+		SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE::HashableReferenceWrapper<_T> >
+	{
+		using _ArgType = SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE::HashableReferenceWrapper<_T>;
+#endif
+
+		using _ObjType = typename std::remove_cv<_T>::type;
+
+	public:
+
+#if __cplusplus < 201703L
+		typedef size_t       result_type;
+		typedef _ArgType     argument_type;
+#endif
+
+		size_t operator()(const _ArgType& obj) const
+		{
+			return std::hash<_ObjType>()(obj.get());
+		}
+	}; // struct hash
 }

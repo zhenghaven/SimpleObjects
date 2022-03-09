@@ -29,11 +29,15 @@ public: // Static member:
 
 	using ContainerType = _CtnType;
 	using ToStringType = _ToStringType;
+	using Self = DictCat<_CtnType, _ToStringType>;
 	using Base = DictBaseObject<
 		typename _CtnType::key_type,
 		typename _CtnType::mapped_type,
 		_ToStringType>;
-	using Self = DictCat<_CtnType, _ToStringType>;
+	using BaseBase = typename Base::Base;
+
+	static_assert(std::is_same<BaseBase, BaseObject<_ToStringType> >::value,
+		"Expecting Base::Base to be BaseObject class");
 
 	typedef typename ContainerType::key_type             key_type;
 	typedef typename ContainerType::mapped_type          mapped_type;
@@ -89,11 +93,14 @@ public:
 		return *this;
 	}
 
-	virtual ObjCategory GetCategory() const override
+	const ContainerType& GetVal() const
 	{
-		return sk_cat();
+		return m_data;
 	}
 
+	// ========== operators ==========
+
+	// overrides Base::operator==
 	virtual bool operator==(const Base& rhs) const override
 	{
 		// reference: https://github.com/llvm/llvm-project/blob/main/libcxx/include/unordered_map#L1877
@@ -115,6 +122,10 @@ public:
 		return true;
 	}
 
+	using BaseBase::operator==;
+
+	using Base::operator!=;
+
 	virtual bool operator==(const Self& rhs) const
 	{
 		return m_data == rhs.m_data;
@@ -123,28 +134,58 @@ public:
 	{
 		return !(m_data == rhs.m_data);
 	}
-	virtual bool operator<(const Self& rhs) const
-	{
-		return Base::operator<(static_cast<const Base&>(rhs));
-	}
-	virtual bool operator>(const Self& rhs) const
-	{
-		return Base::operator>(static_cast<const Base&>(rhs));
-	}
-	virtual bool operator<=(const Self& rhs) const
-	{
-		return Base::operator<=(static_cast<const Base&>(rhs));
-	}
-	virtual bool operator>=(const Self& rhs) const
-	{
-		return Base::operator>=(static_cast<const Base&>(rhs));
-	}
-	using Base::operator==;
-	using Base::operator!=;
+
+	bool operator<(const Self& rhs) = delete;
+	bool operator>(const Self& rhs) = delete;
+	bool operator<=(const Self& rhs) = delete;
+	bool operator>=(const Self& rhs) = delete;
+
 	using Base::operator<;
 	using Base::operator>;
 	using Base::operator<=;
 	using Base::operator>=;
+
+	// ========== Overrides BaseObject ==========
+
+	virtual ObjCategory GetCategory() const override
+	{
+		return sk_cat();
+	}
+
+	using BaseBase::Set;
+
+	virtual void Set(const BaseBase& other) override
+	{
+		try
+		{
+			const Self& casted = dynamic_cast<const Self&>(other);
+			*this = casted;
+		}
+		catch(const std::bad_cast&)
+		{
+			throw TypeError("Dict", this->GetCategoryName());
+		}
+	}
+
+	virtual void Set(BaseBase&& other) override
+	{
+		try
+		{
+			Self&& casted = dynamic_cast<Self&&>(other);
+			*this = std::forward<Self>(casted);
+		}
+		catch(const std::bad_cast&)
+		{
+			throw TypeError("Dict", this->GetCategoryName());
+		}
+	}
+
+	virtual bool IsTrue() const override
+	{
+		return m_data.size() > 0;
+	}
+
+	// ========== Overrides DictBaseObject ==========
 
 	virtual size_t size() const override
 	{
@@ -240,6 +281,8 @@ public:
 		m_data.erase(key);
 	}
 
+	// ========== Interface copy/Move ==========
+
 	using Base::Copy;
 	virtual std::unique_ptr<Base> Copy(const Base* /*unused*/) const override
 	{
@@ -252,10 +295,7 @@ public:
 		return MoveImpl();
 	}
 
-	const ContainerType& GetVal() const
-	{
-		return m_data;
-	}
+	// ========== To string ==========
 
 	virtual std::string DebugString() const override
 	{

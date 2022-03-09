@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <functional>
 #include <string>
 
 #include "Exception.hpp"
@@ -26,6 +27,7 @@ enum class ObjCategory
 	String,
 	List,
 	Dict,
+	StaticDict,
 };
 
 enum class NumericType
@@ -64,6 +66,17 @@ template<typename _ValType,  typename _ToStringType>
 class ListBaseObject;
 template<typename _KeyType,  typename _ValType,     typename _ToStringType>
 class DictBaseObject;
+template<
+	typename _DynKeyType,
+	typename _DynValType,
+	template<typename> class _KeyRefWrapType,
+	template<typename> class _RefWrapType,
+	typename _ToStringType>
+class StaticDictBaseObject;
+template<typename _ToStringType>
+class HashableBaseObject;
+template<typename _T>
+class HashableReferenceWrapper;
 
 template<typename _ToStringType>
 class HashableObjectImpl;
@@ -90,6 +103,12 @@ public: // Static members:
 	using DictBase    = DictBaseObject<HashableObjectImpl<ToStringType>,
 		                               ObjectImpl<ToStringType>,
 		                               ToStringType>;
+
+	using StatDictBase = StaticDictBaseObject<HashableBaseObject<ToStringType>,
+		                                      BaseObject<ToStringType>,
+		                                      HashableReferenceWrapper,
+		                                      std::reference_wrapper,
+		                                      ToStringType>;
 
 	static constexpr Self* sk_null = nullptr;
 
@@ -118,21 +137,21 @@ public:
 	 * @param rhs The other object to test with
 	 * @return whether two objects are equal
 	 */
-	virtual bool operator==(const Self& rhs) const;
+	virtual bool operator==(const Self& rhs) const = 0;
 
 	virtual bool operator!=(const Self& rhs) const
 	{
 		return !((*this) == rhs);
 	}
 
-	virtual bool operator<(const Self& rhs) const;
+	virtual bool operator<(const Self& rhs) const = 0;
 
 	virtual bool operator>=(const Self& rhs) const
 	{
 		return !((*this) < rhs);
 	}
 
-	virtual bool operator>(const Self& rhs) const;
+	virtual bool operator>(const Self& rhs) const = 0;
 
 	virtual bool operator<=(const Self& rhs) const
 	{
@@ -140,6 +159,7 @@ public:
 	}
 
 	// TODO:
+	// =
 	// +=
 	// +
 	// slice
@@ -148,9 +168,106 @@ public:
 	// String(objs)
 	// String::CppStr
 
+	// ========== Setters ==========
+
+	virtual void Set(const Self& other) = 0;
+
+	virtual void Set(Self&& other) = 0;
+
+	virtual void Set(bool val)
+	{
+		throw TypeError(this->GetCategoryName(), "bool");
+	}
+
+	virtual void Set(uint8_t val)
+	{
+		throw TypeError(this->GetCategoryName(), "uint8_t");
+	}
+
+	virtual void Set(int8_t val)
+	{
+		throw TypeError(this->GetCategoryName(), "int8_t");
+	}
+
+	virtual void Set(uint32_t val)
+	{
+		throw TypeError(this->GetCategoryName(), "uint32_t");
+	}
+
+	virtual void Set(int32_t val)
+	{
+		throw TypeError(this->GetCategoryName(), "int32_t");
+	}
+
+	virtual void Set(uint64_t val)
+	{
+		throw TypeError(this->GetCategoryName(), "uint64_t");
+	}
+
+	virtual void Set(int64_t val)
+	{
+		throw TypeError(this->GetCategoryName(), "int64_t");
+	}
+
+	virtual void Set(double val)
+	{
+		throw TypeError(this->GetCategoryName(), "double");
+	}
+
+	// ========== Getters ==========
+
 	virtual bool IsNull() const
 	{
 		return false;
+	}
+
+	// operator bool() const
+	// {
+	// 	return this->AsCppBool();
+	// }
+
+	virtual bool IsTrue() const = 0;
+
+	virtual uint8_t AsCppUInt8() const
+	{
+		throw TypeError(
+			"Numeric no larger than uint8_t", this->GetCategoryName());
+	}
+
+	virtual int8_t AsCppInt8() const
+	{
+		throw TypeError(
+			"Numeric no larger than int8_t", this->GetCategoryName());
+	}
+
+	virtual uint32_t AsCppUInt32() const
+	{
+		throw TypeError(
+			"Numeric no larger than uint32_t", this->GetCategoryName());
+	}
+
+	virtual int32_t AsCppInt32() const
+	{
+		throw TypeError(
+			"Numeric no larger than int32_t", this->GetCategoryName());
+	}
+
+	virtual uint64_t AsCppUInt64() const
+	{
+		throw TypeError(
+			"Numeric no larger than uint64_t", this->GetCategoryName());
+	}
+
+	virtual int64_t AsCppInt64() const
+	{
+		throw TypeError(
+			"Numeric no larger than int64_t", this->GetCategoryName());
+	}
+
+	virtual double AsCppDouble() const
+	{
+		throw TypeError(
+			"Numeric", this->GetCategoryName());
 	}
 
 	virtual NullBase& AsNull()
@@ -203,6 +320,16 @@ public:
 		throw TypeError("Dict", this->GetCategoryName());
 	}
 
+	virtual StatDictBase& AsStaticDict()
+	{
+		throw TypeError("StaticDict", this->GetCategoryName());
+	}
+
+	virtual const StatDictBase& AsStaticDict() const
+	{
+		throw TypeError("StaticDict", this->GetCategoryName());
+	}
+
 	virtual std::unique_ptr<Self> Copy(const Self* /*unused*/) const = 0;
 
 	virtual std::unique_ptr<Self> Move(const Self* /*unused*/) = 0;
@@ -216,5 +343,48 @@ public:
 	virtual void DumpString(OutIterator<typename ToStringType::value_type> outIt) const = 0;
 
 }; // class BaseObject
+
+namespace Internal
+{
+
+template<bool _Match, typename _Child, typename _RetType>
+struct AsChildType;
+
+template<typename _Child, typename _RetType>
+struct AsChildType<false, _Child, _RetType>
+{
+	static_assert(std::is_same<_Child, _RetType>::value,
+		"Implementation Error");
+
+	static _RetType& AsChild(_Child&,
+		const std::string& expTypeName, const std::string& srcTypeName)
+	{
+		throw TypeError(expTypeName, srcTypeName + "-non-default");
+	}
+
+	static const _RetType& AsChild(const _Child&,
+		const std::string& expTypeName, const std::string& srcTypeName)
+	{
+		throw TypeError(expTypeName, srcTypeName + "-non-default");
+	}
+}; // struct AsChildType
+
+template<typename _Child>
+struct AsChildType<true, _Child, _Child>
+{
+	static _Child& AsChild(_Child& c,
+		const std::string&, const std::string&)
+	{
+		return c;
+	}
+
+	static const _Child& AsChild(const _Child& c,
+		const std::string&, const std::string&)
+	{
+		return c;
+	}
+}; // struct AsChildType
+
+} // namespace Internal
 
 }//namespace SimpleObjects

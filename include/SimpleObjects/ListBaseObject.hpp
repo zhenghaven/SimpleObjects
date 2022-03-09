@@ -25,6 +25,8 @@ public: // Static Objects
 	using Self = ListBaseObject<_ValType, _ToStringType>;
 	using Base = BaseObject<_ToStringType>;
 
+	using ListBase = typename Base::ListBase;
+
 	typedef _ValType                            value_type;
 	typedef value_type&                         reference;
 	typedef const value_type&                   const_reference;
@@ -51,14 +53,18 @@ public:
 		return "List";
 	}
 
-	virtual Self& AsList() override
+	virtual ListBase& AsList() override
 	{
-		return *this;
+		return Internal::AsChildType<
+				std::is_same<Self, ListBase>::value, Self, ListBase
+			>::AsChild(*this, "List", this->GetCategoryName());
 	}
 
-	virtual const Self& AsList() const override
+	virtual const ListBase& AsList() const override
 	{
-		return *this;
+		return Internal::AsChildType<
+				std::is_same<Self, ListBase>::value, Self, ListBase
+			>::AsChild(*this, "List", this->GetCategoryName());
 	}
 
 	virtual bool operator==(const Self& rhs) const = 0;
@@ -67,10 +73,52 @@ public:
 	{
 		return !(*this == rhs);
 	}
-	using Base::operator==;
+
+	virtual bool operator<(const Self& rhs) const = 0;
+
+	virtual bool operator>(const Self& rhs) const = 0;
+
+	virtual bool operator<=(const Self& rhs) const
+	{
+		return !(*this > rhs);
+	}
+
+	virtual bool operator>=(const Self& rhs) const
+	{
+		return !(*this < rhs);
+	}
+
+	virtual bool operator==(const Base& rhs) const override
+	{
+		if (rhs.GetCategory() != ObjCategory::List)
+		{
+			return false;
+		}
+		return *this == rhs.AsList();
+	}
+
 	using Base::operator!=;
-	using Base::operator<;
-	using Base::operator>;
+
+	virtual bool operator<(const Base& rhs) const override
+	{
+		if (rhs.GetCategory() != ObjCategory::List)
+		{
+			throw UnsupportedOperation("<",
+				this->GetCategoryName(), rhs.GetCategoryName());
+		}
+		return *this < rhs.AsList();
+	}
+
+	virtual bool operator>(const Base& rhs) const override
+	{
+		if (rhs.GetCategory() != ObjCategory::List)
+		{
+			throw UnsupportedOperation(">",
+				this->GetCategoryName(), rhs.GetCategoryName());
+		}
+		return *this > rhs.AsList();
+	}
+
 	using Base::operator<=;
 	using Base::operator>=;
 

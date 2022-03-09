@@ -29,6 +29,12 @@ public: // Static members
 	using ToStringType = _ToStringType;
 	using Self = StringBaseObject<_CharType, _ToStringType>;
 	using Base = HashableBaseObject<_ToStringType>;
+	using BaseBase = typename Base::Base;
+
+	static_assert(std::is_same<BaseBase, BaseObject<_ToStringType> >::value,
+		"Expecting Base::Base to be BaseObject class");
+
+	using StringBase = typename BaseBase::StringBase;
 
 	typedef _CharType                           value_type;
 	typedef value_type&                         reference;
@@ -56,14 +62,18 @@ public:
 		return "String";
 	}
 
-	virtual Self& AsString() override
+	virtual StringBase& AsString() override
 	{
-		return *this;
+		return Internal::AsChildType<
+				std::is_same<Self, StringBase>::value, Self, StringBase
+			>::AsChild(*this, "String", this->GetCategoryName());
 	}
 
-	virtual const Self& AsString() const override
+	virtual const StringBase& AsString() const override
 	{
-		return *this;
+		return Internal::AsChildType<
+				std::is_same<Self, StringBase>::value, Self, StringBase
+			>::AsChild(*this, "String", this->GetCategoryName());
 	}
 
 	virtual std::unique_ptr<Self> Copy(const Self* /*unused*/) const = 0;
@@ -198,6 +208,43 @@ public:
 	{
 		return !(*this < rhs);
 	}
+
+	virtual bool operator==(const BaseBase& rhs) const override
+	{
+		const auto rhsCat = rhs.GetCategory();
+		if (rhsCat != ObjCategory::String)
+		{
+			return false;
+		}
+		return *this == rhs.AsString();
+	}
+
+	using BaseBase::operator!=;
+
+	virtual bool operator<(const BaseBase& rhs) const override
+	{
+		const auto rhsCat = rhs.GetCategory();
+		if (rhsCat != ObjCategory::String)
+		{
+			throw UnsupportedOperation("<",
+				this->GetCategoryName(), rhs.GetCategoryName());
+		}
+		return *this < rhs.AsString();
+	}
+
+	virtual bool operator>(const BaseBase& rhs) const override
+	{
+		const auto rhsCat = rhs.GetCategory();
+		if (rhsCat != ObjCategory::String)
+		{
+			throw UnsupportedOperation(">",
+				this->GetCategoryName(), rhs.GetCategoryName());
+		}
+		return *this > rhs.AsString();
+	}
+
+	using BaseBase::operator<=;
+	using BaseBase::operator>=;
 
 	virtual Self& operator+=(const Self& rhs)
 	{

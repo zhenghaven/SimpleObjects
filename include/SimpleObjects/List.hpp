@@ -28,8 +28,12 @@ public: // Static member:
 
 	using ContainerType = _CtnType;
 	using ToStringType  = _ToStringType;
-	using Base = ListBaseObject<typename _CtnType::value_type, _ToStringType>;
 	using Self = ListCat<_CtnType, _ToStringType>;
+	using Base = ListBaseObject<typename _CtnType::value_type, _ToStringType>;
+	using BaseBase = typename Base::Base;
+
+	static_assert(std::is_same<BaseBase, BaseObject<_ToStringType> >::value,
+		"Expecting Base::Base to be BaseObject class");
 
 	typedef typename ContainerType::allocator_type       allocator_type;
 	typedef typename ContainerType::value_type           value_type;
@@ -87,59 +91,135 @@ public:
 		return *this;
 	}
 
-	virtual ObjCategory GetCategory() const override
+	const ContainerType& GetVal() const
 	{
-		return sk_cat();
+		return m_data;
 	}
 
+	// ========== operators ==========
+
+	// overrides Base::operator==
 	virtual bool operator==(const Base& rhs) const override
 	{
-		if (size() != rhs.size())
+		if (m_data.size() != rhs.size())
 		{
 			return false;
 		}
-		auto ita = cbegin();
-		auto itb = rhs.cbegin();
-		for (; ita != cend() && itb != rhs.cend(); ++ita, ++itb)
-		{
-			if (*ita != *itb)
-			{
-				return false;
-			}
-		}
-		return true;
+
+		auto ita  = m_data.cbegin();
+		auto itae = m_data.cend();
+		auto itb  = rhs.cbegin();
+		return std::equal(
+			ita, itae,
+			itb);
 	}
+
+	using BaseBase::operator==;
+
+	using Base::operator!=;
+
+	// overrides Base::operator<
+	virtual bool operator<(const Base& rhs) const override
+	{
+		auto ita  = m_data.cbegin();
+		auto itae = m_data.cend();
+		auto itb  = rhs.cbegin();
+		auto itbe = rhs.cend();
+		return std::lexicographical_compare(
+			ita, itae,
+			itb, itbe);
+	}
+
+	using BaseBase::operator<;
+
+	// overrides Base::operator>
+	virtual bool operator>(const Base& rhs) const override
+	{
+		auto ita  = m_data.cbegin();
+		auto itae = m_data.cend();
+		auto itb  = rhs.cbegin();
+		auto itbe = rhs.cend();
+		return std::lexicographical_compare(
+			itb, itbe,
+			ita, itae);
+	}
+
+	using BaseBase::operator>;
+
+	using Base::operator<=;
+	using Base::operator>=;
 
 	virtual bool operator==(const Self& rhs) const
 	{
 		return m_data == rhs.m_data;
 	}
+
 	virtual bool operator!=(const Self& rhs) const
 	{
 		return m_data != rhs.m_data;
 	}
+
 	virtual bool operator<(const Self& rhs) const
 	{
-		return Base::operator<(static_cast<const Base&>(rhs));
+		return m_data < rhs.m_data;
 	}
+
 	virtual bool operator>(const Self& rhs) const
 	{
-		return Base::operator>(static_cast<const Base&>(rhs));
+		return m_data > rhs.m_data;
 	}
+
 	virtual bool operator<=(const Self& rhs) const
 	{
-		return Base::operator<=(static_cast<const Base&>(rhs));
+		return m_data <= rhs.m_data;
 	}
+
 	virtual bool operator>=(const Self& rhs) const
 	{
-		return Base::operator>=(static_cast<const Base&>(rhs));
+		return m_data >= rhs.m_data;
 	}
-	using Base::operator==;
-	using Base::operator!=;
-	using Base::operator<;
-	using Base::operator>;
-	using Base::operator<=;
-	using Base::operator>=;
+
+	// ========== Overrides BaseObject ==========
+
+	virtual ObjCategory GetCategory() const override
+	{
+		return sk_cat();
+	}
+
+	using BaseBase::Set;
+
+	virtual void Set(const BaseBase& other) override
+	{
+		try
+		{
+			const Self& casted = dynamic_cast<const Self&>(other);
+			*this = casted;
+		}
+		catch(const std::bad_cast&)
+		{
+			throw TypeError("List", this->GetCategoryName());
+		}
+	}
+
+	virtual void Set(BaseBase&& other) override
+	{
+		try
+		{
+			Self&& casted = dynamic_cast<Self&&>(other);
+			*this = std::forward<Self>(casted);
+		}
+		catch(const std::bad_cast&)
+		{
+			throw TypeError("List", this->GetCategoryName());
+		}
+	}
+
+	virtual bool IsTrue() const override
+	{
+		return m_data.size() > 0;
+	}
+
+	// ========== Overrides ListBaseObject ==========
 
 	virtual size_t size() const override
 	{
@@ -254,6 +334,8 @@ public:
 		m_data.erase(m_data.begin() + idx);
 	}
 
+	// ========== Interface copy/Move ==========
+
 	using Base::Copy;
 	virtual std::unique_ptr<Base> Copy(const Base* /*unused*/) const override
 	{
@@ -266,10 +348,7 @@ public:
 		return MoveImpl();
 	}
 
-	const ContainerType& GetVal() const
-	{
-		return m_data;
-	}
+	// ========== To string ==========
 
 	virtual std::string DebugString() const override
 	{

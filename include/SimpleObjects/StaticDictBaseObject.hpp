@@ -1,7 +1,9 @@
-// Copyright 2022 Haofan Zheng
+// Copyright (c) 2022 Haofan Zheng
 // Use of this source code is governed by an MIT-style
 // license that can be found in the LICENSE file or at
 // https://opensource.org/licenses/MIT.
+
+
 
 #pragma once
 
@@ -14,55 +16,70 @@ namespace SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE
 #endif
 {
 
-template<typename _KeyType, typename _ValType, typename _ToStringType>
-class DictBaseObject : public BaseObject<_ToStringType>
+template<
+	typename _DynKeyType,
+	typename _DynValType,
+	template<typename> class _KeyRefWrapType,
+	template<typename> class _RefWrapType,
+	typename _ToStringType>
+class StaticDictBaseObject : public BaseObject<_ToStringType>
 {
 public: // Static members
 
-	using Self = DictBaseObject<_KeyType, _ValType, _ToStringType>;
+	using Self = StaticDictBaseObject<
+		_DynKeyType,
+		_DynValType,
+		_KeyRefWrapType,
+		_RefWrapType,
+		_ToStringType>;
 	using Base = BaseObject<_ToStringType>;
 	using ToStringType = _ToStringType;
 
-	using DictBase = typename Base::DictBase;
+	using StatDictBase = typename Base::StatDictBase;
 
-	typedef _KeyType                                  key_type;
-	typedef _ValType                                  mapped_type;
-	typedef std::pair<const key_type, mapped_type>    value_type;
-	typedef value_type&                               reference;
-	typedef const value_type&                         const_reference;
-	typedef FrIterator<value_type, false>             iterator;
-	typedef FrIterator<value_type, true>              const_iterator;
+	typedef _DynKeyType                               key_type;
+	typedef _DynValType                               mapped_type;
+	typedef _KeyRefWrapType<const key_type>           key_const_ref_type;
+	typedef _RefWrapType<mapped_type>                 mapped_ref_type;
+	typedef _RefWrapType<const mapped_type>           mapped_const_ref_type;
+
+	typedef std::pair<const key_const_ref_type, const mapped_ref_type>
+		iterator_value_type;
+	typedef std::pair<const key_const_ref_type, const mapped_const_ref_type>
+		const_iterator_value_type;
+	typedef RdIterator<iterator_value_type,       true>  iterator;
+	typedef RdIterator<const_iterator_value_type, true>  const_iterator;
 
 	static constexpr Self* sk_null = nullptr;
 
 public:
-	DictBaseObject() = default;
+	StaticDictBaseObject() = default;
 
 	// LCOV_EXCL_START
 	/**
 	 * @brief Destroy the Dict Base Object
 	 *
 	 */
-	virtual ~DictBaseObject() = default;
+	virtual ~StaticDictBaseObject() = default;
 	// LCOV_EXCL_STOP
 
 	virtual const char* GetCategoryName() const override
 	{
-		return "Dict";
+		return "StaticDict";
 	}
 
-	virtual DictBase& AsDict() override
+	virtual StatDictBase& AsStaticDict() override
 	{
 		return Internal::AsChildType<
-				std::is_same<Self, DictBase>::value, Self, DictBase
-			>::AsChild(*this, "Dict", this->GetCategoryName());
+				std::is_same<Self, StatDictBase>::value, Self, StatDictBase
+			>::AsChild(*this, "StaticDict", this->GetCategoryName());
 	}
 
-	virtual const DictBase& AsDict() const override
+	virtual const StatDictBase& AsStaticDict() const override
 	{
 		return Internal::AsChildType<
-				std::is_same<Self, DictBase>::value, Self, DictBase
-			>::AsChild(*this, "Dict", this->GetCategoryName());
+				std::is_same<Self, StatDictBase>::value, Self, StatDictBase
+			>::AsChild(*this, "StaticDict", this->GetCategoryName());
 	}
 
 	virtual bool operator==(const Self& rhs) const = 0;
@@ -79,11 +96,11 @@ public:
 
 	virtual bool operator==(const Base& rhs) const override
 	{
-		if (rhs.GetCategory() != ObjCategory::Dict)
+		if (rhs.GetCategory() != ObjCategory::StaticDict)
 		{
 			return false;
 		}
-		return *this == rhs.AsDict();
+		return *this == rhs.AsStaticDict();
 	}
 
 	using Base::operator!=;
@@ -127,19 +144,17 @@ public:
 
 	virtual mapped_type& operator[](const key_type& key) = 0;
 
-	virtual const_iterator find(const key_type& key) const = 0;
+	virtual const mapped_type& operator[](const key_type& key) const = 0;
 
-	virtual iterator find(const key_type& key) = 0;
+	virtual mapped_type& at(size_t idx) = 0;
+
+	virtual const mapped_type& at(size_t idx) const = 0;
+
+	virtual mapped_type& operator[](size_t idx) = 0;
+
+	virtual const mapped_type& operator[](size_t idx) const = 0;
 
 	virtual bool HasKey(const key_type& key) const = 0;
-
-	virtual std::pair<iterator, bool> InsertOnly(
-		const key_type& key, const mapped_type& other) = 0;
-
-	virtual std::pair<iterator, bool> InsertOrAssign(
-		const key_type& key, const mapped_type& other) = 0;
-
-	virtual void Remove(const key_type& key) = 0;
 
 	virtual std::unique_ptr<Self> Copy(const Self* /*unused*/) const = 0;
 
@@ -157,4 +172,4 @@ public:
 
 }; // class DictBaseObject
 
-} //namespace SimpleObjects
+} // namespace SimpleObjects

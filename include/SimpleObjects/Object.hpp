@@ -27,11 +27,12 @@ public: // Static members
 	using Self = ObjectImpl<_ToStringType>;
 	using Base = BaseObject<_ToStringType>;
 
-	using NullBase    = typename Base::NullBase;
-	using NumericBase = typename Base::NumericBase;
-	using StringBase  = typename Base::StringBase;
-	using ListBase    = typename Base::ListBase;
-	using DictBase    = typename Base::DictBase;
+	using NullBase     = typename Base::NullBase;
+	using NumericBase  = typename Base::NumericBase;
+	using StringBase   = typename Base::StringBase;
+	using ListBase     = typename Base::ListBase;
+	using DictBase     = typename Base::DictBase;
+	using StatDictBase = typename Base::StatDictBase;
 
 	using BasePtr = std::unique_ptr<Base>;
 
@@ -82,7 +83,59 @@ public:
 		return *this;
 	}
 
-	// BaseObject virtual functions
+	// ========== operators ==========
+
+	virtual bool operator==(const Self& rhs) const
+	{
+		return *m_ptr == *(rhs.m_ptr);
+	}
+
+	virtual bool operator!=(const Self& rhs) const
+	{
+		return *m_ptr != *(rhs.m_ptr);
+	}
+
+	virtual bool operator<(const Self& rhs) const
+	{
+		return *m_ptr < *(rhs.m_ptr);
+	}
+
+	virtual bool operator>(const Self& rhs) const
+	{
+		return *m_ptr > *(rhs.m_ptr);
+	}
+
+	virtual bool operator<=(const Self& rhs) const
+	{
+		return *m_ptr <= *(rhs.m_ptr);
+	}
+
+	virtual bool operator>=(const Self& rhs) const
+	{
+		return *m_ptr >= *(rhs.m_ptr);
+	}
+
+	virtual bool operator==(const Base& rhs) const override
+	{
+		return m_ptr->operator==(rhs);
+	}
+
+	using Base::operator!=;
+
+	virtual bool operator<(const Base& rhs) const override
+	{
+		return m_ptr->operator<(rhs);
+	}
+
+	virtual bool operator>(const Base& rhs) const override
+	{
+		return m_ptr->operator>(rhs);
+	}
+
+	using Base::operator<=;
+	using Base::operator>=;
+
+	// ========== Overrides BaseObject ==========
 
 	virtual ObjCategory GetCategory() const override
 	{
@@ -94,9 +147,99 @@ public:
 		return m_ptr->GetCategoryName();
 	}
 
+	virtual void Set(const Base& other) override
+	{
+		m_ptr->Set(other);
+	}
+
+	virtual void Set(Base&& other) override
+	{
+		m_ptr->Set(std::forward<Base>(other));
+	}
+
+	virtual void Set(bool val) override
+	{
+		m_ptr->Set(val);
+	}
+
+	virtual void Set(uint8_t val) override
+	{
+		m_ptr->Set(val);
+	}
+
+	virtual void Set(int8_t val) override
+	{
+		m_ptr->Set(val);
+	}
+
+	virtual void Set(uint32_t val) override
+	{
+		m_ptr->Set(val);
+	}
+
+	virtual void Set(int32_t val) override
+	{
+		m_ptr->Set(val);
+	}
+
+	virtual void Set(uint64_t val) override
+	{
+		m_ptr->Set(val);
+	}
+
+	virtual void Set(int64_t val) override
+	{
+		m_ptr->Set(val);
+	}
+
+	virtual void Set(double val) override
+	{
+		m_ptr->Set(val);
+	}
+
 	virtual bool IsNull() const override
 	{
 		return m_ptr->IsNull();
+	}
+
+	virtual bool IsTrue() const override
+	{
+		return m_ptr->IsTrue();
+	}
+
+	virtual uint8_t AsCppUInt8() const override
+	{
+		return m_ptr->AsCppUInt8();
+	}
+
+	virtual int8_t AsCppInt8() const override
+	{
+		return m_ptr->AsCppInt8();
+	}
+
+	virtual uint32_t AsCppUInt32() const override
+	{
+		return m_ptr->AsCppUInt32();
+	}
+
+	virtual int32_t AsCppInt32() const override
+	{
+		return m_ptr->AsCppInt32();
+	}
+
+	virtual uint64_t AsCppUInt64() const override
+	{
+		return m_ptr->AsCppUInt64();
+	}
+
+	virtual int64_t AsCppInt64() const override
+	{
+		return m_ptr->AsCppInt64();
+	}
+
+	virtual double AsCppDouble() const override
+	{
+		return m_ptr->AsCppDouble();
 	}
 
 	virtual NullBase& AsNull() override
@@ -149,6 +292,18 @@ public:
 		return m_ptr->AsDict();
 	}
 
+	virtual StatDictBase& AsStaticDict() override
+	{
+		return m_ptr->AsStaticDict();
+	}
+
+	virtual const StatDictBase& AsStaticDict() const override
+	{
+		return m_ptr->AsStaticDict();
+	}
+
+	// ========== Interface copy/Move ==========
+
 	virtual std::unique_ptr<Base> Copy(const Base* unused) const override
 	{
 		return m_ptr->Copy(unused);
@@ -158,6 +313,8 @@ public:
 	{
 		return m_ptr->Move(unused);
 	}
+
+	// ========== To string ==========
 
 	virtual std::string DebugString() const override
 	{
