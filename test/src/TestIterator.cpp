@@ -264,3 +264,27 @@ GTEST_TEST(TestIterator, OutIterator)
 		EXPECT_EQ(testStr, "test789");
 	}
 }
+
+GTEST_TEST(TestIterator, UpConversion)
+{
+	using _String = StringCat<std::string, std::string>;
+
+	_String testStr = "abcdef";
+
+	auto itrd = testStr.cbegin(); // random iterator
+
+	auto itin = InIterator<char>(itrd.CopyPtr()); // input iterator
+
+	EXPECT_TRUE(*itin == 'a');
+	EXPECT_NO_THROW(++itin);
+	EXPECT_TRUE(*itin == 'b');
+	EXPECT_NO_THROW(++itin);
+	EXPECT_TRUE(*itin == 'c');
+	EXPECT_NO_THROW(++itin);
+	EXPECT_TRUE(*itin == 'd');
+	EXPECT_NO_THROW(++itin);
+	EXPECT_TRUE(*itin == 'e');
+	EXPECT_NO_THROW(++itin);
+	EXPECT_TRUE(*itin == 'f');
+	EXPECT_NO_THROW(++itin);
+}
