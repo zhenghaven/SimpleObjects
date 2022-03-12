@@ -115,6 +115,97 @@ private:
 }; // class OutIterator
 
 /**
+ * @brief The wrapper of input iterator interface, so we can support
+ *        different classes of iterator implementations
+ *
+ * @tparam _TargetType The target type; e.g., the target type for a
+ *         std::vector<uint8_t> vector will be uint8_t
+ */
+template<typename _TargetType>
+class InIterator
+{
+public: // Static members:
+	using WrappedIt = InputIteratorIf<_TargetType, true>;
+	using WrappedItPtr = typename WrappedIt::SelfPtr;
+
+	typedef typename WrappedIt::difference_type         difference_type;
+	typedef typename WrappedIt::value_type              value_type;
+	typedef typename WrappedIt::pointer                 pointer;
+	typedef typename WrappedIt::const_pointer           const_pointer;
+	typedef typename WrappedIt::reference               reference;
+	typedef typename WrappedIt::iterator_category       iterator_category;
+
+public:
+	InIterator() = delete;
+
+	InIterator(WrappedItPtr it) :
+		m_it(std::move(it))
+	{}
+
+	// TODO: non-const to const copy & move
+
+	InIterator(const InIterator& otherIt) :
+		m_it(otherIt.m_it->Copy(*(otherIt.m_it)))
+	{}
+
+	InIterator(InIterator&& otherIt):
+		m_it(std::forward<WrappedItPtr>(otherIt.m_it))
+	{}
+
+	virtual ~InIterator() = default;
+
+	InIterator& operator=(const InIterator& rhs)
+	{
+		if (this != &rhs)
+		{
+			m_it = rhs.m_it->Copy(*(rhs.m_it));
+		}
+		return *this;
+	}
+
+	InIterator& operator=(InIterator&& rhs)
+	{
+		if (this != &rhs)
+		{
+			m_it = std::move(rhs.m_it);
+		}
+		return *this;
+	}
+
+	reference operator*() const
+	{
+		return m_it->GetRef();
+	}
+
+	pointer operator->() const
+	{
+		return m_it->GetPtr();
+	}
+
+	InIterator& operator++()
+	{
+		m_it->Increment();
+		return *this;
+	}
+
+	// NOTE: we cannot compare iterator vs const_iterator for now, because we
+	// are using Downcast in the CppStdIterator implementation
+	bool operator==(const InIterator& rhs) const
+	{
+		return m_it->IsEqual(*rhs.m_it);
+	}
+
+	bool operator!=(const InIterator& rhs) const
+	{
+		return !(*this == rhs);
+	}
+
+private:
+	WrappedItPtr m_it;
+
+}; // class InIterator
+
+/**
  * @brief The wrapper of forward iterator interface, so we can support
  *        different classes of iterator implementations
  *

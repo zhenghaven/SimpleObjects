@@ -70,14 +70,14 @@ public:
 }; // class OutputIteratorIf
 
 /**
- * @brief The interface of a basic iterator
+ * @brief The interface of a input iterator
  *
  * @tparam _TargetType The target type; e.g., the target type for a
  *         std::vector<uint8_t> vector will be uint8_t
  * @tparam _IsConst Is this a const iterator
  */
 template<typename _TargetType, bool _IsConst>
-class ForwardIteratorIf
+class InputIteratorIf
 {
 public: // Static members:
 
@@ -101,24 +101,25 @@ public: // Static members:
 		typename std::add_const<RawTargetType>::type,
 		RawTargetType>::type;
 
-	using Self = ForwardIteratorIf<_TargetType, _IsConst>;
+	using Self = InputIteratorIf<_TargetType, _IsConst>;
 
 	using SelfPtr = std::unique_ptr<Self>;
 
 	// some standard typedefs
 
-	typedef std::ptrdiff_t                                            difference_type;
-	typedef RawTargetType                                             value_type;
-	typedef typename std::add_pointer<ActTargetType>::type            pointer;
+	typedef std::ptrdiff_t                                    difference_type;
+	typedef RawTargetType                                     value_type;
+	typedef typename std::add_pointer<ActTargetType>::type    pointer;
 	typedef typename std::add_pointer<
-		typename std::add_const<RawTargetType>::type>::type           const_pointer;
-	typedef typename std::add_lvalue_reference<ActTargetType>::type   reference;
-	typedef std::forward_iterator_tag                                 iterator_category;
+		typename std::add_const<RawTargetType>::type>::type   const_pointer;
+	typedef typename std::add_lvalue_reference<
+		ActTargetType>::type                                  reference;
+	typedef std::input_iterator_tag                           iterator_category;
 
 public:
-	ForwardIteratorIf() = default;
+	InputIteratorIf() = default;
 
-	virtual ~ForwardIteratorIf() = default;
+	virtual ~InputIteratorIf() = default;
 
 	virtual void Increment() = 0;
 
@@ -127,6 +128,39 @@ public:
 	virtual pointer GetPtr() const = 0;
 
 	virtual bool IsEqual(const Self& rhs) const = 0;
+
+	virtual SelfPtr Copy(const Self& /*unused*/) const = 0;
+
+}; //class InputIteratorIf
+
+/**
+ * @brief The interface of a basic iterator
+ *
+ * @tparam _TargetType The target type; e.g., the target type for a
+ *         std::vector<uint8_t> vector will be uint8_t
+ * @tparam _IsConst Is this a const iterator
+ */
+template<typename _TargetType, bool _IsConst>
+class ForwardIteratorIf : public InputIteratorIf<_TargetType, _IsConst>
+{
+public: // Static members:
+
+	using _Base = InputIteratorIf<_TargetType, _IsConst>;
+
+	using Self = ForwardIteratorIf<_TargetType, _IsConst>;
+
+	using SelfPtr = std::unique_ptr<Self>;
+
+	typedef typename _Base::difference_type         difference_type;
+	typedef typename _Base::value_type              value_type;
+	typedef typename _Base::pointer                 pointer;
+	typedef typename _Base::const_pointer           const_pointer;
+	typedef typename _Base::reference               reference;
+
+public:
+	ForwardIteratorIf() = default;
+
+	virtual ~ForwardIteratorIf() = default;
 
 	virtual SelfPtr Copy(const Self& /*unused*/) const = 0;
 

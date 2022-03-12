@@ -96,12 +96,13 @@ public:
 }; // class CppStdOutIteratorWrap
 
 template<typename _OriItType, typename _TargetType, bool _IsConst>
-class CppStdFwIteratorWrap : public ForwardIteratorIf<_TargetType, _IsConst>
+class CppStdInIteratorWrap : public InputIteratorIf<_TargetType, _IsConst>
 {
 public: // Static members:
-	using _BaseIf = ForwardIteratorIf<_TargetType, _IsConst>;
+	using _BaseIf = InputIteratorIf<_TargetType, _IsConst>;
 	using _BaseIfPtr = std::unique_ptr<_BaseIf>;
-	using Self = CppStdFwIteratorWrap<_OriItType, _TargetType, _IsConst>;
+
+	using Self = CppStdInIteratorWrap<_OriItType, _TargetType, _IsConst>;
 
 	typedef typename _BaseIf::difference_type         difference_type;
 	typedef typename _BaseIf::value_type              value_type;
@@ -113,33 +114,33 @@ public: // Static members:
 	static _BaseIfPtr Build(_OriItType oriIt)
 	{
 		// TODO: make_unique
-		return _BaseIfPtr(new CppStdFwIteratorWrap(oriIt));
+		return _BaseIfPtr(new CppStdInIteratorWrap(oriIt));
 	}
 
 	static_assert(
 		std::is_base_of<
 			iterator_category,
 			typename std::iterator_traits<_OriItType>::iterator_category>::value,
-		"The given C++ standard iterator must be a category based on forward iterator");
+		"The given C++ standard iterator must be a category based on input iterator");
 
 public:
 
-	CppStdFwIteratorWrap(_OriItType oriIt) :
-		_BaseIf::ForwardIteratorIf(),
+	CppStdInIteratorWrap(_OriItType oriIt) :
+		_BaseIf::InputIteratorIf(),
 		m_it(oriIt)
 	{}
 
-	CppStdFwIteratorWrap(const CppStdFwIteratorWrap& other) :
-		_BaseIf::ForwardIteratorIf(other),
+	CppStdInIteratorWrap(const CppStdInIteratorWrap& other) :
+		_BaseIf::InputIteratorIf(),
 		m_it(other.m_it)
 	{}
 
-	CppStdFwIteratorWrap(CppStdFwIteratorWrap&& other) :
-		_BaseIf::ForwardIteratorIf(std::forward<_BaseIf>(other)),
+	CppStdInIteratorWrap(CppStdInIteratorWrap&& other) :
+		_BaseIf::InputIteratorIf(),
 		m_it(std::forward<_OriItType>(other.m_it))
 	{}
 
-	virtual ~CppStdFwIteratorWrap() = default;
+	virtual ~CppStdInIteratorWrap() = default;
 
 	virtual void Increment() override
 	{
@@ -165,7 +166,7 @@ public:
 	virtual _BaseIfPtr Copy(const _BaseIf&) const override
 	{
 		// TODO: make_unique
-		return _BaseIfPtr(new CppStdFwIteratorWrap(*this));
+		return _BaseIfPtr(new CppStdInIteratorWrap(*this));
 	}
 
 public:
@@ -190,6 +191,89 @@ protected:
 		return it;
 	}
 
+}; // class CppStdInIteratorWrap
+
+
+template<typename _OriItType, typename _TargetType, bool _IsConst>
+class CppStdFwIteratorWrap :
+	public ForwardIteratorIf<_TargetType, _IsConst>,
+	public CppStdInIteratorWrap<_OriItType, _TargetType, _IsConst>
+{
+public: // Static members:
+
+	using Self = CppStdFwIteratorWrap<_OriItType, _TargetType, _IsConst>;
+
+	using _BaseInIf = InputIteratorIf<_TargetType, _IsConst>;
+	using _BaseInIfPtr = std::unique_ptr<_BaseInIf>;
+
+	using _BaseIf = ForwardIteratorIf<_TargetType, _IsConst>;
+	using _BaseIfPtr = std::unique_ptr<_BaseIf>;
+
+	using _Base = CppStdInIteratorWrap<_OriItType, _TargetType, _IsConst>;
+
+	typedef typename _BaseIf::difference_type         difference_type;
+	typedef typename _BaseIf::value_type              value_type;
+	typedef typename _BaseIf::pointer                 pointer;
+	typedef typename _BaseIf::const_pointer           const_pointer;
+	typedef typename _BaseIf::reference               reference;
+	typedef typename _BaseIf::iterator_category       iterator_category;
+
+	static _BaseIfPtr Build(_OriItType oriIt)
+	{
+		// TODO: make_unique
+		return _BaseIfPtr(new CppStdFwIteratorWrap(oriIt));
+	}
+
+	static_assert(
+		std::is_base_of<
+			iterator_category,
+			typename std::iterator_traits<_OriItType>::iterator_category>::value,
+		"The given C++ standard iterator must be a category based on forward iterator");
+
+public:
+
+	CppStdFwIteratorWrap(_OriItType oriIt) :
+		_BaseIf::ForwardIteratorIf(),
+		_Base::CppStdInIteratorWrap(oriIt)
+	{}
+
+	CppStdFwIteratorWrap(const CppStdFwIteratorWrap& other) :
+		_BaseIf::ForwardIteratorIf(),
+		_Base::CppStdInIteratorWrap(other)
+	{}
+
+	CppStdFwIteratorWrap(CppStdFwIteratorWrap&& other) :
+		_BaseIf::ForwardIteratorIf(),
+		_Base::CppStdInIteratorWrap(std::forward<_Base>(other))
+	{}
+
+	virtual ~CppStdFwIteratorWrap() = default;
+
+	virtual void Increment() override
+	{ return _Base::Increment(); }
+
+	virtual reference GetRef() override
+	{ return _Base::GetRef(); }
+
+	virtual pointer GetPtr() const override
+	{ return _Base::GetPtr(); }
+
+	virtual bool IsEqual(const _BaseInIf& rhs) const override
+	{ return _Base::IsEqual(rhs); }
+
+	virtual _BaseInIfPtr Copy(const _BaseInIf&) const override
+	{ return CopyImpl(); }
+	virtual _BaseIfPtr Copy(const _BaseIf&) const override
+	{ return CopyImpl(); }
+
+private:
+
+	_BaseIfPtr CopyImpl() const
+	{
+		// TODO: make_unique
+		return _BaseIfPtr(new CppStdFwIteratorWrap(*this));
+	}
+
 }; // class CppStdFwIteratorWrap
 
 
@@ -199,6 +283,10 @@ class CppStdBiIteratorWrap :
 	public CppStdFwIteratorWrap<_OriItType, _TargetType, _IsConst>
 {
 public: // Static members:
+
+	using _BaseInIf = InputIteratorIf<_TargetType, _IsConst>;
+	using _BaseInIfPtr = std::unique_ptr<_BaseInIf>;
+
 	using _BaseFwIf = ForwardIteratorIf<_TargetType, _IsConst>;
 	using _BaseFwIfPtr = std::unique_ptr<_BaseFwIf>;
 
@@ -240,7 +328,7 @@ public:
 
 	CppStdBiIteratorWrap(CppStdBiIteratorWrap&& other) :
 		_BaseIf::BidirectionalIteratorIf(),
-		_Base::CppStdFwIteratorWrap(std::forward<_BaseIf>(other))
+		_Base::CppStdFwIteratorWrap(std::forward<_Base>(other))
 	{}
 
 	virtual ~CppStdBiIteratorWrap() = default;
@@ -248,10 +336,15 @@ public:
 	virtual void Increment() override { return _Base::Increment(); }
 	virtual reference GetRef() override { return _Base::GetRef(); }
 	virtual pointer GetPtr() const override { return _Base::GetPtr(); }
-	virtual bool IsEqual(const _BaseFwIf& rhs) const override { return _Base::IsEqual(rhs); }
+	virtual bool IsEqual(const _BaseInIf& rhs) const override
+	{ return _Base::IsEqual(rhs); }
 
-	virtual _BaseIfPtr Copy(const _BaseIf&) const override { return CopyImpl(); }
-	virtual _BaseFwIfPtr Copy(const _BaseFwIf&) const override { return CopyImpl(); }
+	virtual _BaseInIfPtr Copy(const _BaseInIf&) const override
+	{ return CopyImpl(); }
+	virtual _BaseFwIfPtr Copy(const _BaseFwIf&) const override
+	{ return CopyImpl(); }
+	virtual _BaseIfPtr Copy(const _BaseIf&) const override
+	{ return CopyImpl(); }
 
 	virtual void Decrement() override
 	{
@@ -275,6 +368,9 @@ class CppStdRdIteratorWrap :
 {
 public: // Static members:
 	using Self = CppStdRdIteratorWrap<_OriItType, _TargetType, _IsConst>;
+
+	using _BaseInIf = InputIteratorIf<_TargetType, _IsConst>;
+	using _BaseInIfPtr = std::unique_ptr<_BaseInIf>;
 
 	using _BaseFwIf = ForwardIteratorIf<_TargetType, _IsConst>;
 	using _BaseFwIfPtr = std::unique_ptr<_BaseFwIf>;
@@ -329,11 +425,17 @@ public:
 	virtual void Decrement() override { return _Base::Decrement(); }
 	virtual reference GetRef() override { return _Base::GetRef(); }
 	virtual pointer GetPtr() const override { return _Base::GetPtr(); }
-	virtual bool IsEqual(const _BaseFwIf& rhs) const override { return _Base::IsEqual(rhs); }
+	virtual bool IsEqual(const _BaseInIf& rhs) const override
+	{ return _Base::IsEqual(rhs); }
 
-	virtual _BaseIfPtr Copy(const _BaseIf&) const override { return CopyImpl(); }
-	virtual _BaseFwIfPtr Copy(const _BaseFwIf&) const override { return CopyImpl(); }
-	virtual _BaseBiIfPtr Copy(const _BaseBiIf&) const override { return CopyImpl(); }
+	virtual _BaseInIfPtr Copy(const _BaseInIf&) const override
+	{ return CopyImpl(); }
+	virtual _BaseFwIfPtr Copy(const _BaseFwIf&) const override
+	{ return CopyImpl(); }
+	virtual _BaseBiIfPtr Copy(const _BaseBiIf&) const override
+	{ return CopyImpl(); }
+	virtual _BaseIfPtr Copy(const _BaseIf&) const override
+	{ return CopyImpl(); }
 
 	virtual void Offset(difference_type offset) override
 	{
