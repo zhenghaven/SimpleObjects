@@ -47,8 +47,8 @@ public: // Static members:
 public:
 	OutIterator() = delete;
 
-	OutIterator(WrappedItPtr it) :
-		m_it(std::move(it))
+	OutIterator(typename std::add_rvalue_reference<WrappedItPtr>::type it) :
+		m_it(std::forward<WrappedItPtr>(it))
 	{}
 
 	OutIterator(const OutIterator& otherIt) :
@@ -109,6 +109,11 @@ public:
 		return copy;
 	}
 
+	WrappedItPtr CopyPtr() const
+	{
+		return m_it->Copy(*m_it);
+	}
+
 private:
 	WrappedItPtr m_it;
 
@@ -138,11 +143,9 @@ public: // Static members:
 public:
 	InIterator() = delete;
 
-	InIterator(WrappedItPtr it) :
-		m_it(std::move(it))
+	InIterator(typename std::add_rvalue_reference<WrappedItPtr>::type it) :
+		m_it(std::forward<WrappedItPtr>(it))
 	{}
-
-	// TODO: non-const to const copy & move
 
 	InIterator(const InIterator& otherIt) :
 		m_it(otherIt.m_it->Copy(*(otherIt.m_it)))
@@ -200,6 +203,11 @@ public:
 		return !(*this == rhs);
 	}
 
+	WrappedItPtr CopyPtr() const
+	{
+		return m_it->Copy(*m_it);
+	}
+
 private:
 	WrappedItPtr m_it;
 
@@ -230,11 +238,9 @@ public: // Static members:
 public:
 	FrIterator() = delete;
 
-	FrIterator(WrappedItPtr it) :
-		m_it(std::move(it))
+	FrIterator(typename std::add_rvalue_reference<WrappedItPtr>::type it) :
+		m_it(std::forward<WrappedItPtr>(it))
 	{}
-
-	// TODO: non-const to const copy & move
 
 	FrIterator(const FrIterator& otherIt) :
 		m_it(otherIt.m_it->Copy(*(otherIt.m_it)))
@@ -299,6 +305,11 @@ public:
 		return !(*this == rhs);
 	}
 
+	WrappedItPtr CopyPtr() const
+	{
+		return m_it->Copy(*m_it);
+	}
+
 private:
 	WrappedItPtr m_it;
 
@@ -329,11 +340,9 @@ public: // Static members:
 public:
 	BiIterator() = delete;
 
-	BiIterator(WrappedItPtr it) :
-		m_it(std::move(it))
+	BiIterator(typename std::add_rvalue_reference<WrappedItPtr>::type it) :
+		m_it(std::forward<WrappedItPtr>(it))
 	{}
-
-	// TODO: non-const to const copy & move
 
 	BiIterator(const BiIterator& otherIt) :
 		m_it(otherIt.m_it->Copy(*(otherIt.m_it)))
@@ -409,6 +418,11 @@ public:
 		return !(*this == rhs);
 	}
 
+	WrappedItPtr CopyPtr() const
+	{
+		return m_it->Copy(*m_it);
+	}
+
 private:
 	WrappedItPtr m_it;
 
@@ -443,8 +457,8 @@ public: // Static members:
 public:
 	RdIterator() = delete;
 
-	RdIterator(WrappedItPtr it) :
-		m_it(std::move(it))
+	RdIterator(typename std::add_rvalue_reference<WrappedItPtr>::type it) :
+		m_it(std::forward<WrappedItPtr>(it))
 	{}
 
 	RdIterator(const RdIterator& otherIt) :
@@ -583,6 +597,11 @@ public:
 		return m_it->Diff(*(rhs.m_it));
 	}
 
+	WrappedItPtr CopyPtr() const
+	{
+		return m_it->Copy(*m_it);
+	}
+
 private:
 	WrappedItPtr m_it;
 
@@ -594,6 +613,14 @@ inline OutIterator<_ValType> ToOutIt(_OriItType it)
 {
 	using ItWrap = CppStdOutIteratorWrap<_OriItType, _ValType>;
 	return OutIterator<_ValType>(ItWrap::Build(it));
+}
+
+template<typename _OriItType,
+	typename _ValType = typename std::iterator_traits<_OriItType>::value_type>
+inline InIterator<_ValType> ToInIt(_OriItType it)
+{
+	using ItWrap = CppStdInIteratorWrap<_OriItType, _ValType, true>;
+	return InIterator<_ValType>(ItWrap::Build(it));
 }
 
 template<bool _IsConst,
