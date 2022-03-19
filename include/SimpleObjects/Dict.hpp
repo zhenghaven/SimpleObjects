@@ -258,6 +258,21 @@ public:
 		return {ToFrIt<false>(it), false};
 	}
 
+	virtual std::pair<iterator, bool> InsertOnly(
+		key_type&& key, mapped_type&& other) override
+	{
+		auto it = m_data.find(key);
+		if (it == m_data.end())
+		{
+			// insert
+			it = m_data.emplace(
+				std::forward<key_type>(key),
+				std::forward<mapped_type>(other)).first;
+			return {ToFrIt<false>(it), true};
+		}
+		return {ToFrIt<false>(it), false};
+	}
+
 	virtual std::pair<iterator, bool> InsertOrAssign(
 		const key_type& key, const mapped_type& other) override
 	{
@@ -272,6 +287,26 @@ public:
 		{
 			// assign
 			(*it).second = other;
+			return {ToFrIt<false>(it), false};
+		}
+	}
+
+	virtual std::pair<iterator, bool> InsertOrAssign(
+		key_type&& key, mapped_type&& other) override
+	{
+		auto it = m_data.find(key);
+		if (it == m_data.end())
+		{
+			// insert
+			it = m_data.emplace(
+				std::forward<key_type>(key),
+				std::forward<mapped_type>(other)).first;
+			return {ToFrIt<false>(it), true};
+		}
+		else
+		{
+			// assign
+			(*it).second = std::forward<mapped_type>(other);
 			return {ToFrIt<false>(it), false};
 		}
 	}

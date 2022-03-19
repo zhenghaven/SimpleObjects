@@ -293,6 +293,11 @@ public:
 		return ToRdIt<true>(it);
 	}
 
+	virtual void push_back(value_type&& ch) override
+	{
+		m_data.push_back(std::forward<value_type>(ch));
+	}
+
 	virtual void push_back(const value_type& ch) override
 	{
 		m_data.push_back(ch);

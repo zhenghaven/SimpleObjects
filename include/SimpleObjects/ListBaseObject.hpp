@@ -164,6 +164,8 @@ public:
 
 	virtual const_iterator Contains(const_reference other) const = 0;
 
+	virtual void push_back(value_type&& ch) = 0;
+
 	virtual void push_back(const_reference ch) = 0;
 
 	virtual void pop_back() = 0;

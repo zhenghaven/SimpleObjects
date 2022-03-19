@@ -136,8 +136,14 @@ public:
 	virtual std::pair<iterator, bool> InsertOnly(
 		const key_type& key, const mapped_type& other) = 0;
 
+	virtual std::pair<iterator, bool> InsertOnly(
+		key_type&& key, mapped_type&& other) = 0;
+
 	virtual std::pair<iterator, bool> InsertOrAssign(
 		const key_type& key, const mapped_type& other) = 0;
+
+	virtual std::pair<iterator, bool> InsertOrAssign(
+		key_type&& key, mapped_type&& other) = 0;
 
 	virtual void Remove(const key_type& key) = 0;
 
