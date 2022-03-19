@@ -80,11 +80,17 @@ using HashableObject = HashableObjectImpl<std::string>;
 
 // ========== Convenient types of List ==========
 
-using List = ListCat<VecType<Object>, std::string>;
+template<typename _ValType>
+using ListT = ListCat<VecType<_ValType>, std::string>;
+
+using List = ListT<Object>;
 
 // ========== Convenient types of Dict ==========
 
-using Dict = DictCat<MapType<HashableObject, Object>, std::string>;
+template<typename _KeyType, typename _Valtype>
+using DictT = DictCat<MapType<_KeyType, _Valtype>, std::string>;
+
+using Dict = DictT<HashableObject, Object>;
 
 // ========== Convenient types of base classes ==========
 

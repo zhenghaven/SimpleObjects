@@ -304,8 +304,24 @@ GTEST_TEST(TestDict, Insert)
 	};
 	EXPECT_NO_THROW(subTest1(););
 	EXPECT_TRUE(testDc.at(Int64(1)).AsString() == String("test val 1"));
-	//    Unsuccessful insert
+
+	EXPECT_THROW(testDc.at(Int64(2)), std::out_of_range);
 	auto subTest2 = [&]()
+	{
+		const auto tmpKey = HashableObject(Int64(2));
+		const auto tmpVal = Object(String("test val 2"));
+		auto res = testDc.InsertOnly(tmpKey, tmpVal);
+		EXPECT_TRUE(res.first->first.AsNumeric() == Int64(2));
+		EXPECT_TRUE(res.first->second.AsString() == String("test val 2"));
+		EXPECT_TRUE(&*res.first == &*testDc.find(Int64(2)));
+		EXPECT_TRUE(res.second == true);
+	};
+	EXPECT_NO_THROW(subTest2(););
+	EXPECT_TRUE(testDc.at(Int64(2)).AsString() == String("test val 2"));
+
+
+	//    Unsuccessful insert
+	auto subTest3 = [&]()
 	{
 		auto res = testDc.InsertOnly(Int64(1), String("test val 1_1"));
 		EXPECT_TRUE(res.first->first.AsNumeric() == Int64(1));
@@ -313,19 +329,58 @@ GTEST_TEST(TestDict, Insert)
 		EXPECT_TRUE(&*res.first == &*testDc.find(Int64(1)));
 		EXPECT_TRUE(res.second == false);
 	};
-	EXPECT_NO_THROW(subTest2(););
+	EXPECT_NO_THROW(subTest3(););
+	EXPECT_TRUE(testDc.at(Int64(1)).AsString() == String("test val 1"));
+
+	auto subTest4 = [&]()
+	{
+		const auto tmpKey = HashableObject(Int64(2));
+		const auto tmpVal = Object(String("test val 2_2"));
+		auto res = testDc.InsertOnly(tmpKey, tmpVal);
+		EXPECT_TRUE(res.first->first.AsNumeric() == Int64(2));
+		EXPECT_TRUE(res.first->second.AsString() == String("test val 2"));
+		EXPECT_TRUE(&*res.first == &*testDc.find(Int64(2)));
+		EXPECT_TRUE(res.second == false);
+	};
+	EXPECT_NO_THROW(subTest4(););
+	EXPECT_TRUE(testDc.at(Int64(2)).AsString() == String("test val 2"));
 
 	// InsertOrAssign
 	//    Insert
-	EXPECT_THROW(testDc.at(String("2")), std::out_of_range);
-	EXPECT_NO_THROW(
-		testDc.InsertOrAssign(String("2"), String("test val 2")));
-	EXPECT_TRUE(testDc.at(String("2")).AsString() == String("test val 2"));
+	{
+		EXPECT_THROW(testDc.at(String("2")), std::out_of_range);
+		EXPECT_NO_THROW(
+			auto res = testDc.InsertOrAssign(String("2"), String("test val 2"));
+			EXPECT_TRUE(res.second == true););
+		EXPECT_TRUE(testDc.at(String("2")).AsString() == String("test val 2"));
+	}
+
+	{
+		const auto tmpKey = HashableObject(String("3"));
+		const auto tmpVal = Object(String("test val 3"));
+		EXPECT_THROW(testDc.at(tmpKey), std::out_of_range);
+		EXPECT_NO_THROW(
+			auto res = testDc.InsertOrAssign(tmpKey, tmpVal);
+			EXPECT_TRUE(res.second == true););
+		EXPECT_TRUE(testDc.at(String("3")).AsString() == String("test val 3"));
+	}
 
 	//    Assign
-	EXPECT_NO_THROW(
-		testDc.InsertOrAssign(String("2"), String("test val 2_1")));
-	EXPECT_TRUE(testDc.at(String("2")).AsString() == String("test val 2_1"));
+	{
+		EXPECT_NO_THROW(
+			auto res = testDc.InsertOrAssign(String("2"), String("test val 2_1"));
+			EXPECT_TRUE(res.second == false););
+		EXPECT_TRUE(testDc.at(String("2")).AsString() == String("test val 2_1"));
+	}
+
+	{
+		const auto tmpKey = HashableObject(String("3"));
+		const auto tmpVal = Object(String("test val 3_1"));
+		EXPECT_NO_THROW(
+			auto res = testDc.InsertOrAssign(tmpKey, tmpVal);
+			EXPECT_TRUE(res.second == false););
+		EXPECT_TRUE(testDc.at(String("3")).AsString() == String("test val 3_1"));
+	}
 }
 
 GTEST_TEST(TestDict, Remove)

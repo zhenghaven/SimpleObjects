@@ -340,8 +340,12 @@ GTEST_TEST(TestList, PushPopBack)
 	EXPECT_EQ(nkLs, List({String("Test String"),}));
 	EXPECT_NO_THROW(nkLs.push_back(Int64(12345)));
 	EXPECT_EQ(nkLs, List({String("Test String"),Int64(12345)}));
+	const auto tmpVal = Object(Double(123.0));
+	EXPECT_NO_THROW(nkLs.push_back(tmpVal));
+	EXPECT_EQ(nkLs, List({String("Test String"),Int64(12345), Double(123.0)}));
 
 	//popback
+	EXPECT_NO_THROW(nkLs.pop_back());
 	EXPECT_NO_THROW(nkLs.pop_back());
 	EXPECT_EQ(nkLs, List({String("Test String"),}));
 }
