@@ -353,7 +353,7 @@ struct AsChildType;
 template<typename _Child, typename _RetType>
 struct AsChildType<false, _Child, _RetType>
 {
-	static_assert(std::is_same<_Child, _RetType>::value,
+	static_assert(!std::is_same<_Child, _RetType>::value,
 		"Implementation Error");
 
 	static _RetType& AsChild(_Child&,
