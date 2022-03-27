@@ -99,7 +99,7 @@ using HashableBaseObj = HashableBaseObject<std::string>;
 
 using NumericBaseObj = NumericBaseObject<std::string>;
 using StringBaseObj = StringBaseObject<char, std::string>;
-using ListBaseObj = ListBaseObject<Object, std::string>;
+using ListBaseObj = ListBaseObject<BaseObj, std::string>;
 using DictBaseObj = DictBaseObject<HashableObject, Object, std::string>;
 using StaticDictBaseObj = StaticDictBaseObject<
 	HashableBaseObj,

@@ -62,7 +62,7 @@ template<typename _ToStringType>
 class NumericBaseObject;
 template<typename _CharType, typename _ToStringType>
 class StringBaseObject;
-template<typename _ValType,  typename _ToStringType>
+template<typename _ValBaseType,  typename _ToStringType>
 class ListBaseObject;
 template<typename _KeyType,  typename _ValType,     typename _ToStringType>
 class DictBaseObject;
@@ -98,7 +98,7 @@ public: // Static members:
 
 	using StringBase  = StringBaseObject<char, ToStringType>;
 
-	using ListBase    = ListBaseObject<ObjectImpl<ToStringType>, ToStringType>;
+	using ListBase    = ListBaseObject<BaseObject<ToStringType>, ToStringType>;
 
 	using DictBase    = DictBaseObject<HashableObjectImpl<ToStringType>,
 		                               ObjectImpl<ToStringType>,

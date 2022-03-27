@@ -322,15 +322,9 @@ GTEST_TEST(TestList, At)
 
 GTEST_TEST(TestList, Contains)
 {
-	// non const
 	List nkLs = {String("Test String"), Bool(true), Int64(12345)};
-	EXPECT_EQ(nkLs.Contains(Int64(12345)), nkLs.begin() + 2);
-	EXPECT_EQ(nkLs.Contains(Int64(12000)), nkLs.end());
-
-	// const
-	const List kLs = {String("Test String"), Bool(true), Int64(12345)};
-	EXPECT_EQ(kLs.Contains(Int64(12345)), kLs.begin() + 2);
-	EXPECT_EQ(kLs.Contains(Int64(12000)), kLs.end());
+	EXPECT_TRUE(nkLs.Contains(Int64(12345)) == true);
+	EXPECT_TRUE(nkLs.Contains(Int64(12000)) == false);
 }
 
 GTEST_TEST(TestList, PushPopBack)
@@ -475,5 +469,148 @@ GTEST_TEST(TestList, ToString)
 		EXPECT_NO_THROW(
 			testLs.DumpString(ToOutIt<char>(std::back_inserter(res))));
 		EXPECT_EQ(res, expRes);
+	}
+}
+
+GTEST_TEST(TestList, BaseListIterators)
+{
+	// non-const
+	{
+		auto testLs = List({ Null(), Int64(123), String("test"), });
+		ListBaseObj& testLsB = testLs;
+
+		auto it = testLsB.begin();
+
+		EXPECT_TRUE(it != testLsB.end());
+		EXPECT_TRUE((*it) == Null());
+		EXPECT_NO_THROW(++it);
+
+		EXPECT_TRUE(it != testLsB.end());
+		EXPECT_TRUE((*it) == Int64(123));
+		EXPECT_TRUE((*it) != Int64(321));
+		EXPECT_NO_THROW(++it);
+
+		EXPECT_TRUE(it != testLsB.end());
+		EXPECT_TRUE((*it) == String("test"));
+		EXPECT_TRUE((*it) != String("testXX"));
+		// mutate value
+		EXPECT_NO_THROW((*it).AsString().push_back('Y'));
+		EXPECT_TRUE((*it) == String("testY"));
+		EXPECT_TRUE((*it) != String("testXX"));
+		EXPECT_NO_THROW(++it);
+
+		EXPECT_TRUE(it == testLsB.end());
+	}
+
+	// const
+	{
+		auto testLs = List({ Null(), Int64(123), String("test"), });
+		const ListBaseObj& testLsB = testLs;
+
+		auto it = testLsB.begin();
+
+		EXPECT_TRUE(it != testLsB.end());
+		EXPECT_TRUE((*it) == Null());
+		EXPECT_NO_THROW(++it);
+
+		EXPECT_TRUE(it != testLsB.end());
+		EXPECT_TRUE((*it) == Int64(123));
+		EXPECT_TRUE((*it) != Int64(321));
+		EXPECT_NO_THROW(++it);
+
+		EXPECT_TRUE(it != testLsB.end());
+		EXPECT_TRUE((*it) == String("test"));
+		EXPECT_TRUE((*it) != String("testXX"));
+		EXPECT_NO_THROW(++it);
+
+		EXPECT_TRUE(it == testLsB.end());
+	}
+}
+
+GTEST_TEST(TestList, BaseListIndexing)
+{
+
+	// non-const
+	{
+		auto testLs = List({ Null(), Int64(123), String("test"), });
+		ListBaseObj& testLsB = testLs;
+
+		EXPECT_NO_THROW(EXPECT_TRUE(testLsB[0] == Null()));
+		EXPECT_NO_THROW(EXPECT_TRUE(testLsB[1] == Int64(123)));
+		EXPECT_NO_THROW(EXPECT_TRUE(testLsB[2] == String("test")));
+		EXPECT_NO_THROW((testLsB[2].AsString().push_back('Y')));
+		EXPECT_NO_THROW(EXPECT_TRUE(testLsB[2] == String("testY")));
+
+		EXPECT_NO_THROW(EXPECT_TRUE(testLsB[1] != Int64(321)));
+		EXPECT_NO_THROW(EXPECT_TRUE(testLsB[2] != String("testX")));
+
+		EXPECT_THROW(testLsB[3], IndexError);
+		EXPECT_THROW(testLsB[100], IndexError);
+	}
+
+	// const
+	{
+		auto testLs = List({ Null(), Int64(123), String("test"), });
+		const ListBaseObj& testLsB = testLs;
+
+		EXPECT_NO_THROW(EXPECT_TRUE(testLsB[0] == Null()));
+		EXPECT_NO_THROW(EXPECT_TRUE(testLsB[1] == Int64(123)));
+		EXPECT_NO_THROW(EXPECT_TRUE(testLsB[2] == String("test")));
+
+		EXPECT_NO_THROW(EXPECT_TRUE(testLsB[1] != Int64(321)));
+		EXPECT_NO_THROW(EXPECT_TRUE(testLsB[2] != String("testX")));
+
+		EXPECT_THROW(testLsB[3], IndexError);
+		EXPECT_THROW(testLsB[100], IndexError);
+	}
+}
+
+GTEST_TEST(TestList, BaseListContains)
+{
+	// const
+	{
+		auto testLs = List({ Null(), Int64(123), String("test"), });
+		const ListBaseObj& testLsB = testLs;
+
+		EXPECT_TRUE(testLsB.Contains(Int64(123)));
+		EXPECT_FALSE(testLsB.Contains(Int64(321)));
+	}
+}
+
+GTEST_TEST(TestList, BaseListPushBackAppend)
+{
+
+	// push_back
+	{
+		auto testLs = List({ Null(), Int64(123), String("test"), });
+		ListBaseObj& testLsB = testLs;
+
+		// R-value
+		EXPECT_NO_THROW(testLsB.push_back(Object(Bool(true))));
+		EXPECT_THROW(testLsB.push_back(Double(1.23)), TypeError);
+
+		EXPECT_NO_THROW(EXPECT_TRUE(testLsB[3] == Bool(true)));
+
+		// L-value
+		const auto val1 = Object(Bool(false));
+		const auto val2 = Double(1.23);
+
+		EXPECT_NO_THROW(testLsB.push_back(val1));
+		EXPECT_THROW(testLsB.push_back(val2), TypeError);
+
+		EXPECT_NO_THROW(EXPECT_TRUE(testLsB[4] == Bool(false)));
+	}
+
+	// Append
+	{
+		auto testLs = List({ Null(), Int64(123), String("test"), });
+		ListBaseObj& testLsB = testLs;
+
+		auto testLsA = List({ Bool(true), Double(0.0), });
+
+		testLsB.Append(testLsA);
+		EXPECT_TRUE(testLs ==
+			List({ Null(), Int64(123), String("test"),
+				Bool(true), Double(0.0), }));
 	}
 }

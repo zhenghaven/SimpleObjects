@@ -16,18 +16,18 @@ namespace SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE
 #endif
 {
 
-template<typename _ValType, typename _ToStringType>
+template<typename _ValBaseType, typename _ToStringType>
 class ListBaseObject : public BaseObject<_ToStringType>
 {
 public: // Static Objects
 
 	using ToStringType = _ToStringType;
-	using Self = ListBaseObject<_ValType, _ToStringType>;
+	using Self = ListBaseObject<_ValBaseType, _ToStringType>;
 	using Base = BaseObject<_ToStringType>;
 
 	using ListBase = typename Base::ListBase;
 
-	typedef _ValType                            value_type;
+	typedef _ValBaseType                        value_type;
 	typedef value_type&                         reference;
 	typedef const value_type&                   const_reference;
 	typedef value_type*                         pointer;
@@ -67,16 +67,49 @@ public:
 			>::AsChild(*this, "List", this->GetCategoryName());
 	}
 
-	virtual bool operator==(const Self& rhs) const = 0;
+	// ========== operators ==========
+
+	virtual bool operator==(const Self& rhs) const
+	{
+		if (size() != rhs.size())
+		{
+			return false;
+		}
+
+		auto ita  = cbegin();
+		auto itae = cend();
+		auto itb  = rhs.cbegin();
+		return std::equal(
+			ita, itae,
+			itb);
+	}
 
 	virtual bool operator!=(const Self& rhs) const
 	{
 		return !(*this == rhs);
 	}
 
-	virtual bool operator<(const Self& rhs) const = 0;
+	virtual bool operator<(const Self& rhs) const
+	{
+		auto ita  = cbegin();
+		auto itae = cend();
+		auto itb  = rhs.cbegin();
+		auto itbe = rhs.cend();
+		return std::lexicographical_compare(
+			ita, itae,
+			itb, itbe);
+	}
 
-	virtual bool operator>(const Self& rhs) const = 0;
+	virtual bool operator>(const Self& rhs) const
+	{
+		auto ita  = cbegin();
+		auto itae = cend();
+		auto itb  = rhs.cbegin();
+		auto itbe = rhs.cend();
+		return std::lexicographical_compare(
+			itb, itbe,
+			ita, itae);
+	}
 
 	virtual bool operator<=(const Self& rhs) const
 	{
@@ -122,70 +155,91 @@ public:
 	using Base::operator<=;
 	using Base::operator>=;
 
-	virtual iterator begin() = 0;
-	virtual iterator end() = 0;
-
-	virtual const_iterator cbegin() const = 0;
-	virtual const_iterator cend() const = 0;
-
-	virtual iterator rbegin() = 0;
-	virtual iterator rend() = 0;
-
-	virtual const_iterator crbegin() const = 0;
-	virtual const_iterator crend() const = 0;
-
-	virtual const_iterator begin() const
-	{
-		return this->cbegin();
-	}
-
-	virtual const_iterator end() const
-	{
-		return this->cend();
-	}
+	// ========== Functions that doesn't have value_type in prototype ==========
 
 	virtual size_t size() const = 0;
 
-	virtual reference at(size_t idx) = 0;
-
-	virtual const_reference at(size_t idx) const = 0;
-
-	virtual reference operator[](size_t idx)
-	{
-		return this->at(idx);
-	}
-
-	virtual const_reference operator[](size_t idx) const
-	{
-		return this->at(idx);
-	}
-
-	virtual iterator Contains(const_reference other) = 0;
-
-	virtual const_iterator Contains(const_reference other) const = 0;
-
-	virtual void push_back(value_type&& ch) = 0;
-
-	virtual void push_back(const_reference ch) = 0;
-
 	virtual void pop_back() = 0;
-
-	virtual void Append(const_iterator begin, const_iterator end) = 0;
-
-	virtual void Append(const Self& other)
-	{
-		return this->Append(other.cbegin(), other.cend());
-	}
-
-	virtual const_pointer data() const = 0;
 
 	virtual void resize(size_t len) = 0;
 
 	virtual void reserve(size_t len) = 0;
 
-	virtual void Insert(size_t idx, const_reference other) = 0;
-
 	virtual void Remove(size_t idx) = 0;
+
+	// ========== Functions that involves value_type in prototype ==========
+
+	RdIterator<value_type, false> begin()
+	{
+		return ListBaseBegin();
+	}
+
+	RdIterator<value_type, false> end()
+	{
+		return ListBaseEnd();
+	}
+
+	RdIterator<value_type, true> cbegin() const
+	{
+		return ListBaseBegin();
+	}
+
+	RdIterator<value_type, true> cend() const
+	{
+		return ListBaseEnd();
+	}
+
+	RdIterator<value_type, true> begin() const
+	{
+		return cbegin();
+	}
+
+	RdIterator<value_type, true> end() const
+	{
+		return cend();
+	}
+
+	reference operator[](size_t idx)
+	{
+		return ListBaseAt(idx);
+	}
+
+	const_reference operator[](size_t idx) const
+	{
+		return ListBaseAt(idx);
+	}
+
+	bool Contains(const_reference val) const
+	{
+		auto e = cend();
+		return std::find(cbegin(), e, val) != e;
+	}
+
+	void push_back(value_type&& val)
+	{
+		return ListBasePushBack(std::forward<value_type>(val));
+	}
+
+	void push_back(const_reference val)
+	{
+		return ListBasePushBack(val);
+	}
+
+	void Append(const_iterator begin, const_iterator end)
+	{
+		while (begin != end)
+		{
+			push_back(*begin);
+			++begin;
+		}
+	}
+
+	void Append(const Self& other)
+	{
+		Append(other.cbegin(), other.cend());
+	}
+
+	// ========== Copy and Move ==========
 
 	virtual std::unique_ptr<Self> Copy(const Self* /*unused*/) const = 0;
 
@@ -200,6 +254,24 @@ public:
 	{
 		return Move(sk_null);
 	}
+
+protected:
+
+	virtual RdIterator<value_type, false> ListBaseBegin() = 0;
+
+	virtual RdIterator<value_type, false> ListBaseEnd() = 0;
+
+	virtual RdIterator<value_type, true> ListBaseBegin() const = 0;
+
+	virtual RdIterator<value_type, true> ListBaseEnd() const = 0;
+
+	virtual reference ListBaseAt(size_t idx) = 0;
+
+	virtual const_reference ListBaseAt(size_t idx) const = 0;
+
+	virtual void ListBasePushBack(value_type&& val) = 0;
+
+	virtual void ListBasePushBack(const_reference val) = 0;
 
 }; // class ListBaseObject
 
