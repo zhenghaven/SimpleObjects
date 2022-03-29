@@ -28,35 +28,45 @@ GTEST_TEST(TestIterator, CountTestFile)
 GTEST_TEST(TestIterator, ItTraits)
 {
 	static_assert(std::is_same<
-		typename CppStdRdIteratorWrap<std::string::iterator, char, false>::difference_type,
+		typename CppStdRdIteratorWrap<
+			std::string::iterator, char, false, Internal::ItTransformDirect>::difference_type,
 		std::ptrdiff_t>::value, "ItTraits test failed.");
 	static_assert(std::is_same<
-		typename CppStdRdIteratorWrap<std::string::iterator, char, false>::value_type,
+		typename CppStdRdIteratorWrap<
+		std::string::iterator, char, false, Internal::ItTransformDirect>::value_type,
 		char>::value, "ItTraits test failed.");
 	static_assert(std::is_same<
-		typename CppStdRdIteratorWrap<std::string::iterator, char, false>::pointer,
+		typename CppStdRdIteratorWrap<
+		std::string::iterator, char, false, Internal::ItTransformDirect>::pointer,
 		char*>::value, "ItTraits test failed.");
 	static_assert(std::is_same<
-		typename CppStdRdIteratorWrap<std::string::iterator, char, false>::reference,
+		typename CppStdRdIteratorWrap<
+		std::string::iterator, char, false, Internal::ItTransformDirect>::reference,
 		char&>::value, "ItTraits test failed.");
 	static_assert(std::is_same<
-		typename CppStdRdIteratorWrap<std::string::iterator, char, false>::iterator_category,
+		typename CppStdRdIteratorWrap<
+		std::string::iterator, char, false, Internal::ItTransformDirect>::iterator_category,
 		std::random_access_iterator_tag>::value, "ItTraits test failed.");
 
 	static_assert(std::is_same<
-		typename CppStdRdIteratorWrap<std::string::iterator, char, true>::difference_type,
+		typename CppStdRdIteratorWrap<
+		std::string::iterator, char, true, Internal::ItTransformDirect>::difference_type,
 		std::ptrdiff_t>::value, "ItTraits test failed.");
 	static_assert(std::is_same<
-		typename CppStdRdIteratorWrap<std::string::iterator, char, true>::value_type,
+		typename CppStdRdIteratorWrap<
+		std::string::iterator, char, true, Internal::ItTransformDirect>::value_type,
 		char>::value, "ItTraits test failed.");
 	static_assert(std::is_same<
-		typename CppStdRdIteratorWrap<std::string::iterator, char, true>::pointer,
+		typename CppStdRdIteratorWrap<
+		std::string::iterator, char, true, Internal::ItTransformDirect>::pointer,
 		const char*>::value, "ItTraits test failed.");
 	static_assert(std::is_same<
-		typename CppStdRdIteratorWrap<std::string::iterator, char, true>::reference,
+		typename CppStdRdIteratorWrap<
+		std::string::iterator, char, true, Internal::ItTransformDirect>::reference,
 		const char&>::value, "ItTraits test failed.");
 	static_assert(std::is_same<
-		typename CppStdRdIteratorWrap<std::string::iterator, char, true>::iterator_category,
+		typename CppStdRdIteratorWrap<
+		std::string::iterator, char, true, Internal::ItTransformDirect>::iterator_category,
 		std::random_access_iterator_tag>::value, "ItTraits test failed.");
 }
 

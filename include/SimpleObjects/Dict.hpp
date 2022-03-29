@@ -21,8 +21,8 @@ namespace SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE
 template<typename _CtnType, typename _ToStringType>
 class DictCat :
 	public DictBaseObject<
-		typename _CtnType::key_type,
-		typename _CtnType::mapped_type,
+		HashableBaseObject<_ToStringType>,
+		BaseObject<_ToStringType>,
 		_ToStringType>
 {
 public: // Static member:
@@ -31,8 +31,8 @@ public: // Static member:
 	using ToStringType = _ToStringType;
 	using Self = DictCat<_CtnType, _ToStringType>;
 	using Base = DictBaseObject<
-		typename _CtnType::key_type,
-		typename _CtnType::mapped_type,
+		HashableBaseObject<_ToStringType>,
+		BaseObject<_ToStringType>,
 		_ToStringType>;
 	using BaseBase = typename Base::Base;
 
@@ -47,8 +47,32 @@ public: // Static member:
 	typedef typename ContainerType::const_reference      const_reference;
 	typedef typename ContainerType::pointer              pointer;
 	typedef typename ContainerType::const_pointer        const_pointer;
-	typedef typename Base::iterator                      iterator;
-	typedef typename Base::const_iterator                const_iterator;
+	typedef FrIterator<value_type, false>                iterator;
+	typedef FrIterator<value_type, true>                 const_iterator;
+
+	typedef typename Base::key_type                  base_key_type;
+	typedef typename Base::mapped_type               base_mapped_type;
+	typedef typename Base::key_iterator              base_key_iterator;
+	typedef typename Base::mapped_iterator           base_mapped_iterator;
+	typedef typename Base::const_mapped_iterator     base_const_mapped_iterator;
+
+	using _CtnConstIterator = typename ContainerType::const_iterator;
+	using _CtnIterator = typename ContainerType::iterator;
+	using _KeyIteratorWrap = CppStdFwIteratorWrap<
+			_CtnConstIterator,
+			base_key_type,
+			true,
+			Internal::ItTransformTupleGet<0> >;
+	using _ValKIteratorWrap = CppStdFwIteratorWrap<
+			_CtnConstIterator,
+			base_mapped_type,
+			true,
+			Internal::ItTransformTupleGet<1> >;
+	using _ValIteratorWrap = CppStdFwIteratorWrap<
+			_CtnIterator,
+			base_mapped_type,
+			false,
+			Internal::ItTransformTupleGet<1> >;
 
 	static constexpr ObjCategory sk_cat()
 	{
@@ -100,29 +124,7 @@ public:
 
 	// ========== operators ==========
 
-	// overrides Base::operator==
-	virtual bool operator==(const Base& rhs) const override
-	{
-		// reference: https://github.com/llvm/llvm-project/blob/main/libcxx/include/unordered_map#L1877
-		if (size() != rhs.size())
-		{
-			return false;
-		}
-		auto xi = m_data.begin();
-		auto xe = m_data.end();
-		auto ye = rhs.end();
-		for (; xi != xe; ++xi)
-		{
-			auto yj = rhs.find(xi->first);
-			if (yj == ye || !(*xi == *yj))
-			{
-				return false;
-			}
-		}
-		return true;
-	}
-
-	using BaseBase::operator==;
+	using Base::operator==;
 
 	using Base::operator!=;
 
@@ -144,6 +146,141 @@ public:
 	using Base::operator>;
 	using Base::operator<=;
 	using Base::operator>=;
+
+	// ========== Functions provided by this class ==========
+
+	iterator begin()
+	{
+		return ToFrIt<false>(m_data.begin());
+	}
+
+	iterator end()
+	{
+		return ToFrIt<false>(m_data.end());
+	}
+
+	const_iterator cbegin() const
+	{
+		return ToFrIt<true>(m_data.cbegin());
+	}
+
+	const_iterator cend() const
+	{
+		return ToFrIt<true>(m_data.cend());
+	}
+
+	const_iterator begin() const
+	{
+		return cbegin();
+	}
+
+	const_iterator end() const
+	{
+		return cend();
+	}
+
+	mapped_type& operator[](const key_type& key)
+	{
+		return m_data[key];
+	}
+
+	const mapped_type& operator[](const key_type& key) const
+	{
+		try
+		{
+			return m_data.at(key);
+		}
+		catch (const std::out_of_range&)
+		{
+			throw KeyError(key.ShortDebugString(), KeyError::sk_keyName);
+		}
+	}
+
+	const_iterator find(const key_type& key) const
+	{
+		return ToFrIt<true>(m_data.find(key));
+	}
+
+	iterator find(const key_type& key)
+	{
+		return ToFrIt<false>(m_data.find(key));
+	}
+
+	bool HasKey(const key_type& key) const
+	{
+		return m_data.find(key) != m_data.cend();
+	}
+
+	std::pair<iterator, bool> InsertOnly(
+		const key_type& key, const mapped_type& other)
+	{
+		auto it = m_data.find(key);
+		if (it == m_data.end())
+		{
+			// insert
+			it = m_data.emplace(key, other).first;
+			return {ToFrIt<false>(it), true};
+		}
+		return {ToFrIt<false>(it), false};
+	}
+
+	std::pair<iterator, bool> InsertOnly(
+		key_type&& key, mapped_type&& other)
+	{
+		auto it = m_data.find(key);
+		if (it == m_data.end())
+		{
+			// insert
+			it = m_data.emplace(
+				std::forward<key_type>(key),
+				std::forward<mapped_type>(other)).first;
+			return {ToFrIt<false>(it), true};
+		}
+		return {ToFrIt<false>(it), false};
+	}
+
+	std::pair<iterator, bool> InsertOrAssign(
+		const key_type& key, const mapped_type& other)
+	{
+		auto it = m_data.find(key);
+		if (it == m_data.end())
+		{
+			// insert
+			it = m_data.emplace(key, other).first;
+			return {ToFrIt<false>(it), true};
+		}
+		else
+		{
+			// assign
+			(*it).second = other;
+			return {ToFrIt<false>(it), false};
+		}
+	}
+
+	std::pair<iterator, bool> InsertOrAssign(
+		key_type&& key, mapped_type&& other)
+	{
+		auto it = m_data.find(key);
+		if (it == m_data.end())
+		{
+			// insert
+			it = m_data.emplace(
+				std::forward<key_type>(key),
+				std::forward<mapped_type>(other)).first;
+			return {ToFrIt<false>(it), true};
+		}
+		else
+		{
+			// assign
+			(*it).second = std::forward<mapped_type>(other);
+			return {ToFrIt<false>(it), false};
+		}
+	}
+
+	void Remove(const key_type& key)
+	{
+		m_data.erase(key);
+	}
 
 	// ========== Overrides BaseObject ==========
 
@@ -192,128 +329,36 @@ public:
 		return m_data.size();
 	}
 
-	using Base::begin;
-	using Base::end;
-
-	virtual iterator begin() override
+	virtual base_key_iterator KeysBegin() const override
 	{
-		return ToFrIt<false>(m_data.begin());
+		return base_key_iterator(_KeyIteratorWrap::Build(m_data.cbegin()));
 	}
 
-	virtual iterator end() override
+	virtual base_key_iterator KeysEnd() const override
 	{
-		return ToFrIt<false>(m_data.end());
+		return base_key_iterator(_KeyIteratorWrap::Build(m_data.cend()));
 	}
 
-	virtual const_iterator cbegin() const override
+	virtual base_const_mapped_iterator ValsCBegin() const override
 	{
-		return ToFrIt<true>(m_data.cbegin());
+		return base_const_mapped_iterator(
+			_ValKIteratorWrap::Build(m_data.cbegin()));
 	}
 
-	virtual const_iterator cend() const override
+	virtual base_const_mapped_iterator ValsCEnd() const override
 	{
-		return ToFrIt<true>(m_data.cend());
+		return base_const_mapped_iterator(
+			_ValKIteratorWrap::Build(m_data.cend()));
 	}
 
-	virtual mapped_type& at(const key_type& key) override
+	virtual base_mapped_iterator ValsBegin() override
 	{
-		return m_data.at(key);
+		return base_mapped_iterator(_ValIteratorWrap::Build(m_data.begin()));
 	}
 
-	virtual const mapped_type& at(const key_type& key) const override
+	virtual base_mapped_iterator ValsEnd() override
 	{
-		return m_data.at(key);
-	}
-
-	virtual mapped_type& operator[](const key_type& key) override
-	{
-		return m_data[key];
-	}
-
-	virtual const_iterator find(const key_type& key) const override
-	{
-		return ToFrIt<true>(m_data.find(key));
-	}
-
-	virtual iterator find(const key_type& key) override
-	{
-		return ToFrIt<false>(m_data.find(key));
-	}
-
-	virtual bool HasKey(const key_type& key) const override
-	{
-		return m_data.find(key) != m_data.cend();
-	}
-
-	virtual std::pair<iterator, bool> InsertOnly(
-		const key_type& key, const mapped_type& other) override
-	{
-		auto it = m_data.find(key);
-		if (it == m_data.end())
-		{
-			// insert
-			it = m_data.emplace(key, other).first;
-			return {ToFrIt<false>(it), true};
-		}
-		return {ToFrIt<false>(it), false};
-	}
-
-	virtual std::pair<iterator, bool> InsertOnly(
-		key_type&& key, mapped_type&& other) override
-	{
-		auto it = m_data.find(key);
-		if (it == m_data.end())
-		{
-			// insert
-			it = m_data.emplace(
-				std::forward<key_type>(key),
-				std::forward<mapped_type>(other)).first;
-			return {ToFrIt<false>(it), true};
-		}
-		return {ToFrIt<false>(it), false};
-	}
-
-	virtual std::pair<iterator, bool> InsertOrAssign(
-		const key_type& key, const mapped_type& other) override
-	{
-		auto it = m_data.find(key);
-		if (it == m_data.end())
-		{
-			// insert
-			it = m_data.emplace(key, other).first;
-			return {ToFrIt<false>(it), true};
-		}
-		else
-		{
-			// assign
-			(*it).second = other;
-			return {ToFrIt<false>(it), false};
-		}
-	}
-
-	virtual std::pair<iterator, bool> InsertOrAssign(
-		key_type&& key, mapped_type&& other) override
-	{
-		auto it = m_data.find(key);
-		if (it == m_data.end())
-		{
-			// insert
-			it = m_data.emplace(
-				std::forward<key_type>(key),
-				std::forward<mapped_type>(other)).first;
-			return {ToFrIt<false>(it), true};
-		}
-		else
-		{
-			// assign
-			(*it).second = std::forward<mapped_type>(other);
-			return {ToFrIt<false>(it), false};
-		}
-	}
-
-	virtual void Remove(const key_type& key) override
-	{
-		m_data.erase(key);
+		return base_mapped_iterator(_ValIteratorWrap::Build(m_data.end()));
 	}
 
 	// ========== Interface copy/Move ==========
@@ -417,7 +462,114 @@ public:
 		*outIt++ = '}';
 	}
 
+protected:
+
+	// ========== Overrides DictBaseObject ==========
+
+	virtual base_const_mapped_iterator DictBaseFindVal(
+		const base_key_type& key) const override
+	{
+		return base_const_mapped_iterator(
+			_ValKIteratorWrap::Build(m_data.find(DynCastKey(key))));
+	}
+
+	virtual base_mapped_iterator DictBaseFindVal(
+		const base_key_type& key) override
+	{
+		return base_mapped_iterator(
+			_ValIteratorWrap::Build(m_data.find(DynCastKey(key))));
+	}
+
+	virtual base_mapped_iterator DictBaseFindValOrAddDefault(
+		const base_key_type& key) override
+	{
+		m_data[DynCastKey(key)];
+		return base_mapped_iterator(
+			_ValIteratorWrap::Build(m_data.find(DynCastKey(key))));
+	}
+
+	virtual bool DictBaseInsertOnly(
+		const base_key_type& key, const base_mapped_type& val) override
+	{
+		return InsertOnly(DynCastKey(key), DynCastVal(val)).second;
+	}
+
+	virtual bool DictBaseInsertOnly(
+		base_key_type&& key, base_mapped_type&& val) override
+	{
+		return InsertOnly(
+			DynCastKey(std::forward<base_key_type>(key)),
+			DynCastVal(std::forward<base_mapped_type>(val))).second;
+	}
+
+	virtual bool DictBaseInsertOrAssign(
+		const base_key_type& key, const base_mapped_type& val) override
+	{
+		return InsertOrAssign(DynCastKey(key), DynCastVal(val)).second;
+	}
+
+	virtual bool DictBaseInsertOrAssign(
+		base_key_type&& key, base_mapped_type&& val) override
+	{
+		return InsertOrAssign(
+			DynCastKey(std::forward<base_key_type>(key)),
+			DynCastVal(std::forward<base_mapped_type>(val))).second;
+	}
+
+	virtual void DictBaseRemove(const base_key_type& key) override
+	{
+		return Remove(DynCastKey(key));
+	}
+
 private:
+
+	static const key_type& DynCastKey(const base_key_type& key)
+	{
+		try
+		{
+			return dynamic_cast<const key_type&>(key);
+		}
+		catch(const std::bad_cast&)
+		{
+			throw TypeError("key type of the Dict", key.GetCategoryName());
+		}
+	}
+
+	static key_type&& DynCastKey(base_key_type&& key)
+	{
+		try
+		{
+			return dynamic_cast<key_type&&>(key);
+		}
+		catch(const std::bad_cast&)
+		{
+			throw TypeError("key type of the Dict", key.GetCategoryName());
+		}
+	}
+
+	static const mapped_type& DynCastVal(const base_mapped_type& val)
+	{
+		try
+		{
+			return dynamic_cast<const mapped_type&>(val);
+		}
+		catch(const std::bad_cast&)
+		{
+			throw TypeError("value type of the Dict", val.GetCategoryName());
+		}
+	}
+
+	static mapped_type&& DynCastVal(base_mapped_type&& val)
+	{
+		try
+		{
+			return dynamic_cast<mapped_type&&>(val);
+		}
+		catch(const std::bad_cast&)
+		{
+			throw TypeError("value type of the Dict", val.GetCategoryName());
+		}
+	}
 
 	std::unique_ptr<Self> CopyImpl() const
 	{

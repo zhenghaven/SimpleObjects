@@ -95,14 +95,19 @@ public:
 	_OriItType m_it;
 }; // class CppStdOutIteratorWrap
 
-template<typename _OriItType, typename _TargetType, bool _IsConst>
+template<
+	typename _OriItType,
+	typename _TargetType,
+	bool _IsConst,
+	typename _Transform>
 class CppStdInIteratorWrap : public InputIteratorIf<_TargetType, _IsConst>
 {
 public: // Static members:
 	using _BaseIf = InputIteratorIf<_TargetType, _IsConst>;
 	using _BaseIfPtr = std::unique_ptr<_BaseIf>;
 
-	using Self = CppStdInIteratorWrap<_OriItType, _TargetType, _IsConst>;
+	using Self = CppStdInIteratorWrap<
+		_OriItType, _TargetType, _IsConst, _Transform>;
 
 	typedef typename _BaseIf::difference_type         difference_type;
 	typedef typename _BaseIf::value_type              value_type;
@@ -149,12 +154,12 @@ public:
 
 	virtual reference GetRef() override
 	{
-		return *m_it;
+		return _Transform::template GetRef<reference>(m_it);
 	}
 
 	virtual pointer GetPtr() const override
 	{
-		return GetPtrImpl(m_it);
+		return _Transform::template GetPtr<pointer>(m_it);
 	}
 
 	virtual bool IsEqual(const _BaseIf& rhs) const override
@@ -173,35 +178,22 @@ public:
 
 	_OriItType m_it;
 
-protected:
-
-	template<
-		typename _ItType,
-		typename std::enable_if<std::is_class<_ItType>::value, bool>::type = true>
-	static pointer GetPtrImpl(const _ItType& it)
-	{
-		return it.operator->();
-	}
-
-	template<
-		typename _ItType,
-		typename std::enable_if<std::is_pointer<_ItType>::value, bool>::type = true>
-	static pointer GetPtrImpl(const _ItType& it)
-	{
-		return it;
-	}
-
 }; // class CppStdInIteratorWrap
 
 
-template<typename _OriItType, typename _TargetType, bool _IsConst>
+template<
+	typename _OriItType,
+	typename _TargetType,
+	bool _IsConst,
+	typename _Transform>
 class CppStdFwIteratorWrap :
 	public ForwardIteratorIf<_TargetType, _IsConst>,
-	public CppStdInIteratorWrap<_OriItType, _TargetType, _IsConst>
+	public CppStdInIteratorWrap<_OriItType, _TargetType, _IsConst, _Transform>
 {
 public: // Static members:
 
-	using Self = CppStdFwIteratorWrap<_OriItType, _TargetType, _IsConst>;
+	using Self = CppStdFwIteratorWrap<
+		_OriItType, _TargetType, _IsConst, _Transform>;
 
 	using _BaseInIf = InputIteratorIf<_TargetType, _IsConst>;
 	using _BaseInIfPtr = std::unique_ptr<_BaseInIf>;
@@ -209,7 +201,8 @@ public: // Static members:
 	using _BaseIf = ForwardIteratorIf<_TargetType, _IsConst>;
 	using _BaseIfPtr = std::unique_ptr<_BaseIf>;
 
-	using _Base = CppStdInIteratorWrap<_OriItType, _TargetType, _IsConst>;
+	using _Base = CppStdInIteratorWrap<
+		_OriItType, _TargetType, _IsConst, _Transform>;
 
 	typedef typename _BaseIf::difference_type         difference_type;
 	typedef typename _BaseIf::value_type              value_type;
@@ -277,10 +270,14 @@ private:
 }; // class CppStdFwIteratorWrap
 
 
-template<typename _OriItType, typename _TargetType, bool _IsConst>
+template<
+	typename _OriItType,
+	typename _TargetType,
+	bool _IsConst,
+	typename _Transform>
 class CppStdBiIteratorWrap :
 	public BidirectionalIteratorIf<_TargetType, _IsConst>,
-	public CppStdFwIteratorWrap<_OriItType, _TargetType, _IsConst>
+	public CppStdFwIteratorWrap<_OriItType, _TargetType, _IsConst, _Transform>
 {
 public: // Static members:
 
@@ -293,7 +290,8 @@ public: // Static members:
 	using _BaseIf = BidirectionalIteratorIf<_TargetType, _IsConst>;
 	using _BaseIfPtr = std::unique_ptr<_BaseIf>;
 
-	using _Base = CppStdFwIteratorWrap<_OriItType, _TargetType, _IsConst>;
+	using _Base = CppStdFwIteratorWrap<
+		_OriItType, _TargetType, _IsConst, _Transform>;
 
 	typedef typename _BaseIf::difference_type         difference_type;
 	typedef typename _BaseIf::value_type              value_type;
@@ -361,13 +359,18 @@ private:
 
 }; // class CppStdBiIteratorWrap
 
-template<typename _OriItType, typename _TargetType, bool _IsConst>
+template<
+	typename _OriItType,
+	typename _TargetType,
+	bool _IsConst,
+	typename _Transform>
 class CppStdRdIteratorWrap :
 	public RandomAccessIteratorIf<_TargetType, _IsConst>,
-	public CppStdBiIteratorWrap<_OriItType, _TargetType, _IsConst>
+	public CppStdBiIteratorWrap<_OriItType, _TargetType, _IsConst, _Transform>
 {
 public: // Static members:
-	using Self = CppStdRdIteratorWrap<_OriItType, _TargetType, _IsConst>;
+	using Self = CppStdRdIteratorWrap<
+		_OriItType, _TargetType, _IsConst, _Transform>;
 
 	using _BaseInIf = InputIteratorIf<_TargetType, _IsConst>;
 	using _BaseInIfPtr = std::unique_ptr<_BaseInIf>;
@@ -381,7 +384,8 @@ public: // Static members:
 	using _BaseIf = RandomAccessIteratorIf<_TargetType, _IsConst>;
 	using _BaseIfPtr = std::unique_ptr<_BaseIf>;
 
-	using _Base = CppStdBiIteratorWrap<_OriItType, _TargetType, _IsConst>;
+	using _Base = CppStdBiIteratorWrap<
+		_OriItType, _TargetType, _IsConst, _Transform>;
 
 	typedef typename _BaseIf::difference_type         difference_type;
 	typedef typename _BaseIf::value_type              value_type;

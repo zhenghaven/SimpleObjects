@@ -21,7 +21,7 @@ namespace SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE
 template<typename _CtnType, typename _ToStringType>
 class ListCat :
 	public ListBaseObject<
-		typename _CtnType::value_type,
+		BaseObject<_ToStringType>,
 		_ToStringType>
 {
 public: // Static member:
@@ -29,7 +29,7 @@ public: // Static member:
 	using ContainerType = _CtnType;
 	using ToStringType  = _ToStringType;
 	using Self = ListCat<_CtnType, _ToStringType>;
-	using Base = ListBaseObject<typename _CtnType::value_type, _ToStringType>;
+	using Base = ListBaseObject<BaseObject<_ToStringType>, _ToStringType>;
 	using BaseBase = typename Base::Base;
 
 	static_assert(std::is_same<BaseBase, BaseObject<_ToStringType> >::value,
@@ -43,10 +43,16 @@ public: // Static member:
 	typedef typename ContainerType::const_reference      const_reference;
 	typedef typename ContainerType::pointer              pointer;
 	typedef typename ContainerType::const_pointer        const_pointer;
-	typedef typename Base::iterator                      iterator;
-	typedef typename Base::const_iterator                const_iterator;
-	typedef typename Base::iterator                      reverse_iterator;
-	typedef typename Base::const_iterator                const_reverse_iterator;
+	typedef RdIterator<value_type, false>                iterator;
+	typedef RdIterator<value_type, true>                 const_iterator;
+	typedef RdIterator<value_type, false>                reverse_iterator;
+	typedef RdIterator<value_type, true>                 const_reverse_iterator;
+
+	typedef BaseBase                                     base_value_type;
+	typedef BaseBase&                                    base_reference;
+	typedef const BaseBase&                              base_const_reference;
+	typedef RdIterator<base_value_type, false>           base_iterator;
+	typedef RdIterator<base_value_type, true>            base_const_iterator;
 
 	static constexpr ObjCategory sk_cat()
 	{
@@ -98,53 +104,11 @@ public:
 
 	// ========== operators ==========
 
-	// overrides Base::operator==
-	virtual bool operator==(const Base& rhs) const override
-	{
-		if (m_data.size() != rhs.size())
-		{
-			return false;
-		}
-
-		auto ita  = m_data.cbegin();
-		auto itae = m_data.cend();
-		auto itb  = rhs.cbegin();
-		return std::equal(
-			ita, itae,
-			itb);
-	}
-
-	using BaseBase::operator==;
-
+	using Base::operator==;
 	using Base::operator!=;
 
-	// overrides Base::operator<
-	virtual bool operator<(const Base& rhs) const override
-	{
-		auto ita  = m_data.cbegin();
-		auto itae = m_data.cend();
-		auto itb  = rhs.cbegin();
-		auto itbe = rhs.cend();
-		return std::lexicographical_compare(
-			ita, itae,
-			itb, itbe);
-	}
-
-	using BaseBase::operator<;
-
-	// overrides Base::operator>
-	virtual bool operator>(const Base& rhs) const override
-	{
-		auto ita  = m_data.cbegin();
-		auto itae = m_data.cend();
-		auto itb  = rhs.cbegin();
-		auto itbe = rhs.cend();
-		return std::lexicographical_compare(
-			itb, itbe,
-			ita, itae);
-	}
-
-	using BaseBase::operator>;
+	using Base::operator<;
+	using Base::operator>;
 
 	using Base::operator<=;
 	using Base::operator>=;
@@ -179,6 +143,122 @@ public:
 		return m_data >= rhs.m_data;
 	}
 
+	// ========== Functions provided by this class ==========
+
+	iterator begin()
+	{
+		return ToRdIt<false>(m_data.begin());
+	}
+
+	iterator end()
+	{
+		return ToRdIt<false>(m_data.end());
+	}
+
+	const_iterator cbegin() const
+	{
+		return ToRdIt<true>(m_data.cbegin());
+	}
+
+	const_iterator cend() const
+	{
+		return ToRdIt<true>(m_data.cend());
+	}
+
+	const_iterator begin() const
+	{
+		return cbegin();
+	}
+
+	const_iterator end() const
+	{
+		return cend();
+	}
+
+	reverse_iterator rbegin()
+	{
+		return ToRdIt<false>(m_data.rbegin());
+	}
+
+	reverse_iterator rend()
+	{
+		return ToRdIt<false>(m_data.rend());
+	}
+
+	const_reverse_iterator crbegin() const
+	{
+		return ToRdIt<true>(m_data.crbegin());
+	}
+
+	const_reverse_iterator crend() const
+	{
+		return ToRdIt<true>(m_data.crend());
+	}
+
+	const_pointer data() const
+	{
+		return m_data.data();
+	}
+
+	value_type& operator[](size_t idx)
+	{
+		try
+		{
+			return m_data.at(idx);
+		}
+		catch(const std::out_of_range&)
+		{
+			throw IndexError(idx);
+		}
+	}
+
+	const value_type& operator[](size_t idx) const
+	{
+		try
+		{
+			return m_data.at(idx);
+		}
+		catch(const std::out_of_range&)
+		{
+			throw IndexError(idx);
+		}
+	}
+
+	bool Contains(const_reference val) const
+	{
+		auto e = cend();
+		return std::find(cbegin(), e, val) != e;
+	}
+
+	void push_back(value_type&& ch)
+	{
+		m_data.push_back(std::forward<value_type>(ch));
+	}
+
+	void push_back(const value_type& ch)
+	{
+		m_data.push_back(ch);
+	}
+
+	void Append(const_iterator begin, const_iterator end)
+	{
+		while (begin != end)
+		{
+			push_back(*begin);
+			++begin;
+		}
+	}
+
+	void Append(const Self& other)
+	{
+		Append(other.cbegin(), other.cend());
+	}
+
+	void Insert(size_t idx, const_reference other)
+	{
+		m_data.insert(m_data.begin() + idx, other);
+	}
+
 	// ========== Overrides BaseObject ==========
 
 	virtual ObjCategory GetCategory() const override
@@ -197,7 +277,7 @@ public:
 		}
 		catch(const std::bad_cast&)
 		{
-			throw TypeError("List", this->GetCategoryName());
+			throw TypeError("List", other.GetCategoryName());
 		}
 	}
 
@@ -210,7 +290,7 @@ public:
 		}
 		catch(const std::bad_cast&)
 		{
-			throw TypeError("List", this->GetCategoryName());
+			throw TypeError("List", other.GetCategoryName());
 		}
 	}
 
@@ -226,92 +306,9 @@ public:
 		return m_data.size();
 	}
 
-	using Base::begin;
-	using Base::end;
-
-	virtual iterator begin() override
-	{
-		return ToRdIt<false>(m_data.begin());
-	}
-
-	virtual iterator end() override
-	{
-		return ToRdIt<false>(m_data.end());
-	}
-
-	virtual const_iterator cbegin() const override
-	{
-		return ToRdIt<true>(m_data.cbegin());
-	}
-
-	virtual const_iterator cend() const override
-	{
-		return ToRdIt<true>(m_data.cend());
-	}
-
-	virtual reverse_iterator rbegin() override
-	{
-		return ToRdIt<false>(m_data.rbegin());
-	}
-
-	virtual reverse_iterator rend() override
-	{
-		return ToRdIt<false>(m_data.rend());
-	}
-
-	virtual const_reverse_iterator crbegin() const override
-	{
-		return ToRdIt<true>(m_data.crbegin());
-	}
-
-	virtual const_reverse_iterator crend() const override
-	{
-		return ToRdIt<true>(m_data.crend());
-	}
-
-	virtual value_type& at(size_t idx) override
-	{
-		return m_data[idx];
-	}
-
-	virtual const value_type& at(size_t idx) const override
-	{
-		return m_data[idx];
-	}
-
-	virtual iterator Contains(const_reference other) override
-	{
-		auto it = m_data.begin();
-		for (; it != m_data.end() && *it != other; ++it) {}
-		return ToRdIt<false>(it);
-	}
-
-	virtual const_iterator Contains(const_reference other) const override
-	{
-		auto it = m_data.begin();
-		for (; it != m_data.end() && *it != other; ++it) {}
-		return ToRdIt<true>(it);
-	}
-
-	virtual void push_back(value_type&& ch) override
-	{
-		m_data.push_back(std::forward<value_type>(ch));
-	}
-
-	virtual void push_back(const value_type& ch) override
-	{
-		m_data.push_back(ch);
-	}
-
 	virtual void pop_back() override
 	{
 		m_data.pop_back();
-	}
-
-	using Base::Append;
-	virtual void Append(const_iterator begin, const_iterator end) override
-	{
-		std::copy(begin, end, std::back_inserter(m_data));
 	}
 
 	virtual void resize(size_t len) override
@@ -322,16 +319,6 @@ public:
 	virtual void reserve(size_t len) override
 	{
 		m_data.reserve(len);
-	}
-
-	const_pointer data() const override
-	{
-		return m_data.data();
-	}
-
-	virtual void Insert(size_t idx, const_reference other) override
-	{
-		m_data.insert(m_data.begin() + idx, other);
 	}
 
 	virtual void Remove(size_t idx) override
@@ -428,6 +415,72 @@ public:
 		}
 		*outIt++ = ' ';
 		*outIt++ = ']';
+	}
+
+protected:
+
+	virtual base_iterator ListBaseBegin() override
+	{
+		return ToRdIt<false,
+			typename ContainerType::iterator,
+			base_value_type>(m_data.begin());
+	}
+
+	virtual base_iterator ListBaseEnd() override
+	{
+		return ToRdIt<false,
+			typename ContainerType::iterator,
+			base_value_type>(m_data.end());
+	}
+
+	virtual base_const_iterator ListBaseBegin() const override
+	{
+		return ToRdIt<true,
+			typename ContainerType::const_iterator,
+			base_value_type>(m_data.cbegin());
+	}
+
+	virtual base_const_iterator ListBaseEnd() const override
+	{
+		return ToRdIt<true,
+			typename ContainerType::const_iterator,
+			base_value_type>(m_data.cend());
+	}
+
+	virtual base_reference ListBaseAt(size_t idx) override
+	{
+		return Self::operator[](idx);
+	}
+
+	virtual base_const_reference ListBaseAt(size_t idx) const override
+	{
+		return Self::operator[](idx);
+	}
+
+	virtual void ListBasePushBack(base_value_type&& val) override
+	{
+		try
+		{
+			value_type&& casted = dynamic_cast<value_type&&>(val);
+			m_data.push_back(std::forward<value_type>(casted));
+		}
+		catch(const std::bad_cast&)
+		{
+			throw TypeError("value type of the List", val.GetCategoryName());
+		}
+	}
+
+	virtual void ListBasePushBack(base_const_reference val) override
+	{
+		try
+		{
+			const value_type& casted = dynamic_cast<const value_type&>(val);
+			m_data.push_back(casted);
+		}
+		catch(const std::bad_cast&)
+		{
+			throw TypeError("value type of the List", val.GetCategoryName());
+		}
 	}
 
 private:

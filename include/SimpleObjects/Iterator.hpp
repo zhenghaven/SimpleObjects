@@ -9,6 +9,9 @@
 
 #include "IteratorIf.hpp"
 #include "IteratorStdCpp.hpp"
+#include "IteratorZip.hpp"
+
+#include "Internal/IteratorTransform.hpp"
 
 #ifndef SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE
 namespace SimpleObjects
@@ -619,7 +622,8 @@ template<typename _OriItType,
 	typename _ValType = typename std::iterator_traits<_OriItType>::value_type>
 inline InIterator<_ValType> ToInIt(_OriItType it)
 {
-	using ItWrap = CppStdInIteratorWrap<_OriItType, _ValType, true>;
+	using ItWrap = CppStdInIteratorWrap<
+		_OriItType, _ValType, true, Internal::ItTransformDirect>;
 	return InIterator<_ValType>(ItWrap::Build(it));
 }
 
@@ -628,7 +632,8 @@ template<bool _IsConst,
 	typename _ValType = typename std::iterator_traits<_OriItType>::value_type>
 inline FrIterator<_ValType, _IsConst> ToFrIt(_OriItType it)
 {
-	using ItWrap = CppStdFwIteratorWrap<_OriItType, _ValType, _IsConst>;
+	using ItWrap = CppStdFwIteratorWrap<
+		_OriItType, _ValType, _IsConst, Internal::ItTransformDirect>;
 	return FrIterator<_ValType, _IsConst>(ItWrap::Build(it));
 }
 
@@ -637,7 +642,8 @@ template<bool _IsConst,
 	typename _ValType = typename std::iterator_traits<_OriItType>::value_type>
 inline BiIterator<_ValType, _IsConst> ToBiIt(_OriItType it)
 {
-	using ItWrap = CppStdBiIteratorWrap<_OriItType, _ValType, _IsConst>;
+	using ItWrap = CppStdBiIteratorWrap<
+		_OriItType, _ValType, _IsConst, Internal::ItTransformDirect>;
 	return BiIterator<_ValType, _IsConst>(ItWrap::Build(it));
 }
 
@@ -646,8 +652,21 @@ template<bool _IsConst,
 	typename _ValType = typename std::iterator_traits<_OriItType>::value_type>
 inline RdIterator<_ValType, _IsConst> ToRdIt(_OriItType it)
 {
-	using ItWrap = CppStdRdIteratorWrap<_OriItType, _ValType, _IsConst>;
+	using ItWrap = CppStdRdIteratorWrap<
+		_OriItType, _ValType, _IsConst, Internal::ItTransformDirect>;
 	return RdIterator<_ValType, _IsConst>(ItWrap::Build(it));
+}
+
+template<bool _IsConst, typename ..._ItTypes>
+inline FrIterator<std::tuple<_ItTypes...>, _IsConst> FwItZip(_ItTypes... its)
+{
+	using ValType = std::tuple<_ItTypes...>;
+	using ItWrap = FwItZipper<_IsConst, _ItTypes...>;
+
+	// TODO: make_unique
+	auto ptr = std::unique_ptr<ItWrap>(new ItWrap(its...));
+
+	return FrIterator<ValType, _IsConst>(std::move(ptr));
 }
 
 }//namespace SimpleObjects

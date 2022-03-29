@@ -6,6 +6,7 @@
 #pragma once
 
 #include "BaseObject.hpp"
+#include "HashableBaseObject.hpp"
 
 #ifndef SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE
 namespace SimpleObjects
@@ -27,11 +28,15 @@ public: // Static members
 
 	typedef _KeyType                                  key_type;
 	typedef _ValType                                  mapped_type;
-	typedef std::pair<const key_type, mapped_type>    value_type;
-	typedef value_type&                               reference;
-	typedef const value_type&                         const_reference;
-	typedef FrIterator<value_type, false>             iterator;
-	typedef FrIterator<value_type, true>              const_iterator;
+
+	typedef FrIterator<key_type, true>                key_iterator;
+	typedef FrIterator<mapped_type, false>            mapped_iterator;
+	typedef FrIterator<mapped_type, true>             const_mapped_iterator;
+
+	typedef FrIterator<std::tuple<key_iterator, mapped_iterator>, false>
+		                                              iterator;
+	typedef FrIterator<std::tuple<key_iterator, const_mapped_iterator>, true>
+		                                              const_iterator;
 
 	static constexpr Self* sk_null = nullptr;
 
@@ -65,7 +70,29 @@ public:
 			>::AsChild(*this, "Dict", this->GetCategoryName());
 	}
 
-	virtual bool operator==(const Self& rhs) const = 0;
+	// ========== operators ==========
+
+	virtual bool operator==(const Self& rhs) const
+	{
+		// reference: https://github.com/llvm/llvm-project/blob/main/libcxx/include/unordered_map#L1877
+
+		if (size() != rhs.size())
+		{
+			return false;
+		}
+		auto xi = begin();
+		auto xe = end();
+		auto ye = rhs.ValsCEnd();
+		for (; xi != xe; ++xi)
+		{
+			auto yj = rhs.FindVal((*std::get<0>(*xi)));
+			if (yj == ye || !((*std::get<1>(*xi)) == *yj))
+			{
+				return false;
+			}
+		}
+		return true;
+	}
 
 	virtual bool operator!=(const Self& rhs) const
 	{
@@ -103,49 +130,127 @@ public:
 	using Base::operator<=;
 	using Base::operator>=;
 
-	virtual iterator begin() = 0;
-	virtual iterator end() = 0;
-
-	virtual const_iterator cbegin() const = 0;
-	virtual const_iterator cend() const = 0;
-
-	virtual const_iterator begin() const
-	{
-		return this->cbegin();
-	}
-
-	virtual const_iterator end() const
-	{
-		return this->cend();
-	}
+	// ========== Functions that doesn't have value_type in prototype ==========
 
 	virtual size_t size() const = 0;
 
-	virtual mapped_type& at(const key_type& key) = 0;
+	// ========== Functions that involves value_type in prototype ==========
 
-	virtual const mapped_type& at(const key_type& key) const = 0;
+	mapped_type& operator[](const key_type& key)
+	{
+		auto it = DictBaseFindValOrAddDefault(key);
+		return *it;
+	}
 
-	virtual mapped_type& operator[](const key_type& key) = 0;
+	const mapped_type& operator[](const key_type& key) const
+	{
+		auto it = FindVal(key);
+		if (it != ValsCEnd())
+		{
+			return *it;
+		}
+		throw KeyError(key.ShortDebugString(), KeyError::sk_keyName);
+	}
 
-	virtual const_iterator find(const key_type& key) const = 0;
+	const_mapped_iterator FindVal(const key_type& key) const
+	{
+		return DictBaseFindVal(key);
+	}
 
-	virtual iterator find(const key_type& key) = 0;
+	mapped_iterator FindVal(const key_type& key)
+	{
+		return DictBaseFindVal(key);
+	}
 
-	virtual bool HasKey(const key_type& key) const = 0;
+	bool HasKey(const key_type& key) const
+	{
+		return FindVal(key) != ValsCEnd();
+	}
 
-	virtual std::pair<iterator, bool> InsertOnly(
-		const key_type& key, const mapped_type& other) = 0;
+	bool InsertOnly(const key_type& key, const mapped_type& val)
+	{
+		return DictBaseInsertOnly(key, val);
+	}
 
-	virtual std::pair<iterator, bool> InsertOnly(
-		key_type&& key, mapped_type&& other) = 0;
+	bool InsertOnly(key_type&& key, mapped_type&& val)
+	{
+		return DictBaseInsertOnly(
+			std::forward<key_type>(key),
+			std::forward<mapped_type>(val));
+	}
 
-	virtual std::pair<iterator, bool> InsertOrAssign(
-		const key_type& key, const mapped_type& other) = 0;
+	bool InsertOrAssign(const key_type& key, const mapped_type& val)
+	{
+		return DictBaseInsertOrAssign(key, val);
+	}
 
-	virtual std::pair<iterator, bool> InsertOrAssign(
-		key_type&& key, mapped_type&& other) = 0;
+	bool InsertOrAssign(key_type&& key, mapped_type&& val)
+	{
+		return DictBaseInsertOrAssign(
+			std::forward<key_type>(key),
+			std::forward<mapped_type>(val));
+	}
 
-	virtual void Remove(const key_type& key) = 0;
+	void Remove(const key_type& key)
+	{
+		return DictBaseRemove(key);
+	}
+
+	// ========== iterators ==========
+
+	virtual key_iterator KeysBegin() const = 0;
+
+	virtual key_iterator KeysEnd() const = 0;
+
+	virtual const_mapped_iterator ValsCBegin() const = 0;
+
+	virtual const_mapped_iterator ValsCEnd() const = 0;
+
+	virtual const_mapped_iterator ValsBegin() const
+	{
+		return ValsCBegin();
+	}
+
+	virtual const_mapped_iterator ValsEnd() const
+	{
+		return ValsCEnd();
+	}
+
+	virtual mapped_iterator ValsBegin() = 0;
+
+	virtual mapped_iterator ValsEnd() = 0;
+
+	iterator begin()
+	{
+		return FwItZip<false>(KeysBegin(), ValsBegin());
+	}
+
+	iterator end()
+	{
+		return FwItZip<false>(KeysEnd(), ValsEnd());
+	}
+
+	const_iterator cbegin() const
+	{
+		return FwItZip<true>(KeysBegin(), ValsCBegin());
+	}
+
+	const_iterator cend() const
+	{
+		return FwItZip<true>(KeysEnd(), ValsCEnd());
+	}
+
+	const_iterator begin() const
+	{
+		return cbegin();
+	}
+
+	const_iterator end() const
+	{
+		return cend();
+	}
+
+	// ========== Copy and Move ==========
 
 	virtual std::unique_ptr<Self> Copy(const Self* /*unused*/) const = 0;
 
@@ -160,6 +265,29 @@ public:
 	{
 		return Move(sk_null);
 	}
+
+protected:
+
+	virtual const_mapped_iterator DictBaseFindVal(
+		const key_type& key) const = 0;
+
+	virtual mapped_iterator DictBaseFindVal(const key_type& key) = 0;
+
+	virtual mapped_iterator DictBaseFindValOrAddDefault(
+		const key_type& key) = 0;
+
+	virtual bool DictBaseInsertOnly(
+		const key_type& key, const mapped_type& val) = 0;
+
+	virtual bool DictBaseInsertOnly(key_type&& key, mapped_type&& val) = 0;
+
+	virtual bool DictBaseInsertOrAssign(
+		const key_type& key, const mapped_type& val) = 0;
+
+	virtual bool DictBaseInsertOrAssign(
+		key_type&& key, mapped_type&& val) = 0;
+
+	virtual void DictBaseRemove(const key_type& key) = 0;
 
 }; // class DictBaseObject
 
