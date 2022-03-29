@@ -247,6 +247,16 @@ struct TupleOperationImpl;
 template<size_t _I>
 struct TupleOperationImpl
 {
+	template<typename _Tp1, typename _CallbackType>
+	static void UnaOp(_Tp1&& tp1, _CallbackType&& callback)
+	{
+		TupleOperationImpl<_I - 1>::UnaOp(
+			std::forward<_Tp1>(tp1),
+			std::forward<_CallbackType>(callback));
+		callback(
+			std::get<_I>(std::forward<_Tp1>(tp1)));
+	}
+
 	template<typename _Tp1, typename _Tp2, typename _CallbackType>
 	static void BinOp(_Tp1&& tp1, _Tp2&& tp2, _CallbackType&& callback)
 	{
@@ -263,6 +273,13 @@ struct TupleOperationImpl
 template<>
 struct TupleOperationImpl<0>
 {
+	template<typename _Tp1, typename _CallbackType>
+	static void UnaOp(_Tp1&& tp1, _CallbackType&& callback)
+	{
+		callback(
+			std::get<0>(std::forward<_Tp1>(tp1)));
+	}
+
 	template<typename _Tp1, typename _Tp2, typename _CallbackType>
 	static void BinOp(_Tp1&& tp1, _Tp2&& tp2, _CallbackType&& callback)
 	{
@@ -274,6 +291,20 @@ struct TupleOperationImpl<0>
 
 struct TupleOperation
 {
+	template<typename _Tp1, typename _CallbackType>
+	static void UnaOp(_Tp1&& tp1, _CallbackType&& callback)
+	{ // ^ perfect forwarding
+		using _Tp1Raw = typename std::remove_cv<
+			typename std::remove_reference<_Tp1>::type>::type;
+		static constexpr size_t tp1Size = std::tuple_size<_Tp1Raw>::value;
+		static_assert(tp1Size > 0,
+			"The tuple must have at least 1 item");
+
+		TupleOperationImpl<tp1Size - 1>::UnaOp(
+			std::forward<_Tp1>(tp1),
+			std::forward<_CallbackType>(callback));
+	}
+
 	template<typename _Tp1, typename _Tp2, typename _CallbackType>
 	static void BinOp(_Tp1&& tp1, _Tp2&& tp2, _CallbackType&& callback)
 	{ // ^ perfect forwarding

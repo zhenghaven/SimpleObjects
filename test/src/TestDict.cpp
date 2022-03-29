@@ -254,15 +254,13 @@ GTEST_TEST(TestDict, At)
 	};
 	const Dict kCpDc = cpDc;
 
-	EXPECT_EQ(cpDc.at(Null()), testDc.at(Null()));
-	EXPECT_EQ(cpDc.at(Int64(1)), testDc.at(Int64(1)));
+	EXPECT_EQ(cpDc[Null()], testDc.at(Null()));
+	EXPECT_EQ(cpDc[Int64(1)], testDc.at(Int64(1)));
 
-	EXPECT_EQ(kCpDc.at(Int64(1)), testDc.at(Int64(1)));
-	EXPECT_EQ(kCpDc.at(String("2")), testDc.at(String("2")));
+	EXPECT_EQ(kCpDc[Int64(1)], testDc.at(Int64(1)));
+	EXPECT_EQ(kCpDc[String("2")], testDc.at(String("2")));
 
-	EXPECT_THROW(cpDc.at(String("3")), std::out_of_range);
-	EXPECT_THROW(kCpDc.at(String("3")), std::out_of_range);
-
+	EXPECT_THROW(kCpDc[String("3")], KeyError);
 	EXPECT_TRUE(cpDc[String("3")].IsNull());
 }
 
@@ -274,12 +272,12 @@ GTEST_TEST(TestDict, FindKey)
 		{ String("2"), String("test val 2") },
 	};
 
-	EXPECT_EQ(&cpDc.find(String("2"))->second, &cpDc.at(String("2")));
-	EXPECT_EQ(cpDc.find(String("3")), cpDc.end());
 	[cpDc](){
-		EXPECT_EQ(&cpDc.find(String("2"))->second, &cpDc.at(String("2")));
+		EXPECT_EQ(&cpDc.find(String("2"))->second, &cpDc[String("2")]);
 		EXPECT_EQ(cpDc.find(String("3")), cpDc.end());
 	}();
+	EXPECT_EQ(&cpDc.find(String("2"))->second, &cpDc[String("2")]);
+	EXPECT_EQ(cpDc.find(String("3")), cpDc.end());
 
 	EXPECT_TRUE(cpDc.HasKey(String("2")));
 	EXPECT_FALSE(cpDc.HasKey(String("3")));
@@ -293,7 +291,7 @@ GTEST_TEST(TestDict, Insert)
 
 	// InsertOnly
 	//    Successful insert
-	EXPECT_THROW(testDc.at(Int64(1)), std::out_of_range);
+	EXPECT_FALSE(testDc.HasKey(Int64(1)));
 	auto subTest1 = [&]()
 	{
 		auto res = testDc.InsertOnly(Int64(1), String("test val 1"));
@@ -303,9 +301,9 @@ GTEST_TEST(TestDict, Insert)
 		EXPECT_TRUE(res.second == true);
 	};
 	EXPECT_NO_THROW(subTest1(););
-	EXPECT_TRUE(testDc.at(Int64(1)).AsString() == String("test val 1"));
+	EXPECT_TRUE(testDc[Int64(1)].AsString() == String("test val 1"));
 
-	EXPECT_THROW(testDc.at(Int64(2)), std::out_of_range);
+	EXPECT_FALSE(testDc.HasKey(Int64(2)));
 	auto subTest2 = [&]()
 	{
 		const auto tmpKey = HashableObject(Int64(2));
@@ -317,7 +315,7 @@ GTEST_TEST(TestDict, Insert)
 		EXPECT_TRUE(res.second == true);
 	};
 	EXPECT_NO_THROW(subTest2(););
-	EXPECT_TRUE(testDc.at(Int64(2)).AsString() == String("test val 2"));
+	EXPECT_TRUE(testDc[Int64(2)].AsString() == String("test val 2"));
 
 
 	//    Unsuccessful insert
@@ -330,7 +328,7 @@ GTEST_TEST(TestDict, Insert)
 		EXPECT_TRUE(res.second == false);
 	};
 	EXPECT_NO_THROW(subTest3(););
-	EXPECT_TRUE(testDc.at(Int64(1)).AsString() == String("test val 1"));
+	EXPECT_TRUE(testDc[Int64(1)].AsString() == String("test val 1"));
 
 	auto subTest4 = [&]()
 	{
@@ -343,26 +341,26 @@ GTEST_TEST(TestDict, Insert)
 		EXPECT_TRUE(res.second == false);
 	};
 	EXPECT_NO_THROW(subTest4(););
-	EXPECT_TRUE(testDc.at(Int64(2)).AsString() == String("test val 2"));
+	EXPECT_TRUE(testDc[Int64(2)].AsString() == String("test val 2"));
 
 	// InsertOrAssign
 	//    Insert
 	{
-		EXPECT_THROW(testDc.at(String("2")), std::out_of_range);
+		EXPECT_FALSE(testDc.HasKey(String("2")));
 		EXPECT_NO_THROW(
 			auto res = testDc.InsertOrAssign(String("2"), String("test val 2"));
 			EXPECT_TRUE(res.second == true););
-		EXPECT_TRUE(testDc.at(String("2")).AsString() == String("test val 2"));
+		EXPECT_TRUE(testDc[String("2")].AsString() == String("test val 2"));
 	}
 
 	{
 		const auto tmpKey = HashableObject(String("3"));
 		const auto tmpVal = Object(String("test val 3"));
-		EXPECT_THROW(testDc.at(tmpKey), std::out_of_range);
+		EXPECT_FALSE(testDc.HasKey(tmpKey));
 		EXPECT_NO_THROW(
 			auto res = testDc.InsertOrAssign(tmpKey, tmpVal);
 			EXPECT_TRUE(res.second == true););
-		EXPECT_TRUE(testDc.at(String("3")).AsString() == String("test val 3"));
+		EXPECT_TRUE(testDc[String("3")].AsString() == String("test val 3"));
 	}
 
 	//    Assign
@@ -370,7 +368,7 @@ GTEST_TEST(TestDict, Insert)
 		EXPECT_NO_THROW(
 			auto res = testDc.InsertOrAssign(String("2"), String("test val 2_1"));
 			EXPECT_TRUE(res.second == false););
-		EXPECT_TRUE(testDc.at(String("2")).AsString() == String("test val 2_1"));
+		EXPECT_TRUE(testDc[String("2")].AsString() == String("test val 2_1"));
 	}
 
 	{
@@ -379,7 +377,7 @@ GTEST_TEST(TestDict, Insert)
 		EXPECT_NO_THROW(
 			auto res = testDc.InsertOrAssign(tmpKey, tmpVal);
 			EXPECT_TRUE(res.second == false););
-		EXPECT_TRUE(testDc.at(String("3")).AsString() == String("test val 3_1"));
+		EXPECT_TRUE(testDc[String("3")].AsString() == String("test val 3_1"));
 	}
 }
 
@@ -391,10 +389,10 @@ GTEST_TEST(TestDict, Remove)
 		{ String("2"), String("test val 2") },
 	};
 
-	EXPECT_TRUE(testDc.at(String("2")).AsString() == String("test val 2"));
+	EXPECT_TRUE(testDc[String("2")].AsString() == String("test val 2"));
 	EXPECT_NO_THROW(
 		testDc.Remove(String("2")));
-	EXPECT_THROW(testDc.at(String("2")), std::out_of_range);
+	EXPECT_FALSE(testDc.HasKey(String("2")));
 }
 
 GTEST_TEST(TestDict, Miscs)
@@ -492,5 +490,373 @@ GTEST_TEST(TestDict, ToString)
 		EXPECT_TRUE(
 			res == expRes1 ||
 			res == expRes2);
+	}
+}
+
+GTEST_TEST(TestDict, BaseDictIterator)
+{
+	// const
+	{
+		auto testDc = Dict({
+			{ Null(),         Bool(false) },
+			{ Int64(123),     Int64(321) },
+			{ String("key3"), String("val3") },
+		});
+		auto testKeys = List({ Null(), Int64(123), String("key3") });
+		auto testNKeys = List({ Bool(true), Int64(321), String("key3X") });
+
+		auto testVals = List({ Bool(false), Int64(321), String("val3") });
+		auto testNVals = List({ Bool(true), Int64(123), String("val3X") });
+
+		const DictBaseObj& testDcB = testDc;
+
+		{
+			auto it = testDcB.KeysBegin();
+			auto ite = testDcB.KeysEnd();
+			size_t i = 0;
+
+			for (; it != ite; ++it, ++i)
+			{
+				EXPECT_TRUE(testKeys.Contains(*it));
+				EXPECT_FALSE(testNKeys.Contains(*it));
+			}
+
+			EXPECT_TRUE(i == 3);
+			EXPECT_TRUE(it == testDcB.KeysEnd());
+		}
+		{
+			auto it = testDcB.ValsBegin();
+			auto ite = testDcB.ValsEnd();
+			size_t i = 0;
+
+			for (; it != ite; ++it, ++i)
+			{
+				EXPECT_TRUE(testVals.Contains(*it));
+				EXPECT_FALSE(testNVals.Contains(*it));
+			}
+
+			EXPECT_TRUE(i == 3);
+			EXPECT_TRUE(it == testDcB.ValsEnd());
+		}
+	}
+
+	// non-const
+	{
+		auto testDc = Dict({
+			{ Null(),         Bool(false) },
+			{ Int64(123),     Int64(321) },
+			{ String("key3"), String("val3") },
+		});
+
+		auto testVals = List({ Bool(true), Int64(123), String("val3Y") });
+		auto testNVals = List({ Bool(false), Int64(321), String("val3") });
+
+		DictBaseObj& testDcB = testDc;
+
+		{
+			auto it = testDcB.ValsBegin();
+			auto ite = testDcB.ValsEnd();
+			size_t i = 0;
+
+			for (; it != ite; ++it, ++i)
+			{
+				if ((*it) == Bool(false))
+				{
+					(*it).Set(Bool(true));
+				}
+				else if ((*it) == Int64(321))
+				{
+					(*it).Set(Int64(123));
+				}
+				else if ((*it) == String("val3"))
+				{
+					(*it).Set(String("val3Y"));
+				}
+			}
+
+			EXPECT_TRUE(i == 3);
+			EXPECT_TRUE(it == testDcB.ValsEnd());
+		}
+		{
+			auto it = testDcB.ValsBegin();
+			auto ite = testDcB.ValsEnd();
+			size_t i = 0;
+
+			for (; it != ite; ++it, ++i)
+			{
+				EXPECT_TRUE(testVals.Contains(*it));
+				EXPECT_FALSE(testNVals.Contains(*it));
+			}
+
+			EXPECT_TRUE(i == 3);
+			EXPECT_TRUE(it == testDcB.ValsEnd());
+		}
+	}
+
+	// const zipped iterators
+	{
+		auto testDc = Dict({
+			{ Null(),         Bool(false) },
+			{ Int64(123),     Int64(321) },
+			{ String("key3"), String("val3") },
+		});
+		auto testKeys = List({ Null(), Int64(123), String("key3") });
+		auto testNKeys = List({ Bool(true), Int64(321), String("key3X") });
+
+		auto testVals = List({ Bool(false), Int64(321), String("val3") });
+		auto testNVals = List({ Bool(true), Int64(123), String("val3X") });
+
+		const DictBaseObj& testDcB = testDc;
+
+		{
+			auto it = testDcB.begin();
+			auto ite = testDcB.end();
+			size_t i = 0;
+
+			for (; it != ite; ++it, ++i)
+			{
+				// Keys
+				EXPECT_TRUE(testKeys.Contains(*std::get<0>(*it)));
+				EXPECT_FALSE(testNKeys.Contains(*std::get<0>(*it)));
+
+				// Vals
+				EXPECT_TRUE(testVals.Contains(*std::get<1>(*it)));
+				EXPECT_FALSE(testNVals.Contains(*std::get<1>(*it)));
+			}
+
+			EXPECT_TRUE(i == 3);
+			EXPECT_TRUE(it == testDcB.end());
+		}
+	}
+
+	// non-const zipped iterators
+	{
+		auto testDc = Dict({
+			{ Null(),         Bool(false) },
+			{ Int64(123),     Int64(321) },
+			{ String("key3"), String("val3") },
+		});
+		auto testKeys = List({ Null(), Int64(123), String("key3") });
+		auto testNKeys = List({ Bool(true), Int64(321), String("key3X") });
+
+		auto testVals = List({ Bool(false), Int64(321), String("val3") });
+		auto testNVals = List({ Bool(true), Int64(123), String("val3X") });
+
+		DictBaseObj& testDcB = testDc;
+
+		{
+			auto it = testDcB.begin();
+			auto ite = testDcB.end();
+			size_t i = 0;
+
+			for (; it != ite; ++it, ++i)
+			{
+				// Keys
+				EXPECT_TRUE(testKeys.Contains(*std::get<0>(*it)));
+				EXPECT_FALSE(testNKeys.Contains(*std::get<0>(*it)));
+
+				// Vals
+				EXPECT_TRUE(testVals.Contains(*std::get<1>(*it)));
+				EXPECT_FALSE(testNVals.Contains(*std::get<1>(*it)));
+
+				// check mutation APIs
+				if ((*std::get<1>(*it)) == String("val3"))
+				{
+					(*std::get<1>(*it)).AsString().push_back('X');
+					(*std::get<1>(*it)).AsString().pop_back();
+				}
+			}
+
+			EXPECT_TRUE(i == 3);
+			EXPECT_TRUE(it == testDcB.end());
+		}
+	}
+}
+
+GTEST_TEST(TestDict, BaseDictFindVal)
+{
+	{
+		auto testDc = Dict({
+			{ Null(),         Bool(false) },
+			{ Int64(123),     Int64(321) },
+			{ String("key3"), String("val3") },
+		});
+		DictBaseObj& testDcB = testDc;
+		const DictBaseObj& testKDcB = testDc;
+
+		auto it = testDcB.FindVal(HashableObject(Int64(123)));
+		EXPECT_TRUE(it != testDcB.ValsEnd());
+		EXPECT_TRUE((*it) == testDc[Int64(123)]);
+		EXPECT_TRUE(testDcB[HashableObject(Int64(123))] == testDc[Int64(123)]);
+
+		it = testDcB.FindVal(HashableObject(String("keyX")));
+		EXPECT_TRUE(it == testDcB.ValsEnd());
+
+		auto kit = testKDcB.FindVal(HashableObject(Int64(123)));
+		EXPECT_TRUE(kit != testKDcB.ValsEnd());
+		EXPECT_TRUE((*kit) == testDc[Int64(123)]);
+		EXPECT_TRUE(testKDcB[HashableObject(Int64(123))] == testDc[Int64(123)]);
+
+		kit = testKDcB.FindVal(HashableObject(String("keyX")));
+		EXPECT_TRUE(kit == testKDcB.ValsEnd());
+		EXPECT_THROW(testKDcB[HashableObject(String("keyX"))], KeyError);
+
+		EXPECT_FALSE(testKDcB.HasKey(HashableObject(String("keyX"))));
+
+		EXPECT_TRUE(testDcB[HashableObject(String("keyXX"))] == Null());
+	}
+}
+
+GTEST_TEST(TestDict, BaseDictInsert)
+{
+	// Insert-only
+	{
+		auto testDc = Dict({
+			{ Null(),         Bool(false) },
+			{ Int64(123),     Int64(321) },
+			{ String("key3"), String("val3") },
+		});
+		DictBaseObj& testDcB = testDc;
+
+		// Successful
+		//     l-reference
+		EXPECT_NO_THROW(
+			auto res = testDcB.InsertOnly(
+				HashableObject(String("key4")), Object(String("val4")));
+			EXPECT_TRUE(res);
+			EXPECT_TRUE(
+				testDcB[HashableObject(String("key4"))] == String("val4"));
+		);
+
+		//     r-reference
+		const auto key5 = HashableObject(String("key5"));
+		const auto val5 = Object(String("val5"));
+		EXPECT_NO_THROW(
+			auto res = testDcB.InsertOnly(key5, val5);
+			EXPECT_TRUE(res);
+			EXPECT_TRUE(testDcB[key5] == val5);
+		);
+
+		// Failed
+		//     l-reference
+		EXPECT_NO_THROW(
+			auto res = testDcB.InsertOnly(
+				HashableObject(String("key3")), Object(String("valx")));
+			EXPECT_FALSE(res);
+			EXPECT_TRUE(
+				testDcB[HashableObject(String("key3"))] == String("val3"));
+		);
+
+		//     r-reference
+		const auto key3 = HashableObject(String("key3"));
+		const auto val3 = Object(String("valx"));
+		EXPECT_NO_THROW(
+			auto res = testDcB.InsertOnly(key3, val3);
+			EXPECT_FALSE(res);
+			EXPECT_TRUE(testDcB[key3] == String("val3"));
+		);
+	}
+
+	// Insert-or-assign
+	{
+		auto testDc = Dict({
+			{ Null(),         Bool(false) },
+			{ Int64(123),     Int64(321) },
+			{ String("key3"), String("val3") },
+		});
+		DictBaseObj& testDcB = testDc;
+
+		// Insert
+		//     l-reference
+		EXPECT_NO_THROW(
+			auto res = testDcB.InsertOrAssign(
+				HashableObject(String("key4")), Object(String("val4")));
+			EXPECT_TRUE(res);
+			EXPECT_TRUE(
+				testDcB[HashableObject(String("key4"))] == String("val4"));
+		);
+
+		//     r-reference
+		const auto key5 = HashableObject(String("key5"));
+		const auto val5 = Object(String("val5"));
+		EXPECT_NO_THROW(
+			auto res = testDcB.InsertOrAssign(key5, val5);
+			EXPECT_TRUE(res);
+			EXPECT_TRUE(testDcB[key5] == val5);
+		);
+
+		// Assign
+		//     l-reference
+		EXPECT_NO_THROW(
+			auto res = testDcB.InsertOrAssign(
+				HashableObject(String("key3")), Object(String("valx")));
+			EXPECT_FALSE(res);
+			EXPECT_TRUE(
+				testDcB[HashableObject(String("key3"))] == String("valx"));
+		);
+
+		//     r-reference
+		const auto key3 = HashableObject(String("key3"));
+		const auto val3 = Object(String("valy"));
+		EXPECT_NO_THROW(
+			auto res = testDcB.InsertOrAssign(key3, val3);
+			EXPECT_FALSE(res);
+			EXPECT_TRUE(testDcB[key3] == val3);
+		);
+	}
+
+	// cast fails
+	{
+		auto testDc = Dict({
+			{ Null(),         Bool(false) },
+			{ Int64(123),     Int64(321) },
+			{ String("key3"), String("val3") },
+		});
+		DictBaseObj& testDcB = testDc;
+
+		EXPECT_THROW(
+			testDcB.InsertOrAssign(
+				HashableObject(String("key4")), String("val4")), TypeError);
+		EXPECT_THROW(
+			testDcB.InsertOnly(
+				HashableObject(String("key4")), String("val4")), TypeError);
+		EXPECT_THROW(
+			testDcB.InsertOrAssign(
+				String("key4"), Object(String("val4"))), TypeError);
+		EXPECT_THROW(
+			testDcB.InsertOnly(
+				String("key4"), Object(String("val4"))), TypeError);
+
+		const auto key5 = HashableObject(String("key5"));
+		const auto val5 = Object(String("val5"));
+		const auto keyx = String("keyx");
+		const auto valx = String("valx");
+
+		EXPECT_THROW(
+			testDcB.InsertOrAssign(key5, valx), TypeError);
+		EXPECT_THROW(
+			testDcB.InsertOnly(key5, valx), TypeError);
+		EXPECT_THROW(
+			testDcB.InsertOrAssign(keyx, val5), TypeError);
+		EXPECT_THROW(
+			testDcB.InsertOnly(keyx, val5), TypeError);
+	}
+}
+
+GTEST_TEST(TestDict, BaseDictRemove)
+{
+	{
+		auto testDc = Dict({
+			{ Null(),         Bool(false) },
+			{ Int64(123),     Int64(321) },
+			{ String("key3"), String("val3") },
+		});
+		DictBaseObj& testDcB = testDc;
+
+		EXPECT_TRUE(testDcB.HasKey(HashableObject(String("key3"))));
+
+		testDcB.Remove(HashableObject(String("key3")));
+
+		EXPECT_FALSE(testDcB.HasKey(HashableObject(String("key3"))));
 	}
 }

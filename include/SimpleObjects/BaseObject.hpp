@@ -79,11 +79,6 @@ template<typename _T>
 class HashableReferenceWrapper;
 
 template<typename _ToStringType>
-class HashableObjectImpl;
-template<typename _ToStringType>
-class ObjectImpl;
-
-template<typename _ToStringType>
 class BaseObject
 {
 public: // Static members:
@@ -100,8 +95,8 @@ public: // Static members:
 
 	using ListBase    = ListBaseObject<BaseObject<ToStringType>, ToStringType>;
 
-	using DictBase    = DictBaseObject<HashableObjectImpl<ToStringType>,
-		                               ObjectImpl<ToStringType>,
+	using DictBase    = DictBaseObject<HashableBaseObject<ToStringType>,
+		                               BaseObject<ToStringType>,
 		                               ToStringType>;
 
 	using StatDictBase = StaticDictBaseObject<HashableBaseObject<ToStringType>,
