@@ -456,7 +456,11 @@ GTEST_TEST(TestStaticDict, Assignment)
 	EXPECT_EQ(dictCp.get_Key2_1(), String("val2_1"));
 	EXPECT_EQ(dictCp.get_Key2_2(), Int64(12345));
 	EXPECT_EQ(dictCp.get_Key2_3().get_Key1_1(), Int64(54321));
-	dictCp = dictCp; // self copy ==> no op
+	// We want to ensure self assignment is OK,
+	// meanwhile to avoid compiler warning
+	TestStaticDict2* dictCpPtr = nullptr;
+	dictCpPtr = &dictCp;
+	dictCp = *dictCpPtr; // self copy ==> no op
 	EXPECT_EQ(dictCp.get_Key2_1(), String("val2_1"));
 	EXPECT_EQ(dictCp.get_Key2_2(), Int64(12345));
 	EXPECT_EQ(dictCp.get_Key2_3().get_Key1_1(), Int64(54321));
@@ -470,7 +474,9 @@ GTEST_TEST(TestStaticDict, Assignment)
 	EXPECT_EQ(dictMv.get_Key2_1(), String("val2_1"));
 	EXPECT_EQ(dictMv.get_Key2_2(), Int64(12345));
 	EXPECT_EQ(dictMv.get_Key2_3().get_Key1_1(), Int64(54321));
-	dictMv = std::move(dictMv); // self move ==> no op
+	TestStaticDict2* dictMvPtr = nullptr;
+	dictMvPtr = &dictMv;
+	dictMv = std::move(*dictMvPtr); // self move ==> no op
 	EXPECT_EQ(dictMv.get_Key2_1(), String("val2_1"));
 	EXPECT_EQ(dictMv.get_Key2_2(), Int64(12345));
 	EXPECT_EQ(dictMv.get_Key2_3().get_Key1_1(), Int64(54321));
