@@ -64,14 +64,18 @@ GTEST_TEST(TestDict, Assignment)
 	EXPECT_EQ(cpDc.size(), 0);
 	cpDc = testDc;
 	EXPECT_EQ(cpDc, testDc);
-	cpDc = cpDc;
+	Dict* cpDcPtr = nullptr;
+	cpDcPtr = &cpDc;
+	cpDc = *cpDcPtr;
 	EXPECT_EQ(cpDc, testDc);
 
 	Dict mvDc;
 	EXPECT_EQ(mvDc.size(), 0);
 	mvDc = std::move(cpDc);
 	EXPECT_EQ(mvDc, testDc);
-	mvDc = std::move(mvDc);
+	Dict* mvDcPtr = nullptr;
+	mvDcPtr = &mvDc;
+	mvDc = std::move(*mvDcPtr);
 	EXPECT_EQ(mvDc, testDc);
 }
 

@@ -22,16 +22,26 @@ struct IsPrimitiveType;
 template<typename _T> struct IsPrimitiveType : std::false_type {};
 
 template<> struct IsPrimitiveType<bool    > : std::true_type {};
-template<> struct IsPrimitiveType<int8_t  > : std::true_type {};
-template<> struct IsPrimitiveType<int16_t > : std::true_type {};
-template<> struct IsPrimitiveType<int32_t > : std::true_type {};
-template<> struct IsPrimitiveType<int64_t > : std::true_type {};
-template<> struct IsPrimitiveType<uint8_t > : std::true_type {};
-template<> struct IsPrimitiveType<uint16_t> : std::true_type {};
-template<> struct IsPrimitiveType<uint32_t> : std::true_type {};
-template<> struct IsPrimitiveType<uint64_t> : std::true_type {};
-template<> struct IsPrimitiveType<float   > : std::true_type {};
-template<> struct IsPrimitiveType<double  > : std::true_type {};
+// char
+template<> struct IsPrimitiveType<char         > : std::true_type {};
+template<> struct IsPrimitiveType<signed   char> : std::true_type {};
+template<> struct IsPrimitiveType<unsigned char> : std::true_type {};
+// short
+template<> struct IsPrimitiveType<signed   short> : std::true_type {};
+template<> struct IsPrimitiveType<unsigned short> : std::true_type {};
+// int
+template<> struct IsPrimitiveType<signed   int> : std::true_type {};
+template<> struct IsPrimitiveType<unsigned int> : std::true_type {};
+// long
+template<> struct IsPrimitiveType<signed   long> : std::true_type {};
+template<> struct IsPrimitiveType<unsigned long> : std::true_type {};
+// long long
+template<> struct IsPrimitiveType<signed   long long> : std::true_type {};
+template<> struct IsPrimitiveType<unsigned long long> : std::true_type {};
+// float
+template<> struct IsPrimitiveType<float > : std::true_type {};
+// double
+template<> struct IsPrimitiveType<double> : std::true_type {};
 
 static_assert(IsPrimitiveType<bool    >::value, "Implementation Error");
 static_assert(IsPrimitiveType<int8_t  >::value, "Implementation Error");

@@ -73,7 +73,7 @@ GTEST_TEST(TestStaticDict, KeyValuePairs)
 	using Key1 = StrKey<SIMOBJ_KSTR("Key1")>;
 	using Key2 = StrKey<SIMOBJ_KSTR("Key2")>;
 	using Key3 = Int64Key<3>;
-	using KeyX = StrKey<SIMOBJ_KSTR("KeyX")>;
+	// using KeyX = StrKey<SIMOBJ_KSTR("KeyX")>;
 
 	using Tp = std::tuple<
 		std::pair<Key1, String>,
