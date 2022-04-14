@@ -21,6 +21,7 @@ namespace SimpleObjects_Test
 GTEST_TEST(TestBaseObjects, CountTestFile)
 {
 	static auto tmp = ++SimpleObjects_Test::g_numOfTestFile;
+	(void)tmp;
 }
 
 // Nothing to be tested on Base object for now

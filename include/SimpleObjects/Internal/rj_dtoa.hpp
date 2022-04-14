@@ -198,18 +198,18 @@ inline void Prettify(ContainerType& buf, int k, int16_t maxDecimal) {
 	static constexpr size_t maxSigWidth = 21;
 
 	const int signAdjust = (buf.size() > 0 && buf[0] == '-') ? -1 : 0;
-	const size_t sigLen = buf.size() + signAdjust;
-	const int kk = static_cast<int>(buf.size()) + signAdjust + k;  // 10^(kk-1) <= v < 10^kk
+	const int sigLen = static_cast<int>(buf.size()) + signAdjust;
+	const int kk     = static_cast<int>(buf.size()) + signAdjust + k;  // 10^(kk-1) <= v < 10^kk
 	const int maxDecimalPlaces = maxDecimal;
 
-	if (0 <= k && kk <= maxSigWidth) {
+	if (0 <= k && ((kk < 0) || (static_cast<size_t>(kk) <= maxSigWidth))) {
 		// 1234e7 -> 12340000000
 		buf.insert(buf.end(), k, '0');
 		buf.push_back('.');
 		buf.push_back('0');
 		return;
 	}
-	else if (0 < kk && kk <= maxSigWidth) {
+	else if (0 < kk && static_cast<size_t>(kk) <= maxSigWidth) {
 		// implies
 		//     (0 <= k) != true
 		//     0 > k

@@ -404,24 +404,24 @@ static_assert(Compare<uint32_t, int32_t>::Equal(
 	static_cast<uint32_t>(10), static_cast<int32_t>(10)),
 	"Implementation Error");
 
-static_assert(!(static_cast<uint32_t>(10) > static_cast<int32_t>(-20)),
-	"Implementation Error");
+// static_assert(!(static_cast<uint32_t>(10) > static_cast<int32_t>(-20)),
+// 	"Implementation Error");
 static_assert(Compare<uint32_t, int32_t>::Greater(
 	static_cast<uint32_t>(10), static_cast<int32_t>(-20)),
 	"Implementation Error");
-static_assert(!(static_cast<int32_t>(-20) < static_cast<uint32_t>(10)),
-	"Implementation Error");
+// static_assert(!(static_cast<int32_t>(-20) < static_cast<uint32_t>(10)),
+// 	"Implementation Error");
 static_assert(Compare<int32_t, uint32_t>::Less(
 	static_cast<int32_t>(-20), static_cast<uint32_t>(10)),
 	"Implementation Error");
 
-static_assert(!(static_cast<uint32_t>(10) >= static_cast<int32_t>(-20)),
-	"Implementation Error");
+// static_assert(!(static_cast<uint32_t>(10) >= static_cast<int32_t>(-20)),
+// 	"Implementation Error");
 static_assert(Compare<uint32_t, int32_t>::GreaterEqual(
 	static_cast<uint32_t>(10), static_cast<int32_t>(-20)),
 	"Implementation Error");
-static_assert(!(static_cast<int32_t>(-20) <= static_cast<uint32_t>(10)),
-	"Implementation Error");
+// static_assert(!(static_cast<int32_t>(-20) <= static_cast<uint32_t>(10)),
+// 	"Implementation Error");
 static_assert(Compare<int32_t, uint32_t>::LessEqual(
 	static_cast<int32_t>(-20), static_cast<uint32_t>(10)),
 	"Implementation Error");

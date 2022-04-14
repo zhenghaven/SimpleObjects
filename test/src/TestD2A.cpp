@@ -21,6 +21,7 @@ namespace SimpleObjects_Test
 GTEST_TEST(TestD2A, CountTestFile)
 {
 	static auto tmp = ++SimpleObjects_Test::g_numOfTestFile;
+	(void)tmp;
 }
 
 GTEST_TEST(TestD2A, Zeros) {

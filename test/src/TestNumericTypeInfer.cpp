@@ -21,6 +21,7 @@ namespace SimpleObjects_Test
 GTEST_TEST(TestNumericTypeInfer, CountTestFile)
 {
 	static auto tmp = ++SimpleObjects_Test::g_numOfTestFile;
+	(void)tmp;
 }
 
 GTEST_TEST(TestNumericTypeInfer, InferBinOpRetType)

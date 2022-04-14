@@ -23,6 +23,7 @@ namespace SimpleObjects_Test
 GTEST_TEST(TestObject, CountTestFile)
 {
 	static auto tmp = ++SimpleObjects_Test::g_numOfTestFile;
+	(void)tmp;
 }
 
 GTEST_TEST(TestObject, Construction)
