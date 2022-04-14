@@ -279,21 +279,15 @@ public:
 	template<typename _RhsValType, typename _RhsStringType>
 	bool operator==(const Numeric<_RhsValType, _RhsStringType>& rhs) const
 	{
-		return (
-			Internal::
-				BoolToInt<InternalType, _RhsValType>::Convert(m_data) ==
-			Internal::
-				BoolToInt<_RhsValType, InternalType>::Convert(rhs.m_data));
+		using namespace Internal;
+		return (Compare<InternalType, _RhsValType>::Equal(
+			(m_data), (rhs.m_data)));
 	}
 
 	template<typename _RhsValType, typename _RhsStringType>
 	bool operator!=(const Numeric<_RhsValType, _RhsStringType>& rhs) const
 	{
-		return (
-			Internal::
-				BoolToInt<InternalType, _RhsValType>::Convert(m_data) !=
-			Internal::
-				BoolToInt<_RhsValType, InternalType>::Convert(rhs.m_data));
+		return !(this->operator==(rhs));
 	}
 
 	template<typename _RhsValType, typename _RhsStringType>

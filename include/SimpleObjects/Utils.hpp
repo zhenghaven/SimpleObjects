@@ -55,14 +55,14 @@ template<>
 struct IfConstexpr<true>
 {
 	template<typename _TrOpType, typename _FaOpType>
-	static void Eval(_TrOpType tOp, _FaOpType fOp) { tOp(); }
+	static void Eval(_TrOpType tOp, _FaOpType) { tOp(); }
 };
 
 template<>
 struct IfConstexpr<false>
 {
 	template<typename _TrOpType, typename _FaOpType>
-	static void Eval(_TrOpType tOp, _FaOpType fOp) { fOp(); }
+	static void Eval(_TrOpType, _FaOpType fOp) { fOp(); }
 };
 
 /**

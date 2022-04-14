@@ -169,42 +169,42 @@ public:
 
 	virtual void Set(Self&& other) = 0;
 
-	virtual void Set(bool val)
+	virtual void Set(bool)
 	{
 		throw TypeError(this->GetCategoryName(), "bool");
 	}
 
-	virtual void Set(uint8_t val)
+	virtual void Set(uint8_t)
 	{
 		throw TypeError(this->GetCategoryName(), "uint8_t");
 	}
 
-	virtual void Set(int8_t val)
+	virtual void Set(int8_t)
 	{
 		throw TypeError(this->GetCategoryName(), "int8_t");
 	}
 
-	virtual void Set(uint32_t val)
+	virtual void Set(uint32_t)
 	{
 		throw TypeError(this->GetCategoryName(), "uint32_t");
 	}
 
-	virtual void Set(int32_t val)
+	virtual void Set(int32_t)
 	{
 		throw TypeError(this->GetCategoryName(), "int32_t");
 	}
 
-	virtual void Set(uint64_t val)
+	virtual void Set(uint64_t)
 	{
 		throw TypeError(this->GetCategoryName(), "uint64_t");
 	}
 
-	virtual void Set(int64_t val)
+	virtual void Set(int64_t)
 	{
 		throw TypeError(this->GetCategoryName(), "int64_t");
 	}
 
-	virtual void Set(double val)
+	virtual void Set(double)
 	{
 		throw TypeError(this->GetCategoryName(), "double");
 	}

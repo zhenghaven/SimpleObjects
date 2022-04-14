@@ -25,6 +25,7 @@ namespace SimpleObjects_Test
 GTEST_TEST(TestDict, CountTestFile)
 {
 	static auto tmp = ++SimpleObjects_Test::g_numOfTestFile;
+	(void)tmp;
 }
 
 GTEST_TEST(TestDict, Construction)
@@ -63,14 +64,20 @@ GTEST_TEST(TestDict, Assignment)
 	EXPECT_EQ(cpDc.size(), 0);
 	cpDc = testDc;
 	EXPECT_EQ(cpDc, testDc);
-	cpDc = cpDc;
+	// We want to ensure assignment self is OK,
+	// meanwhile to avoid compiler warning
+	Dict* cpDcPtr = nullptr;
+	cpDcPtr = &cpDc;
+	cpDc = *cpDcPtr;
 	EXPECT_EQ(cpDc, testDc);
 
 	Dict mvDc;
 	EXPECT_EQ(mvDc.size(), 0);
 	mvDc = std::move(cpDc);
 	EXPECT_EQ(mvDc, testDc);
-	mvDc = std::move(mvDc);
+	Dict* mvDcPtr = nullptr;
+	mvDcPtr = &mvDc;
+	mvDc = std::move(*mvDcPtr);
 	EXPECT_EQ(mvDc, testDc);
 }
 
@@ -254,7 +261,8 @@ GTEST_TEST(TestDict, At)
 	};
 	const Dict kCpDc = cpDc;
 
-	EXPECT_EQ(cpDc[Null()], testDc.at(Null()));
+	auto tmpNull = Null();
+	EXPECT_EQ(cpDc[tmpNull], testDc.at(Null()));
 	EXPECT_EQ(cpDc[Int64(1)], testDc.at(Int64(1)));
 
 	EXPECT_EQ(kCpDc[Int64(1)], testDc.at(Int64(1)));

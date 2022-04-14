@@ -13,12 +13,12 @@ include(TestCoverage.cmake)
 ################################################################################
 
 if(MSVC)
-	set(COMMON_OPTIONS /W3 /wd4996 /we4239 /we4002 /we4700 /we4305 /EHsc /MP
-		/GR /Zc:__cplusplus)
+	set(COMMON_OPTIONS /W4 /WX /EHsc /MP /GR /Zc:__cplusplus)
 	set(DEBUG_OPTIONS /MTd /Od /Zi /DDEBUG)
 	set(RELEASE_OPTIONS /MT /Ox /Oi /Ob2 /fp:fast)# /DNDEBUG
 else()
-	set(COMMON_OPTIONS -pthread)
+	set(COMMON_OPTIONS -pthread -Wall -Wextra -Werror
+		-pedantic -Wpedantic -pedantic-errors)
 	set(DEBUG_OPTIONS -O0 -g -DDEBUG)
 	set(RELEASE_OPTIONS -O2) #-DNDEBUG defined by default
 endif()
@@ -56,9 +56,9 @@ file(GLOB_RECURSE SOURCES ${SOURCES_DIR_PATH}/*.[ch]*)
 
 add_executable(SimpleObjects_test ${SOURCES})
 
-target_compile_options(SimpleObjects_test PUBLIC
-	"$<$<CONFIG:Debug>:${DEBUG_OPTIONS}>"
-	"$<$<CONFIG:Release>:${RELEASE_OPTIONS}>")
+target_compile_options(SimpleObjects_test
+	PRIVATE "$<$<CONFIG:Debug>:${DEBUG_OPTIONS}>"
+			"$<$<CONFIG:Release>:${RELEASE_OPTIONS}>")
 target_link_libraries(SimpleObjects_test SimpleObjects gtest)
 
 add_test(NAME SimpleObjects_test

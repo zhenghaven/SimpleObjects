@@ -162,6 +162,7 @@ public:
 
 	virtual ~ForwardIteratorIf() = default;
 
+	using _Base::Copy;
 	virtual SelfPtr Copy(const Self& /*unused*/) const = 0;
 
 }; //class ForwardIteratorIf
@@ -191,6 +192,7 @@ public:
 
 	virtual void Decrement() = 0;
 
+	using _Base::Copy;
 	virtual SelfPtr Copy(const Self& /*unused*/) const = 0;
 
 }; //class BidirectionalIteratorIf
@@ -222,6 +224,7 @@ public:
 
 	virtual difference_type Diff(const Self& other) const = 0;
 
+	using _Base::Copy;
 	virtual SelfPtr Copy(const Self& /*unused*/) const = 0;
 
 }; //class RandomAccessIteratorIf
