@@ -113,12 +113,12 @@ public:
 			>::AsChild(*this, "Null", this->GetCategoryName());
 	}
 
-	virtual bool operator==(const Self& rhs) const
+	virtual bool operator==(const Self&) const
 	{
 		return true;
 	}
 
-	virtual bool operator!=(const Self& rhs) const
+	virtual bool operator!=(const Self&) const
 	{
 		return false;
 	}

@@ -9,6 +9,7 @@
 
 #include <algorithm>
 
+#include "PrimitiveCmp.hpp"
 #include "ToString.hpp"
 #include "Utils.hpp"
 
@@ -301,9 +302,11 @@ public:
 	virtual bool Equal(size_t pos1, size_t count1,
 		const_pointer begin, const_pointer end) const override
 	{
-		return ((end - begin) != size()) ?
-			false :
-			std::equal(&m_data[pos1], &m_data[pos1 + count1], begin);
+		auto ptrDiff = end - begin;
+		return Internal::Compare<decltype(ptrDiff), size_t>::Equal(
+				ptrDiff, size()) ?
+			std::equal(&m_data[pos1], &m_data[pos1 + count1], begin) :
+			false;
 	}
 
 	// ========== operators ==========

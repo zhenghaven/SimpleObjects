@@ -254,7 +254,8 @@ GTEST_TEST(TestDict, At)
 	};
 	const Dict kCpDc = cpDc;
 
-	EXPECT_EQ(cpDc[Null()], testDc.at(Null()));
+	auto tmpNull = Null();
+	EXPECT_EQ(cpDc[tmpNull], testDc.at(Null()));
 	EXPECT_EQ(cpDc[Int64(1)], testDc.at(Int64(1)));
 
 	EXPECT_EQ(kCpDc[Int64(1)], testDc.at(Int64(1)));
