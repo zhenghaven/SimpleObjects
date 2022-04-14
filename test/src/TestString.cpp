@@ -55,14 +55,20 @@ GTEST_TEST(TestString, Assignment)
 	EXPECT_EQ(cpStr.size(), 0);
 	cpStr = testStr;
 	EXPECT_EQ(cpStr, testStr);
-	cpStr = cpStr;
+	// We want to ensure assignment self is OK,
+	// meanwhile to avoid compiler warning
+	String* cpStrPtr = nullptr;
+	cpStrPtr = &cpStr;
+	cpStr = *cpStrPtr;
 	EXPECT_EQ(cpStr, testStr);
 
 	String mvStr;
 	EXPECT_EQ(mvStr.size(), 0);
 	mvStr = std::move(cpStr);
 	EXPECT_EQ(mvStr, testStr);
-	mvStr = std::move(mvStr);
+	String* mvStrPtr = nullptr;
+	mvStrPtr = &mvStr;
+	mvStr = std::move(*mvStrPtr);
 	EXPECT_EQ(mvStr, testStr);
 }
 

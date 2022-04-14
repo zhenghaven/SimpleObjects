@@ -56,14 +56,20 @@ GTEST_TEST(TestList, Assignment)
 	EXPECT_EQ(cpLs.size(), 0);
 	cpLs = testLs;
 	EXPECT_EQ(cpLs, testLs);
-	cpLs = cpLs;
+	// We want to ensure assignment self is OK,
+	// meanwhile to avoid compiler warning
+	List* cpLsPtr = nullptr;
+	cpLsPtr = &cpLs;
+	cpLs = *cpLsPtr;
 	EXPECT_EQ(cpLs, testLs);
 
 	List mvLs;
 	EXPECT_EQ(mvLs.size(), 0);
 	mvLs = std::move(cpLs);
 	EXPECT_EQ(mvLs, testLs);
-	mvLs = std::move(mvLs);
+	List* mvLsPtr = nullptr;
+	mvLsPtr = &mvLs;
+	mvLs = std::move(*mvLsPtr);
 	EXPECT_EQ(mvLs, testLs);
 }
 

@@ -64,6 +64,8 @@ GTEST_TEST(TestDict, Assignment)
 	EXPECT_EQ(cpDc.size(), 0);
 	cpDc = testDc;
 	EXPECT_EQ(cpDc, testDc);
+	// We want to ensure assignment self is OK,
+	// meanwhile to avoid compiler warning
 	Dict* cpDcPtr = nullptr;
 	cpDcPtr = &cpDc;
 	cpDc = *cpDcPtr;
