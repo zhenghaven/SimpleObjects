@@ -23,7 +23,7 @@ namespace Internal
 struct TupleItemIncrement
 {
 	template<typename _ItemType>
-	void operator()(_ItemType& i)
+	void operator()(size_t, _ItemType& i)
 	{
 		++i;
 	}
@@ -41,7 +41,7 @@ struct IsIteratorTupleEqual
 	 *
 	 */
 	template<typename _ItemType1, typename _ItemType2>
-	void operator()(const _ItemType1& a, const _ItemType2& b)
+	void operator()(size_t, const _ItemType1& a, const _ItemType2& b)
 	{
 		m_isEqual = m_isEqual || (a == b);
 	}

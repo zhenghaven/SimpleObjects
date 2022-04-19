@@ -254,6 +254,7 @@ struct TupleOperationImpl
 			std::forward<_Tp1>(tp1),
 			std::forward<_CallbackType>(callback));
 		callback(
+			_I,
 			std::get<_I>(std::forward<_Tp1>(tp1)));
 	}
 
@@ -265,6 +266,7 @@ struct TupleOperationImpl
 			std::forward<_Tp2>(tp2),
 			std::forward<_CallbackType>(callback));
 		callback(
+			_I,
 			std::get<_I>(std::forward<_Tp1>(tp1)),
 			std::get<_I>(std::forward<_Tp2>(tp2)));
 	}
@@ -277,6 +279,7 @@ struct TupleOperationImpl<0>
 	static void UnaOp(_Tp1&& tp1, _CallbackType&& callback)
 	{
 		callback(
+			0,
 			std::get<0>(std::forward<_Tp1>(tp1)));
 	}
 
@@ -284,6 +287,7 @@ struct TupleOperationImpl<0>
 	static void BinOp(_Tp1&& tp1, _Tp2&& tp2, _CallbackType&& callback)
 	{
 		callback(
+			0,
 			std::get<0>(std::forward<_Tp1>(tp1)),
 			std::get<0>(std::forward<_Tp2>(tp2)));
 	}
@@ -324,6 +328,25 @@ struct TupleOperation
 			std::forward<_CallbackType>(callback));
 	}
 }; // struct TupleOperation
+
+template<template<typename> class _Transform, typename _T>
+struct TupleTransform;
+
+template<template<typename> class _Transform, typename ..._Items>
+struct TupleTransform<_Transform, std::tuple<_Items...> >
+{
+	using type = std::tuple<
+		typename _Transform<_Items>::type ...
+	>;
+}; // struct TupleTransform
+
+static_assert(std::is_same<
+	typename TupleTransform<
+		std::make_unsigned,
+		std::tuple<int, int, int> >::type,
+	std::tuple<unsigned int, unsigned int, unsigned int>
+	>::value,
+	"Programming Error - TupleTransform");
 
 } // namespace Internal
 
