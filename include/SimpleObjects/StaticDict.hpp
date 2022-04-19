@@ -295,7 +295,9 @@ struct DTupleAssign
 	{
 		template<typename _Pair1First, typename _Pair1Second,
 			typename _Pair2First, typename _Pair2Second>
-		void operator()(std::pair<_Pair1First, _Pair1Second>& p1,
+		void operator()(
+			size_t,
+			std::pair<_Pair1First, _Pair1Second>& p1,
 			const std::pair<_Pair2First, _Pair2Second>& p2)
 		{
 			p1.second = p2.second;
@@ -306,7 +308,9 @@ struct DTupleAssign
 	{
 		template<typename _Pair1First, typename _Pair1Second,
 			typename _Pair2First, typename _Pair2Second>
-		void operator()(std::pair<_Pair1First, _Pair1Second>& p1,
+		void operator()(
+			size_t,
+			std::pair<_Pair1First, _Pair1Second>& p1,
 			std::pair<_Pair2First, _Pair2Second>&& p2)
 		{
 			p1.second = std::forward<_Pair2Second>(p2.second);
@@ -326,6 +330,20 @@ struct DTupleAssign
 			tp1, std::forward<_Tp2>(tp2), DPairAssignMove());
 	}
 }; // struct DTupleAssign
+
+template<
+	template<typename, typename> class _Transform,
+	typename _T>
+struct DPairTransform;
+
+template<
+	template<typename, typename> class _Transform,
+	typename _First,
+	typename _Second>
+struct DPairTransform<_Transform, std::pair<_First, _Second> >
+{
+	using type = typename _Transform<_First, _Second>::type;
+}; // struct DPairTransform
 
 } // namespace Internal
 
