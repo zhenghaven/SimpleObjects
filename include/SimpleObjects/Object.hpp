@@ -33,6 +33,7 @@ public: // Static members
 	using ListBase     = typename Base::ListBase;
 	using DictBase     = typename Base::DictBase;
 	using StatDictBase = typename Base::StatDictBase;
+	using BytesBase    = typename Base::BytesBase;
 
 	using BasePtr = std::unique_ptr<Base>;
 
@@ -300,6 +301,16 @@ public:
 	virtual const StatDictBase& AsStaticDict() const override
 	{
 		return m_ptr->AsStaticDict();
+	}
+
+	virtual BytesBase& AsBytes() override
+	{
+		return m_ptr->AsBytes();
+	}
+
+	virtual const BytesBase& AsBytes() const override
+	{
+		return m_ptr->AsBytes();
 	}
 
 	// ========== Interface copy/Move ==========

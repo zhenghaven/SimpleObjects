@@ -169,6 +169,25 @@ GTEST_TEST(TestObject, Cast)
 		EXPECT_NO_THROW(obj.AsDict());
 		EXPECT_THROW(obj.AsStaticDict(), TypeError);
 	}();
+
+	obj = Bytes();
+	EXPECT_THROW(obj.AsNull(),       TypeError);
+	EXPECT_THROW(obj.AsNumeric(),    TypeError);
+	EXPECT_THROW(obj.AsString(),     TypeError);
+	EXPECT_THROW(obj.AsList(),       TypeError);
+	EXPECT_THROW(obj.AsDict(),       TypeError);
+	EXPECT_THROW(obj.AsStaticDict(), TypeError);
+	EXPECT_NO_THROW(obj.AsBytes());
+	// test const version
+	[obj](){
+		EXPECT_THROW(obj.AsNull(),       TypeError);
+		EXPECT_THROW(obj.AsNumeric(),    TypeError);
+		EXPECT_THROW(obj.AsString(),     TypeError);
+		EXPECT_THROW(obj.AsList(),       TypeError);
+		EXPECT_THROW(obj.AsDict(),       TypeError);
+		EXPECT_THROW(obj.AsStaticDict(), TypeError);
+		EXPECT_NO_THROW(obj.AsBytes());
+	}();
 }
 
 GTEST_TEST(TestObject, Copy)

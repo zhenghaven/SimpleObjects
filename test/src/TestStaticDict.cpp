@@ -687,6 +687,7 @@ GTEST_TEST(TestStaticDict, Miscs)
 	EXPECT_THROW(dict1.AsNumeric(), TypeError);
 	EXPECT_THROW(dict1.AsString(),  TypeError);
 	EXPECT_THROW(dict1.AsList(),    TypeError);
+	EXPECT_THROW(dict1.AsBytes(),   TypeError);
 
 	const auto& kDict1 = dict1;
 	EXPECT_NO_THROW(kDict1.AsStaticDict());
@@ -695,6 +696,7 @@ GTEST_TEST(TestStaticDict, Miscs)
 	EXPECT_THROW(kDict1.AsNumeric(), TypeError);
 	EXPECT_THROW(kDict1.AsString(),  TypeError);
 	EXPECT_THROW(kDict1.AsList(),    TypeError);
+	EXPECT_THROW(kDict1.AsBytes(),   TypeError);
 
 	// Copy
 	static_assert(std::is_same<

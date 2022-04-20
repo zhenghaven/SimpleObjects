@@ -12,7 +12,7 @@ namespace SimpleObjects_Test
 
 int main(int argc, char** argv)
 {
-	constexpr size_t EXPECTED_NUM_OF_TEST_FILE = 14;
+	constexpr size_t EXPECTED_NUM_OF_TEST_FILE = 15;
 
 	std::cout << "===== SimpleObjects test program =====" << std::endl;
 	std::cout << std::endl;
@@ -30,7 +30,7 @@ int main(int argc, char** argv)
 	{
 		std::cout << "********************************************************************************" << std::endl;
 		std::cout << "***** WARNING: Expecting " << EXPECTED_NUM_OF_TEST_FILE;
-		std::cout << " testing source files, but only ";
+		std::cout << " testing source files, but ";
 		std::cout << SimpleObjects_Test::g_numOfTestFile << " were ran. *****" << std::endl;
 		std::cout << "********************************************************************************" << std::endl;
 

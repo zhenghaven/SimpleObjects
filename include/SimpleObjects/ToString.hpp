@@ -38,5 +38,22 @@ inline _OutputType ToString(_ItType begin, _ItType end)
 	return _OutputType(begin, end);
 }
 
+template<typename _CharType, typename _OutIt>
+inline void ByteToString(_OutIt destIt, uint8_t b)
+{
+	static constexpr char alphabet[] = "0123456789ABCDEF";
+
+	*destIt++ = static_cast<_CharType>('\\');
+	*destIt++ = static_cast<_CharType>('x');
+
+	// the first nibble (half of byte)
+	*destIt++ = static_cast<_CharType>(
+		alphabet[((b >> 4) & 0x0F)]);
+
+	// the second nibble (half of byte)
+	*destIt++ = static_cast<_CharType>(
+		alphabet[(b & 0x0F)]);
+}
+
 } // Internal
 } // namespace SimpleObjects
