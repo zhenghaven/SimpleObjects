@@ -99,6 +99,7 @@ GTEST_TEST(TestString, Miscs)
 	EXPECT_THROW(kStr.AsList(),       TypeError);
 	EXPECT_THROW(kStr.AsDict(),       TypeError);
 	EXPECT_THROW(kStr.AsStaticDict(), TypeError);
+	EXPECT_THROW(kStr.AsBytes(),      TypeError);
 
 	EXPECT_NO_THROW(String().AsString());
 	EXPECT_THROW(String().AsNull(),       TypeError);
@@ -106,6 +107,7 @@ GTEST_TEST(TestString, Miscs)
 	EXPECT_THROW(String().AsList(),       TypeError);
 	EXPECT_THROW(String().AsDict(),       TypeError);
 	EXPECT_THROW(String().AsStaticDict(), TypeError);
+	EXPECT_THROW(String().AsBytes(),      TypeError);
 
 	// Copy
 	static_assert(std::is_same<
@@ -190,6 +192,13 @@ GTEST_TEST(TestString, Hash)
 		std::hash<std::string>()(std::string("test string2")));
 	EXPECT_NE(String("test string1").Hash(),
 		std::hash<std::string>()(std::string("test string2")));
+
+	EXPECT_EQ(String("test string1").Hash(),
+		std::hash<String>()(String("test string1")));
+	EXPECT_EQ(String("test string2").Hash(),
+		std::hash<String>()(String("test string2")));
+	EXPECT_NE(String("test string1").Hash(),
+		std::hash<String>()(String("test string2")));
 }
 
 GTEST_TEST(TestString, Len)
@@ -316,72 +325,80 @@ GTEST_TEST(TestString, Compare)
 GTEST_TEST(TestString, BaseIsEqual)
 {
 	// Base object
-	using ObjPtr = std::unique_ptr<BaseObj>;
+	auto testBaseObjNE = [](const BaseObj& a, const BaseObj& b) -> bool
+		{
+			return a != b;
+		};
 
-	EXPECT_TRUE(*ObjPtr(new Bool(true)) != *ObjPtr(new String()));
-	EXPECT_TRUE(*ObjPtr(new Null()) != *ObjPtr(new String()));
+	EXPECT_TRUE(testBaseObjNE(String(), Bool(true)));
+	EXPECT_TRUE(testBaseObjNE(String(), Null()));
 
-	EXPECT_TRUE(*ObjPtr(new String("test string1")) != *ObjPtr(new String("test string2")));
-	EXPECT_FALSE(*ObjPtr(new String("test string")) != *ObjPtr(new String("test string")));
+	EXPECT_TRUE(testBaseObjNE(
+		String("test string1"), String("test string2")));
+	EXPECT_FALSE(testBaseObjNE(
+		String("test string"), String("test string")));
 
 	// String base object
-	using StrPtr = std::unique_ptr<StringBaseObj>;
+	auto testStrBaseObjNE =
+		[](const StringBaseObj& a, const StringBaseObj& b) -> bool
+		{
+			return a != b;
+		};
 
-	EXPECT_TRUE(*StrPtr(new String("test string1")) != *StrPtr(new String("test string2")));
-	EXPECT_FALSE(*StrPtr(new String("test string")) != *StrPtr(new String("test string")));
+	EXPECT_TRUE(testStrBaseObjNE(
+		String("test string1"), String("test string2")));
+	EXPECT_FALSE(testStrBaseObjNE(
+		String("test string"), String("test string")));
 }
 
 GTEST_TEST(TestString, BaseCompare)
 {
-	using StrPtr = std::unique_ptr<StringBaseObj>;
+	// Base object
+	auto testBaseObjLE = [](const BaseObj& a, const BaseObj& b) -> bool
+		{
+			return a <= b;
+		};
+	auto testBaseObjGE = [](const BaseObj& a, const BaseObj& b) -> bool
+		{
+			return a >= b;
+		};
 
-	// greater than, true
-	EXPECT_TRUE (*StrPtr(new String("123466")) >  *StrPtr(new String("123456")));
-	EXPECT_FALSE(*StrPtr(new String("123466")) <= *StrPtr(new String("123456")));
+	EXPECT_THROW(testBaseObjLE(String(), Null()), UnsupportedOperation);
+	EXPECT_THROW(testBaseObjGE(String(), Null()), UnsupportedOperation);
+	EXPECT_THROW(testBaseObjLE(String(), Int32()), UnsupportedOperation);
+	EXPECT_THROW(testBaseObjGE(String(), Int32()), UnsupportedOperation);
 
-	EXPECT_TRUE (*StrPtr(new String("123456")) >  *StrPtr(new String("12345")));
-	EXPECT_FALSE(*StrPtr(new String("123456")) <= *StrPtr(new String("12345")));
+	EXPECT_FALSE(testBaseObjLE(String("123466"), String("123456")));
+	EXPECT_FALSE(testBaseObjGE(String("123456"), String("123466")));
 
-	// greater than, false
-	EXPECT_FALSE(*StrPtr(new String("123456")) >  *StrPtr(new String("123466")));
-	EXPECT_TRUE (*StrPtr(new String("123456")) <= *StrPtr(new String("123466")));
+	// String base object
+	auto testStrBaseObjLE =
+		[](const StringBaseObj& a, const StringBaseObj& b) -> bool
+		{
+			return a <= b;
+		};
 
-	EXPECT_FALSE(*StrPtr(new String("12345")) >  *StrPtr(new String("12345")));
-	EXPECT_TRUE (*StrPtr(new String("12345")) <= *StrPtr(new String("12345")));
+	// less or equal to, true
+	EXPECT_TRUE(testStrBaseObjLE(String("123456"), String("123466")));
+	EXPECT_TRUE(testStrBaseObjLE(String("12345"), String("12345")));
 
-	// less than, true
-	EXPECT_TRUE (*StrPtr(new String("123456")) <  *StrPtr(new String("123466")));
-	EXPECT_FALSE(*StrPtr(new String("123456")) >= *StrPtr(new String("123466")));
+	// less or equal to, false
+	EXPECT_FALSE(testStrBaseObjLE(String("123466"), String("123456")));
+	EXPECT_FALSE(testStrBaseObjLE(String("123456"), String("12345")));
 
-	EXPECT_TRUE (*StrPtr(new String("12345")) <  *StrPtr(new String("123456")));
-	EXPECT_FALSE(*StrPtr(new String("12345")) >= *StrPtr(new String("123456")));
+	auto testStrBaseObjGE =
+		[](const StringBaseObj& a, const StringBaseObj& b) -> bool
+		{
+			return a >= b;
+		};
 
-	// less than, false
-	EXPECT_FALSE(*StrPtr(new String("123466")) <  *StrPtr(new String("123456")));
-	EXPECT_TRUE (*StrPtr(new String("123466")) >= *StrPtr(new String("123456")));
+	// greater or equal to, true
+	EXPECT_TRUE(testStrBaseObjGE(String("123466"), String("123456")));
+	EXPECT_TRUE(testStrBaseObjGE(String("12345"), String("12345")));
 
-	EXPECT_FALSE(*StrPtr(new String("12345")) <  *StrPtr(new String("12345")));
-	EXPECT_TRUE (*StrPtr(new String("12345")) >= *StrPtr(new String("12345")));
-
-
-
-	using ObjPtr = std::unique_ptr<BaseObj>;
-
-	EXPECT_FALSE(*ObjPtr(new String("123466")) <= *ObjPtr(new String("123456")));
-	EXPECT_FALSE(*ObjPtr(new String("123456")) >= *ObjPtr(new String("123466")));
-
-	EXPECT_THROW(
-		(void)(*ObjPtr(new String("123456")) >= *ObjPtr(new Null())),
-		UnsupportedOperation);
-	EXPECT_THROW(
-		(void)(*ObjPtr(new String("123456")) <= *ObjPtr(new Null())),
-		UnsupportedOperation);
-	EXPECT_THROW(
-		(void)(*ObjPtr(new String("123456")) >= *ObjPtr(new Int32(123456))),
-		UnsupportedOperation);
-	EXPECT_THROW(
-		(void)(*ObjPtr(new String("123456")) <= *ObjPtr(new Int32(123456))),
-		UnsupportedOperation);
+	// greater or equal to, false
+	EXPECT_FALSE(testStrBaseObjGE(String("123456"), String("123466")));
+	EXPECT_FALSE(testStrBaseObjGE(String("12345"), String("123456")));
 }
 
 GTEST_TEST(TestString, ToString)

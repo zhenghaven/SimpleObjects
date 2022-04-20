@@ -413,6 +413,7 @@ GTEST_TEST(TestList, Miscs)
 	EXPECT_THROW(kList.AsString(),     TypeError);
 	EXPECT_THROW(kList.AsDict(),       TypeError);
 	EXPECT_THROW(kList.AsStaticDict(), TypeError);
+	EXPECT_THROW(kList.AsBytes(),      TypeError);
 
 	EXPECT_NO_THROW(List().AsList());
 	EXPECT_THROW(List().AsNull(),       TypeError);
@@ -420,6 +421,7 @@ GTEST_TEST(TestList, Miscs)
 	EXPECT_THROW(List().AsString(),     TypeError);
 	EXPECT_THROW(List().AsDict(),       TypeError);
 	EXPECT_THROW(List().AsStaticDict(), TypeError);
+	EXPECT_THROW(List().AsBytes(),      TypeError);
 
 	// Copy
 	static_assert(std::is_same<

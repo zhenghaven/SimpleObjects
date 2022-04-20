@@ -304,7 +304,7 @@ public:
 	{
 		auto ptrDiff = end - begin;
 		return Internal::Compare<decltype(ptrDiff), size_t>::Equal(
-				ptrDiff, size()) ?
+				ptrDiff, m_data.size()) ?
 			std::equal(&m_data[pos1], &m_data[pos1 + count1], begin) :
 			false;
 	}
@@ -440,27 +440,29 @@ private:
 // ========== Hash ==========
 namespace std
 {
+
 	template<typename _CtnType, typename _ToStringType>
 #ifndef SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE
-	struct hash<SimpleObjects::StringCat<_CtnType, _ToStringType> > : hash<_CtnType>
+	struct hash<SimpleObjects::StringCat<_CtnType, _ToStringType> >
 	{
 		using _ObjType = SimpleObjects::StringCat<_CtnType, _ToStringType>;
 #else
-	struct hash<SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE::StringCat<_CtnType, _ToStringType> > : hash<_CtnType>
+	struct hash<SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE::StringCat<_CtnType, _ToStringType> >
 	{
 		using _ObjType = SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE::StringCat<_CtnType, _ToStringType>;
 #endif
+
 	public:
-		using Base = std::hash<_CtnType>;
 
 #if __cplusplus < 201703L
-		typedef typename Base::result_type       result_type;
-		typedef typename Base::argument_type     argument_type;
+		typedef size_t       result_type;
+		typedef _ObjType     argument_type;
 #endif
 
 		size_t operator()(const _ObjType& cnt) const
 		{
-			return Base::operator()(cnt.m_data);
+			return cnt.Hash();
 		}
-	};
-}
+	}; // struct hash
+
+} // namespace std

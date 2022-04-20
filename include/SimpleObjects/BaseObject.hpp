@@ -28,6 +28,7 @@ enum class ObjCategory
 	List,
 	Dict,
 	StaticDict,
+	Bytes,
 };
 
 enum class NumericType
@@ -62,10 +63,12 @@ template<typename _ToStringType>
 class NumericBaseObject;
 template<typename _CharType, typename _ToStringType>
 class StringBaseObject;
-template<typename _ValBaseType,  typename _ToStringType>
+template<typename _ValBaseType, typename _ToStringType>
 class ListBaseObject;
-template<typename _KeyType,  typename _ValType,     typename _ToStringType>
+template<typename _KeyType, typename _ValType, typename _ToStringType>
 class DictBaseObject;
+template<typename _ValType, typename _ToStringType>
+class BytesBaseObject;
 template<
 	typename _DynKeyType,
 	typename _DynValType,
@@ -98,6 +101,8 @@ public: // Static members:
 	using DictBase    = DictBaseObject<HashableBaseObject<ToStringType>,
 		                               BaseObject<ToStringType>,
 		                               ToStringType>;
+
+	using BytesBase   = BytesBaseObject<uint8_t, ToStringType>;
 
 	using StatDictBase = StaticDictBaseObject<HashableBaseObject<ToStringType>,
 		                                      BaseObject<ToStringType>,
@@ -323,6 +328,16 @@ public:
 	virtual const StatDictBase& AsStaticDict() const
 	{
 		throw TypeError("StaticDict", this->GetCategoryName());
+	}
+
+	virtual BytesBase& AsBytes()
+	{
+		throw TypeError("Bytes", this->GetCategoryName());
+	}
+
+	virtual const BytesBase& AsBytes() const
+	{
+		throw TypeError("Bytes", this->GetCategoryName());
 	}
 
 	virtual std::unique_ptr<Self> Copy(const Self* /*unused*/) const = 0;

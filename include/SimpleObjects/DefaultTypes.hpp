@@ -15,6 +15,7 @@
 #include "String.hpp"
 #include "List.hpp"
 #include "Dict.hpp"
+#include "Bytes.hpp"
 
 #include "Object.hpp"
 #include "HashableObject.hpp"
@@ -91,6 +92,11 @@ template<typename _KeyType, typename _Valtype>
 using DictT = DictCat<MapType<_KeyType, _Valtype>, std::string>;
 
 using Dict = DictT<HashableObject, Object>;
+
+// ========== Convenient types of Bytes ==========
+
+using BytesBaseObj = BytesBaseObject<uint8_t, std::string>;
+using Bytes = BytesImpl<std::vector<uint8_t>, std::string>;
 
 // ========== Convenient types of base classes ==========
 

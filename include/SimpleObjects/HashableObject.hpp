@@ -39,6 +39,7 @@ public: // Static members
 	using ListBase     = typename Base::ListBase;
 	using DictBase     = typename Base::DictBase;
 	using StatDictBase = typename Base::StatDictBase;
+	using BytesBase    = typename Base::BytesBase;
 
 public:
 	HashableObjectImpl() :
@@ -282,6 +283,16 @@ public:
 	virtual const StatDictBase& AsStaticDict() const override
 	{
 		return m_ptr->AsStaticDict();
+	}
+
+	virtual BytesBase& AsBytes() override
+	{
+		return m_ptr->AsBytes();
+	}
+
+	virtual const BytesBase& AsBytes() const override
+	{
+		return m_ptr->AsBytes();
 	}
 
 	virtual bool operator==(const BaseBase& rhs) const override
