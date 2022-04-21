@@ -89,10 +89,10 @@ struct NumericBinOp
 		//    Src's value might fall outside of Dst's range => need to check
 		static constexpr bool isCheckNeed = (
 			!(
-				Compare<_DstValType, _SrcValType>::LessEqual(
+				RealNumCompare<_DstValType, _SrcValType>::LessEqual(
 					std::numeric_limits<_DstValType>::lowest(),
 					std::numeric_limits<_SrcValType>::lowest()) &&
-				Compare<_SrcValType, _DstValType>::LessEqual(
+				RealNumCompare<_SrcValType, _DstValType>::LessEqual(
 					std::numeric_limits<_SrcValType>::max(),
 					std::numeric_limits<_DstValType>::max())
 			));
@@ -103,10 +103,10 @@ struct NumericBinOp
 			// if (src < DstType.Lowest) or (DstType.Max < src)
 			//    throw
 			const bool isOutRange = (
-					(Compare<_SrcValType, _DstValType>::Less(
+					(RealNumCompare<_SrcValType, _DstValType>::Less(
 						src,
 						std::numeric_limits<_DstValType>::lowest())) ||
-					(Compare<_DstValType, _SrcValType>::Less(
+					(RealNumCompare<_DstValType, _SrcValType>::Less(
 						std::numeric_limits<_DstValType>::max(),
 						src))
 				);
@@ -279,9 +279,8 @@ public:
 	template<typename _RhsValType, typename _RhsStringType>
 	bool operator==(const Numeric<_RhsValType, _RhsStringType>& rhs) const
 	{
-		using namespace Internal;
-		return (Compare<InternalType, _RhsValType>::Equal(
-			(m_data), (rhs.m_data)));
+		return Internal::RealNumCompare<InternalType, _RhsValType>::Equal(
+			(m_data), (rhs.m_data));
 	}
 
 	template<typename _RhsValType, typename _RhsStringType>
@@ -305,17 +304,16 @@ public:
 	template<typename _RhsValType, typename _RhsStringType>
 	bool operator<(const Numeric<_RhsValType, _RhsStringType>& rhs) const
 	{
-		using namespace Internal;
-		return (Compare<InternalType, _RhsValType>::Less(
-			(m_data), (rhs.m_data)));
+		return Internal::RealNumCompare<InternalType, _RhsValType>::Less(
+			(m_data), (rhs.m_data));
 	}
 
 	template<typename _RhsValType, typename _RhsStringType>
 	bool operator>(const Numeric<_RhsValType, _RhsStringType>& rhs) const
 	{
-		using namespace Internal;
-		return (Compare<InternalType, _RhsValType>::Greater(
-			(m_data), (rhs.m_data)));
+		return Internal::RealNumCompare<
+			InternalType, _RhsValType>::Greater(
+				(m_data), (rhs.m_data));
 	}
 
 	template<typename _RhsValType, typename _RhsStringType>

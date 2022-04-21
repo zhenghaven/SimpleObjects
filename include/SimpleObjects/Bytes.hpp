@@ -193,7 +193,7 @@ public:
 		const_pointer begin, const_pointer end) const override
 	{
 		auto ptrDiff = end - begin;
-		return Internal::Compare<decltype(ptrDiff), size_t>::Equal(
+		return Internal::RealNumCompare<decltype(ptrDiff), size_t>::Equal(
 				ptrDiff, m_data.size()) ?
 			std::equal(&m_data[pos1], &m_data[pos1 + count1], begin) :
 			false;
