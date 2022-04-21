@@ -5,6 +5,12 @@
 
 #pragma once
 
+#if __cplusplus > 201703L
+#	include <version>
+#	ifdef __cpp_lib_three_way_comparison
+#		include <compare>
+#	endif
+#endif
 #include <functional>
 #include <string>
 

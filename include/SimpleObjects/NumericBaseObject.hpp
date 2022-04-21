@@ -64,26 +64,55 @@ public:
 			>::AsChild(*this, "Numeric Category", this->GetCategoryName());
 	}
 
-	virtual bool operator==(const Self& rhs) const = 0;
+	// ========== Comparisons ==========
 
-	virtual bool operator!=(const Self& rhs) const
+	// ===== This class
+
+	virtual bool RealNumBaseEqual(const Self& rhs) const = 0;
+
+	virtual int RealNumBaseCmp(const Self& rhs) const = 0;
+
+	bool operator==(const Self& rhs) const
+	{
+		return RealNumBaseEqual(rhs);
+	}
+
+#ifdef __cpp_lib_three_way_comparison
+	std::strong_ordering operator<=>(const Self& rhs) const
+	{
+		auto cmpRes = RealNumBaseCmp(rhs);
+		return cmpRes == 0 ? std::strong_ordering::equal :
+				(cmpRes < 0 ? std::strong_ordering::less :
+				(std::strong_ordering::greater));
+	}
+#else
+	bool operator!=(const Self& rhs) const
 	{
 		return !(*this == rhs);
 	}
 
-	virtual bool operator<(const Self& rhs) const = 0;
-
-	virtual bool operator>=(const Self& rhs) const
+	bool operator<(const Self& rhs) const
 	{
-		return !(*this < rhs);
+		return RealNumBaseCmp(rhs) < 0;
 	}
 
-	virtual bool operator>(const Self& rhs) const = 0;
+	bool operator>(const Self& rhs) const
+	{
+		return RealNumBaseCmp(rhs) > 0;
+	}
 
-	virtual bool operator<=(const Self& rhs) const
+	bool operator<=(const Self& rhs) const
 	{
 		return !(*this > rhs);
 	}
+
+	bool operator>=(const Self& rhs) const
+	{
+		return !(*this < rhs);
+	}
+#endif
+
+	// ===== BaseObject class
 
 	virtual bool operator==(const BaseBase& rhs) const override
 	{
@@ -96,8 +125,6 @@ public:
 		}
 		return *this == rhs.AsNumeric();
 	}
-
-	using BaseBase::operator!=;
 
 	virtual bool operator<(const BaseBase& rhs) const override
 	{
@@ -125,8 +152,14 @@ public:
 		return *this > rhs.AsNumeric();
 	}
 
-	using BaseBase::operator<=;
-	using BaseBase::operator>=;
+	using Base::operator==;
+	using Base::operator!=;
+	using Base::operator<;
+	using Base::operator>;
+	using Base::operator<=;
+	using Base::operator>=;
+
+	// ========== Interface copy/Move ==========
 
 	virtual std::unique_ptr<Self> Copy(const Self* /*unused*/) const = 0;
 

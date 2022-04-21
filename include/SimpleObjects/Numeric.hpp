@@ -25,7 +25,7 @@ namespace SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE
 {
 
 template<typename _ValType>
-struct NumericUtils
+struct NumericTraits
 {
 	static constexpr ObjCategory sk_cat();
 	static constexpr const char* sk_catName();
@@ -33,12 +33,13 @@ struct NumericUtils
 	static constexpr NumericType sk_numType();
 	static constexpr const char* sk_numTypeName();
 
-}; // struct NumericUtils
+}; // struct NumericTraits
 
 namespace Internal
 {
 
-struct NumCompareEq {
+struct NumCompareEq
+{
 	template <typename _LhsType, typename _RhsType>
 	bool operator()(const _LhsType& lhs, const _RhsType& rhs) const
 	{
@@ -46,22 +47,14 @@ struct NumCompareEq {
 	}
 }; // struct NumCompareEq
 
-struct NumCompareLt {
+struct NumCompareCmp
+{
 	template <typename _LhsType, typename _RhsType>
-	bool operator()(const _LhsType& lhs, const _RhsType& rhs) const
+	int operator()(const _LhsType& lhs, const _RhsType& rhs) const
 	{
-		return lhs < rhs;
+		return lhs.RealNumCmp(rhs);
 	}
-}; // struct NumCompareLt
-
-struct NumCompareGt {
-	template <typename _LhsType, typename _RhsType>
-	bool operator()(const _LhsType& lhs, const _RhsType& rhs) const
-	{
-		return lhs > rhs;
-	}
-
-}; // struct NumCompareGt
+}; // struct NumCompareCmp
 
 template<typename _DstValType, typename _SrcValType>
 struct NumericBinOp;
@@ -112,8 +105,8 @@ struct NumericBinOp
 				);
 			if (isOutRange)
 			{
-				throw TypeError(NumericUtils<_DstValType>::sk_numTypeName(),
-					NumericUtils<_SrcValType>::sk_numTypeName());
+				throw TypeError(NumericTraits<_DstValType>::sk_numTypeName(),
+					NumericTraits<_SrcValType>::sk_numTypeName());
 			}
 		}
 
@@ -149,7 +142,7 @@ public: // Static member:
 
 	static constexpr ObjCategory sk_cat()
 	{
-		return NumericUtils<InternalType>::sk_cat();
+		return NumericTraits<InternalType>::sk_cat();
 	}
 
 public:
@@ -209,34 +202,82 @@ public:
 		return res;
 	}
 
-	// ========== operators ==========
+	// ========== Comparisons ==========
 
-	// overrides Base::operator==
-	virtual bool operator==(const Base& rhs) const override
+	// ===== This class
+
+	template<typename _RhsValType, typename _RhsStringType>
+	int RealNumCmp(const Numeric<_RhsValType, _RhsStringType>& rhs) const
+	{
+		return Internal::RealNumCompare<InternalType, _RhsValType>::Compare(
+			(m_data), (rhs.m_data));
+	}
+
+	template<typename _RhsValType, typename _RhsStringType>
+	bool operator==(const Numeric<_RhsValType, _RhsStringType>& rhs) const
+	{
+		return Internal::RealNumCompare<InternalType, _RhsValType>::Equal(
+			(m_data), (rhs.m_data));
+	}
+
+#ifdef __cpp_lib_three_way_comparison
+	template<typename _RhsValType, typename _RhsStringType>
+	std::strong_ordering operator<=>(
+		const Numeric<_RhsValType, _RhsStringType>& rhs) const
+	{
+		auto cmpRes = RealNumCmp(rhs);
+		return cmpRes == 0 ? std::strong_ordering::equal :
+				(cmpRes < 0 ? std::strong_ordering::less :
+				(std::strong_ordering::greater));
+	}
+#else
+	template<typename _RhsValType, typename _RhsStringType>
+	bool operator!=(const Numeric<_RhsValType, _RhsStringType>& rhs) const
+	{
+		return !(this->operator==(rhs));
+	}
+
+	template<typename _RhsValType, typename _RhsStringType>
+	bool operator<(const Numeric<_RhsValType, _RhsStringType>& rhs) const
+	{
+		return RealNumCmp(rhs) < 0;
+	}
+
+	template<typename _RhsValType, typename _RhsStringType>
+	bool operator>(const Numeric<_RhsValType, _RhsStringType>& rhs) const
+	{
+		return RealNumCmp(rhs) > 0;
+	}
+
+	template<typename _RhsValType, typename _RhsStringType>
+	bool operator<=(const Numeric<_RhsValType, _RhsStringType>& rhs) const
+	{
+		return RealNumCmp(rhs) <= 0;
+	}
+
+	template<typename _RhsValType, typename _RhsStringType>
+	bool operator>=(const Numeric<_RhsValType, _RhsStringType>& rhs) const
+	{
+		return RealNumCmp(rhs) >= 0;
+	}
+#endif
+
+	// ===== RealNumBase class
+
+	virtual bool RealNumBaseEqual(const Base& rhs) const override
 	{
 		return GenericBinaryOpThrow<bool>("=", rhs, Internal::NumCompareEq());
 	}
 
-	using BaseBaseBase::operator==;
+	virtual int RealNumBaseCmp(const Base& rhs) const override
+	{
+		return GenericBinaryOpThrow<int>("<=>", rhs, Internal::NumCompareCmp());
+	}
 
+	using Base::operator==;
 	using Base::operator!=;
-
-	// overrides Base::operator<
-	virtual bool operator<(const Base& rhs) const override
-	{
-		return GenericBinaryOpThrow<bool>("<", rhs, Internal::NumCompareLt());
-	}
-
-	using BaseBaseBase::operator<;
-
-	// overrides Base::operator>
-	virtual bool operator>(const Base& rhs) const override
-	{
-		return GenericBinaryOpThrow<bool>(">", rhs, Internal::NumCompareGt());
-	}
-
-	using BaseBaseBase::operator>;
-
+	using Base::operator<;
+	using Base::operator>;
 	using Base::operator<=;
 	using Base::operator>=;
 
@@ -271,50 +312,9 @@ public:
 	}
 
 	//     ========== operators for Numeric ==========
-	//     ==, !=, <=, >=, <, >,
 	//     &, |, ^, <<, >>, ~,
 	//     +=, -=, *=, /=, %=, &=, |=, ^=
 	//     ++, --, -
-
-	template<typename _RhsValType, typename _RhsStringType>
-	bool operator==(const Numeric<_RhsValType, _RhsStringType>& rhs) const
-	{
-		return Internal::RealNumCompare<InternalType, _RhsValType>::Equal(
-			(m_data), (rhs.m_data));
-	}
-
-	template<typename _RhsValType, typename _RhsStringType>
-	bool operator!=(const Numeric<_RhsValType, _RhsStringType>& rhs) const
-	{
-		return !(this->operator==(rhs));
-	}
-
-	template<typename _RhsValType, typename _RhsStringType>
-	bool operator<=(const Numeric<_RhsValType, _RhsStringType>& rhs) const
-	{
-		return !(this->operator>(rhs));
-	}
-
-	template<typename _RhsValType, typename _RhsStringType>
-	bool operator>=(const Numeric<_RhsValType, _RhsStringType>& rhs) const
-	{
-		return !(this->operator<(rhs));
-	}
-
-	template<typename _RhsValType, typename _RhsStringType>
-	bool operator<(const Numeric<_RhsValType, _RhsStringType>& rhs) const
-	{
-		return Internal::RealNumCompare<InternalType, _RhsValType>::Less(
-			(m_data), (rhs.m_data));
-	}
-
-	template<typename _RhsValType, typename _RhsStringType>
-	bool operator>(const Numeric<_RhsValType, _RhsStringType>& rhs) const
-	{
-		return Internal::RealNumCompare<
-			InternalType, _RhsValType>::Greater(
-				(m_data), (rhs.m_data));
-	}
 
 	template<typename _RhsValType, typename _RhsStringType>
 	Self operator&(const Numeric<_RhsValType, _RhsStringType>& rhs) const
@@ -470,7 +470,7 @@ public:
 		catch(const std::bad_cast&)
 		{
 			throw TypeError(
-				NumericUtils<InternalType>::sk_numTypeName(),
+				NumericTraits<InternalType>::sk_numTypeName(),
 				this->GetCategoryName());
 		}
 	}
@@ -485,7 +485,7 @@ public:
 		catch(const std::bad_cast&)
 		{
 			throw TypeError(
-				NumericUtils<InternalType>::sk_numTypeName(),
+				NumericTraits<InternalType>::sk_numTypeName(),
 				this->GetCategoryName());
 		}
 	}
@@ -591,7 +591,7 @@ public:
 
 	virtual const char* GetCategoryName() const override
 	{
-		return NumericUtils<InternalType>::sk_catName();
+		return NumericTraits<InternalType>::sk_catName();
 	}
 
 	// ========== Overrides HashableBaseObject ==========
@@ -605,12 +605,12 @@ public:
 
 	virtual NumericType GetNumType() const override
 	{
-		return NumericUtils<InternalType>::sk_numType();
+		return NumericTraits<InternalType>::sk_numType();
 	}
 
 	virtual const char* GetNumTypeName() const override
 	{
-		return NumericUtils<InternalType>::sk_numTypeName();
+		return NumericTraits<InternalType>::sk_numTypeName();
 	}
 
 	// ========== Interface copy/Move ==========
@@ -674,96 +674,96 @@ private:
 // ========== Category specialization ==========
 
 template<>
-inline constexpr ObjCategory NumericUtils<bool    >::sk_cat() { return ObjCategory::Bool; }
+inline constexpr ObjCategory NumericTraits<bool    >::sk_cat() { return ObjCategory::Bool; }
 template<>
-inline constexpr ObjCategory NumericUtils<int8_t  >::sk_cat() { return ObjCategory::Integer; }
+inline constexpr ObjCategory NumericTraits<int8_t  >::sk_cat() { return ObjCategory::Integer; }
 template<>
-inline constexpr ObjCategory NumericUtils<int16_t >::sk_cat() { return ObjCategory::Integer; }
+inline constexpr ObjCategory NumericTraits<int16_t >::sk_cat() { return ObjCategory::Integer; }
 template<>
-inline constexpr ObjCategory NumericUtils<int32_t >::sk_cat() { return ObjCategory::Integer; }
+inline constexpr ObjCategory NumericTraits<int32_t >::sk_cat() { return ObjCategory::Integer; }
 template<>
-inline constexpr ObjCategory NumericUtils<int64_t >::sk_cat() { return ObjCategory::Integer; }
+inline constexpr ObjCategory NumericTraits<int64_t >::sk_cat() { return ObjCategory::Integer; }
 template<>
-inline constexpr ObjCategory NumericUtils<uint8_t >::sk_cat() { return ObjCategory::Integer; }
+inline constexpr ObjCategory NumericTraits<uint8_t >::sk_cat() { return ObjCategory::Integer; }
 template<>
-inline constexpr ObjCategory NumericUtils<uint16_t>::sk_cat() { return ObjCategory::Integer; }
+inline constexpr ObjCategory NumericTraits<uint16_t>::sk_cat() { return ObjCategory::Integer; }
 template<>
-inline constexpr ObjCategory NumericUtils<uint32_t>::sk_cat() { return ObjCategory::Integer; }
+inline constexpr ObjCategory NumericTraits<uint32_t>::sk_cat() { return ObjCategory::Integer; }
 template<>
-inline constexpr ObjCategory NumericUtils<uint64_t>::sk_cat() { return ObjCategory::Integer; }
+inline constexpr ObjCategory NumericTraits<uint64_t>::sk_cat() { return ObjCategory::Integer; }
 template<>
-inline constexpr ObjCategory NumericUtils<float   >::sk_cat() { return ObjCategory::Real; }
+inline constexpr ObjCategory NumericTraits<float   >::sk_cat() { return ObjCategory::Real; }
 template<>
-inline constexpr ObjCategory NumericUtils<double  >::sk_cat() { return ObjCategory::Real; }
+inline constexpr ObjCategory NumericTraits<double  >::sk_cat() { return ObjCategory::Real; }
 
 template<>
-inline constexpr const char* NumericUtils<bool    >::sk_catName() { return "Bool";  }
+inline constexpr const char* NumericTraits<bool    >::sk_catName() { return "Bool";  }
 template<>
-inline constexpr const char* NumericUtils<int8_t  >::sk_catName() { return "Integer";  }
+inline constexpr const char* NumericTraits<int8_t  >::sk_catName() { return "Integer";  }
 template<>
-inline constexpr const char* NumericUtils<int16_t >::sk_catName() { return "Integer"; }
+inline constexpr const char* NumericTraits<int16_t >::sk_catName() { return "Integer"; }
 template<>
-inline constexpr const char* NumericUtils<int32_t >::sk_catName() { return "Integer"; }
+inline constexpr const char* NumericTraits<int32_t >::sk_catName() { return "Integer"; }
 template<>
-inline constexpr const char* NumericUtils<int64_t >::sk_catName() { return "Integer"; }
+inline constexpr const char* NumericTraits<int64_t >::sk_catName() { return "Integer"; }
 template<>
-inline constexpr const char* NumericUtils<uint8_t >::sk_catName() { return "Integer";  }
+inline constexpr const char* NumericTraits<uint8_t >::sk_catName() { return "Integer";  }
 template<>
-inline constexpr const char* NumericUtils<uint16_t>::sk_catName() { return "Integer"; }
+inline constexpr const char* NumericTraits<uint16_t>::sk_catName() { return "Integer"; }
 template<>
-inline constexpr const char* NumericUtils<uint32_t>::sk_catName() { return "Integer"; }
+inline constexpr const char* NumericTraits<uint32_t>::sk_catName() { return "Integer"; }
 template<>
-inline constexpr const char* NumericUtils<uint64_t>::sk_catName() { return "Integer"; }
+inline constexpr const char* NumericTraits<uint64_t>::sk_catName() { return "Integer"; }
 template<>
-inline constexpr const char* NumericUtils<float   >::sk_catName() { return "Real";  }
+inline constexpr const char* NumericTraits<float   >::sk_catName() { return "Real";  }
 template<>
-inline constexpr const char* NumericUtils<double  >::sk_catName() { return "Real"; }
+inline constexpr const char* NumericTraits<double  >::sk_catName() { return "Real"; }
 
 template<>
-inline constexpr NumericType NumericUtils<bool    >::sk_numType() { return NumericType::Bool;  }
+inline constexpr NumericType NumericTraits<bool    >::sk_numType() { return NumericType::Bool;  }
 template<>
-inline constexpr NumericType NumericUtils<int8_t  >::sk_numType() { return NumericType::Int8;  }
+inline constexpr NumericType NumericTraits<int8_t  >::sk_numType() { return NumericType::Int8;  }
 template<>
-inline constexpr NumericType NumericUtils<int16_t >::sk_numType() { return NumericType::Int16; }
+inline constexpr NumericType NumericTraits<int16_t >::sk_numType() { return NumericType::Int16; }
 template<>
-inline constexpr NumericType NumericUtils<int32_t >::sk_numType() { return NumericType::Int32; }
+inline constexpr NumericType NumericTraits<int32_t >::sk_numType() { return NumericType::Int32; }
 template<>
-inline constexpr NumericType NumericUtils<int64_t >::sk_numType() { return NumericType::Int64; }
+inline constexpr NumericType NumericTraits<int64_t >::sk_numType() { return NumericType::Int64; }
 template<>
-inline constexpr NumericType NumericUtils<uint8_t >::sk_numType() { return NumericType::UInt8;  }
+inline constexpr NumericType NumericTraits<uint8_t >::sk_numType() { return NumericType::UInt8;  }
 template<>
-inline constexpr NumericType NumericUtils<uint16_t>::sk_numType() { return NumericType::UInt16; }
+inline constexpr NumericType NumericTraits<uint16_t>::sk_numType() { return NumericType::UInt16; }
 template<>
-inline constexpr NumericType NumericUtils<uint32_t>::sk_numType() { return NumericType::UInt32; }
+inline constexpr NumericType NumericTraits<uint32_t>::sk_numType() { return NumericType::UInt32; }
 template<>
-inline constexpr NumericType NumericUtils<uint64_t>::sk_numType() { return NumericType::UInt64; }
+inline constexpr NumericType NumericTraits<uint64_t>::sk_numType() { return NumericType::UInt64; }
 template<>
-inline constexpr NumericType NumericUtils<float   >::sk_numType() { return NumericType::Float;  }
+inline constexpr NumericType NumericTraits<float   >::sk_numType() { return NumericType::Float;  }
 template<>
-inline constexpr NumericType NumericUtils<double  >::sk_numType() { return NumericType::Double; }
+inline constexpr NumericType NumericTraits<double  >::sk_numType() { return NumericType::Double; }
 
 template<>
-inline constexpr const char* NumericUtils<bool    >::sk_numTypeName() { return "Bool";  }
+inline constexpr const char* NumericTraits<bool    >::sk_numTypeName() { return "Bool";  }
 template<>
-inline constexpr const char* NumericUtils<int8_t  >::sk_numTypeName() { return "Int8";  }
+inline constexpr const char* NumericTraits<int8_t  >::sk_numTypeName() { return "Int8";  }
 template<>
-inline constexpr const char* NumericUtils<int16_t >::sk_numTypeName() { return "Int16"; }
+inline constexpr const char* NumericTraits<int16_t >::sk_numTypeName() { return "Int16"; }
 template<>
-inline constexpr const char* NumericUtils<int32_t >::sk_numTypeName() { return "Int32"; }
+inline constexpr const char* NumericTraits<int32_t >::sk_numTypeName() { return "Int32"; }
 template<>
-inline constexpr const char* NumericUtils<int64_t >::sk_numTypeName() { return "Int64"; }
+inline constexpr const char* NumericTraits<int64_t >::sk_numTypeName() { return "Int64"; }
 template<>
-inline constexpr const char* NumericUtils<uint8_t >::sk_numTypeName() { return "UInt8";  }
+inline constexpr const char* NumericTraits<uint8_t >::sk_numTypeName() { return "UInt8";  }
 template<>
-inline constexpr const char* NumericUtils<uint16_t>::sk_numTypeName() { return "UInt16"; }
+inline constexpr const char* NumericTraits<uint16_t>::sk_numTypeName() { return "UInt16"; }
 template<>
-inline constexpr const char* NumericUtils<uint32_t>::sk_numTypeName() { return "UInt32"; }
+inline constexpr const char* NumericTraits<uint32_t>::sk_numTypeName() { return "UInt32"; }
 template<>
-inline constexpr const char* NumericUtils<uint64_t>::sk_numTypeName() { return "UInt64"; }
+inline constexpr const char* NumericTraits<uint64_t>::sk_numTypeName() { return "UInt64"; }
 template<>
-inline constexpr const char* NumericUtils<float   >::sk_numTypeName() { return "Float";  }
+inline constexpr const char* NumericTraits<float   >::sk_numTypeName() { return "Float";  }
 template<>
-inline constexpr const char* NumericUtils<double  >::sk_numTypeName() { return "Double"; }
+inline constexpr const char* NumericTraits<double  >::sk_numTypeName() { return "Double"; }
 
 // ========== binary operators for Numeric ==========
 
