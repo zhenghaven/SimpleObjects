@@ -78,26 +78,72 @@ public:
 
 	// ========== comparison ==========
 
-	virtual bool operator==(const Self& rhs) const = 0;
+	// ===== This class
 
-	virtual bool operator>(const Self& rhs) const = 0;
+	/**
+	 * @brief lexicographical compare this bytes with the other
+	 *
+	 * @param pos1   the begin position of this bytes
+	 * @param count1 the length since the begin position to be compared
+	 * @param begin  the begin of the other bytes
+	 * @param end    the end of the other bytes
+	 * @return compare result
+	 */
+	virtual bool BytesBaseEqual(size_t pos1, size_t count1,
+		const_pointer begin, const_pointer end) const = 0;
 
-	virtual bool operator<(const Self& rhs) const = 0;
+	virtual int BytesBaseCompare(size_t pos1, size_t count1,
+		const_pointer begin, const_pointer end) const = 0;
 
-	virtual bool operator!=(const Self& rhs) const
+	bool operator==(const Self& rhs) const
+	{
+		return BytesBaseEqual(
+			0, size(),
+			rhs.data(), rhs.data() + rhs.size());
+	}
+
+#ifdef __cpp_lib_three_way_comparison
+	std::strong_ordering operator<=>(const Self& rhs) const
+	{
+		auto cmpRes = BytesBaseCompare(
+			0, size(),
+			rhs.data(), rhs.data() + rhs.size());
+		return cmpRes == 0 ? std::strong_ordering::equal :
+				(cmpRes < 0 ? std::strong_ordering::less :
+				(std::strong_ordering::greater));
+	}
+#else
+	bool operator!=(const Self& rhs) const
 	{
 		return !(*this == rhs);
 	}
 
-	virtual bool operator<=(const Self& rhs) const
+	bool operator<(const Self& rhs) const
+	{
+		return BytesBaseCompare(
+			0, size(),
+			rhs.data(), rhs.data() + rhs.size()) < 0;
+	}
+
+	bool operator>(const Self& rhs) const
+	{
+		return BytesBaseCompare(
+			0, size(),
+			rhs.data(), rhs.data() + rhs.size()) > 0;
+	}
+
+	bool operator<=(const Self& rhs) const
 	{
 		return !(*this > rhs);
 	}
 
-	virtual bool operator>=(const Self& rhs) const
+	bool operator>=(const Self& rhs) const
 	{
 		return !(*this < rhs);
 	}
+#endif
+
+	// ===== StringBase class
 
 	virtual bool operator==(const BaseBase& rhs) const override
 	{
@@ -131,33 +177,12 @@ public:
 		return *this > rhs.AsBytes();
 	}
 
+	using Base::operator==;
 	using Base::operator!=;
+	using Base::operator<;
+	using Base::operator>;
 	using Base::operator<=;
 	using Base::operator>=;
-
-	virtual Self& operator+=(const Self& rhs)
-	{
-		this->Append(rhs);
-		return *this;
-	}
-
-	/**
-	 * @brief lexicographical compare this bytes with the other
-	 *
-	 * @param pos1   the begin position of this bytes
-	 * @param count1 the length since the begin position to be compared
-	 * @param begin  the begin of the other bytes
-	 * @param end    the end of the other bytes
-	 * @return compare result
-	 */
-	virtual bool LessThan(size_t pos1, size_t count1,
-		const_pointer begin, const_pointer end) const = 0;
-
-	virtual bool GreaterThan(size_t pos1, size_t count1,
-		const_pointer begin, const_pointer end) const = 0;
-
-	virtual bool Equal(size_t pos1, size_t count1,
-		const_pointer begin, const_pointer end) const = 0;
 
 	// ========== capacity ==========
 
@@ -187,6 +212,12 @@ public:
 	virtual void Append(const Self& other)
 	{
 		return this->Append(other.cbegin(), other.cend());
+	}
+
+	virtual Self& operator+=(const Self& rhs)
+	{
+		this->Append(rhs);
+		return *this;
 	}
 
 	// ========== iterators ==========
