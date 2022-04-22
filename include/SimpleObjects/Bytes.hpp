@@ -9,7 +9,7 @@
 
 #include "Internal/hash.hpp"
 
-#include "PrimitiveCmp.hpp"
+#include "Compare.hpp"
 #include "ToString.hpp"
 
 #ifndef SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE

@@ -9,7 +9,7 @@
 
 #include <algorithm>
 
-#include "PrimitiveCmp.hpp"
+#include "Compare.hpp"
 #include "ToString.hpp"
 #include "Utils.hpp"
 
@@ -114,59 +114,169 @@ public:
 		return *this;
 	}
 
-	// ========== Overrides BaseObject ==========
-
-	virtual ObjCategory GetCategory() const override
+	const ContainerType& GetVal() const
 	{
-		return sk_cat();
+		return m_data;
 	}
 
-	using BaseBaseBase::Set;
+	// ========== operators ==========
 
-	virtual void Set(const BaseBaseBase& other) override
+	// ===== This class
+
+	bool operator==(const Self& rhs) const
 	{
-		try
-		{
-			const Self& casted = dynamic_cast<const Self&>(other);
-			*this = casted;
-		}
-		catch(const std::bad_cast&)
-		{
-			throw TypeError("String", this->GetCategoryName());
-		}
+		return m_data == rhs.m_data;
+	}
+#ifdef __cpp_lib_three_way_comparison
+	auto operator<=>(const Self& rhs) const
+	{
+		return m_data <=> rhs.m_data;
+	}
+#else
+	bool operator!=(const Self& rhs) const
+	{
+		return m_data != rhs.m_data;
+	}
+	bool operator<(const Self& rhs) const
+	{
+		return m_data < rhs.m_data;
+	}
+	bool operator>(const Self& rhs) const
+	{
+		return m_data > rhs.m_data;
+	}
+	bool operator<=(const Self& rhs) const
+	{
+		return m_data <= rhs.m_data;
+	}
+	bool operator>=(const Self& rhs) const
+	{
+		return m_data >= rhs.m_data;
+	}
+#endif
+
+	// ===== StringBase class
+
+	virtual bool StringBaseEqual(size_t pos1, size_t count1,
+		const_pointer begin, const_pointer end) const override
+	{
+		auto ptrDiff = end - begin;
+		return Internal::RealNumCompare<decltype(ptrDiff), size_t>::Equal(
+				ptrDiff, count1) ?
+			std::equal(
+				m_data.data() + pos1, m_data.data() + pos1 + count1,
+				begin) :
+			false;
 	}
 
-	virtual void Set(BaseBaseBase&& other) override
+	virtual int StringBaseCompare(size_t pos1, size_t count1,
+		const_pointer begin, const_pointer end) const override
 	{
-		try
-		{
-			Self&& casted = dynamic_cast<Self&&>(other);
-			*this = std::forward<Self>(casted);
-		}
-		catch(const std::bad_cast&)
-		{
-			throw TypeError("String", this->GetCategoryName());
-		}
+		return Internal::LexicographicalCompareThreeWay(
+			m_data.data() + pos1, m_data.data() + pos1 + count1,
+			begin, end);
 	}
 
-	virtual bool IsTrue() const override
-	{
-		return m_data.size() > 0;
-	}
-
-	// ========== Overrides HashableBaseObject ==========
-
-	virtual std::size_t Hash() const override
-	{
-		return std::hash<ContainerType>()(m_data);
-	}
+	using Base::operator==;
+	using Base::operator!=;
+	using Base::operator<;
+	using Base::operator>;
+	using Base::operator<=;
+	using Base::operator>=;
 
 	// ========== Overrides StringBaseObject ==========
+
+	// ========== capacity ==========
 
 	virtual size_t size() const override
 	{
 		return m_data.size();
 	}
+
+	virtual void resize(size_t len) override
+	{
+		m_data.resize(len);
+	}
+
+	virtual void reserve(size_t len) override
+	{
+		m_data.reserve(len);
+	}
+
+	// ========== value access ==========
+
+	virtual value_type& at(size_t idx) override
+	{
+		return m_data[idx];
+	}
+
+	virtual const value_type& at(size_t idx) const override
+	{
+		return m_data[idx];
+	}
+
+	const_pointer data() const override
+	{
+		return m_data.data();
+	}
+
+	const_pointer c_str() const override
+	{
+		return m_data.c_str();
+	}
+
+	// ========== adding/removing values ==========
+
+	virtual void push_back(const value_type& ch) override
+	{
+		m_data.push_back(ch);
+	}
+
+	virtual void pop_back() override
+	{
+		m_data.pop_back();
+	}
+
+	using Base::Append;
+	virtual void Append(const_iterator begin, const_iterator end) override
+	{
+		std::copy(begin, end, std::back_inserter(m_data));
+	}
+
+	// ========== item searching ==========
+
+	using Base::StartsWith;
+	virtual bool StartsWith(
+		const_iterator begin, const_iterator end) const override
+	{
+		return Internal::FindAt(cbegin(), cend(), begin, end);
+	}
+
+	using Base::EndsWith;
+	virtual bool EndsWith(
+		const_iterator begin, const_iterator end) const override
+	{
+		return Internal::FindAt(crbegin(), crend(),
+			std::reverse_iterator<const_iterator >(end),
+			std::reverse_iterator<const_iterator >(begin));
+	}
+
+	using Base::Contains;
+	virtual const_iterator Contains(
+		const_iterator begin, const_iterator end) const override
+	{
+		auto res = cbegin();
+		for(; res != cend(); ++res)
+		{
+			if (Internal::FindAt(res, cend(), begin, end))
+			{
+				return res;
+			}
+		}
+		return res;
+	}
+
+	// ========== iterators ==========
 
 	using Base::begin;
 	using Base::end;
@@ -211,168 +321,51 @@ public:
 		return ToRdIt<true>(m_data.crend());
 	}
 
-	virtual value_type& at(size_t idx) override
+	// ========== Overrides HashableBaseObject ==========
+
+	virtual std::size_t Hash() const override
 	{
-		return m_data[idx];
+		return std::hash<ContainerType>()(m_data);
 	}
 
-	virtual const value_type& at(size_t idx) const override
+	// ========== Overrides BaseObject ==========
+
+	virtual ObjCategory GetCategory() const override
 	{
-		return m_data[idx];
+		return sk_cat();
 	}
 
-	using Base::StartsWith;
-	virtual bool StartsWith(
-		const_iterator begin, const_iterator end) const override
-	{
-		return Internal::FindAt(cbegin(), cend(), begin, end);
-	}
+	using BaseBaseBase::Set;
 
-	using Base::EndsWith;
-	virtual bool EndsWith(
-		const_iterator begin, const_iterator end) const override
+	virtual void Set(const BaseBaseBase& other) override
 	{
-		return Internal::FindAt(crbegin(), crend(),
-			std::reverse_iterator<const_iterator >(end),
-			std::reverse_iterator<const_iterator >(begin));
-	}
-
-	using Base::Contains;
-	virtual const_iterator Contains(
-		const_iterator begin, const_iterator end) const override
-	{
-		auto res = cbegin();
-		for(; res != cend(); ++res)
+		try
 		{
-			if (Internal::FindAt(res, cend(), begin, end))
-			{
-				return res;
-			}
+			const Self& casted = dynamic_cast<const Self&>(other);
+			*this = casted;
 		}
-		return res;
+		catch(const std::bad_cast&)
+		{
+			throw TypeError("String", this->GetCategoryName());
+		}
 	}
 
-	virtual void push_back(const value_type& ch) override
+	virtual void Set(BaseBaseBase&& other) override
 	{
-		m_data.push_back(ch);
+		try
+		{
+			Self&& casted = dynamic_cast<Self&&>(other);
+			*this = std::forward<Self>(casted);
+		}
+		catch(const std::bad_cast&)
+		{
+			throw TypeError("String", this->GetCategoryName());
+		}
 	}
 
-	virtual void pop_back() override
+	virtual bool IsTrue() const override
 	{
-		m_data.pop_back();
-	}
-
-	using Base::Append;
-	virtual void Append(const_iterator begin, const_iterator end) override
-	{
-		std::copy(begin, end, std::back_inserter(m_data));
-	}
-
-	virtual void resize(size_t len) override
-	{
-		m_data.resize(len);
-	}
-
-	virtual void reserve(size_t len) override
-	{
-		m_data.reserve(len);
-	}
-
-	const_pointer c_str() const override
-	{
-		return m_data.c_str();
-	}
-
-	virtual bool LessThan(size_t pos1, size_t count1,
-		const_pointer begin, const_pointer end) const override
-	{
-		// m_data < (begin, end)
-		return std::lexicographical_compare(&m_data[pos1], &m_data[pos1 + count1],
-			begin, end);
-	}
-
-	virtual bool GreaterThan(size_t pos1, size_t count1,
-		const_pointer begin, const_pointer end) const override
-	{
-		// (begin, end) < m_data ==> m_data > (begin, end)
-		return std::lexicographical_compare(begin, end,
-			&m_data[pos1], &m_data[pos1 + count1]);
-	}
-
-	virtual bool Equal(size_t pos1, size_t count1,
-		const_pointer begin, const_pointer end) const override
-	{
-		auto ptrDiff = end - begin;
-		return Internal::RealNumCompare<decltype(ptrDiff), size_t>::Equal(
-				ptrDiff, m_data.size()) ?
-			std::equal(&m_data[pos1], &m_data[pos1 + count1], begin) :
-			false;
-	}
-
-	// ========== operators ==========
-
-	// overrides Base::operator==
-	virtual bool operator==(const Base& rhs) const override
-	{
-		auto ptr = m_data.data();
-		return rhs.Equal(0, rhs.size(), ptr, ptr + size());
-	}
-
-	using BaseBaseBase::operator==;
-
-	using Base::operator!=;
-
-	// overrides Base::operator<
-	virtual bool operator<(const Base& rhs) const override
-	{
-		auto ptr = m_data.data();
-		// rhs > this ==> this < rhs
-		return rhs.GreaterThan(0, rhs.size(), ptr, ptr + size());
-	}
-
-	using BaseBaseBase::operator<;
-
-	// overrides Base::operator>
-	virtual bool operator>(const Base& rhs) const override
-	{
-		auto ptr = m_data.data();
-		// rhs < this ==> this > rhs
-		return rhs.LessThan(0, rhs.size(), ptr, ptr + size());
-	}
-
-	using BaseBaseBase::operator>;
-
-	using Base::operator<=;
-	using Base::operator>=;
-
-	virtual bool operator==(const Self& rhs) const
-	{
-		return m_data == rhs.m_data;
-	}
-	virtual bool operator!=(const Self& rhs) const
-	{
-		return m_data != rhs.m_data;
-	}
-	virtual bool operator<(const Self& rhs) const
-	{
-		return m_data < rhs.m_data;
-	}
-	virtual bool operator>(const Self& rhs) const
-	{
-		return m_data > rhs.m_data;
-	}
-	virtual bool operator<=(const Self& rhs) const
-	{
-		return m_data <= rhs.m_data;
-	}
-	virtual bool operator>=(const Self& rhs) const
-	{
-		return m_data >= rhs.m_data;
-	}
-
-	const ContainerType& GetVal() const
-	{
-		return m_data;
+		return m_data.size() > 0;
 	}
 
 	// ========== Interface copy/Move ==========

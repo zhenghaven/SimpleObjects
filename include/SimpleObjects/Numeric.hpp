@@ -11,9 +11,9 @@
 #include <type_traits>
 #include <limits>
 
+#include "CompareRealNum.hpp"
 #include "Exception.hpp"
 #include "NumericTypeInfer.hpp"
-#include "PrimitiveCmp.hpp"
 #include "ToString.hpp"
 #include "Utils.hpp"
 
