@@ -72,7 +72,9 @@ public:
 
 	// ========== operators ==========
 
-	virtual bool operator==(const Self& rhs) const
+	// ===== This class
+
+	bool operator==(const Self& rhs) const
 	{
 		// reference: https://github.com/llvm/llvm-project/blob/main/libcxx/include/unordered_map#L1877
 
@@ -94,15 +96,19 @@ public:
 		return true;
 	}
 
-	virtual bool operator!=(const Self& rhs) const
+#ifndef __cpp_lib_three_way_comparison
+	bool operator!=(const Self& rhs) const
 	{
 		return !(*this == rhs);
 	}
+#endif
 
 	bool operator<(const Self& rhs) = delete;
 	bool operator>(const Self& rhs) = delete;
 	bool operator<=(const Self& rhs) = delete;
 	bool operator>=(const Self& rhs) = delete;
+
+	// ===== ObjectBase class
 
 	virtual bool operator==(const Base& rhs) const override
 	{
@@ -112,8 +118,6 @@ public:
 		}
 		return *this == rhs.AsDict();
 	}
-
-	using Base::operator!=;
 
 	virtual bool operator<(const Base& rhs) const override
 	{
@@ -127,6 +131,10 @@ public:
 			this->GetCategoryName(), rhs.GetCategoryName());
 	}
 
+	using Base::operator==;
+	using Base::operator!=;
+	using Base::operator<;
+	using Base::operator>;
 	using Base::operator<=;
 	using Base::operator>=;
 

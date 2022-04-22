@@ -143,7 +143,7 @@ public:
 	}
 #endif
 
-	// ===== StringBase class
+	// ===== BytesBase class
 
 	virtual bool operator==(const BaseBase& rhs) const override
 	{

@@ -124,30 +124,34 @@ public:
 
 	// ========== operators ==========
 
-	using Base::operator==;
-
-	using Base::operator!=;
-
 	virtual bool operator==(const Self& rhs) const
 	{
 		return m_data == rhs.m_data;
 	}
+#ifndef __cpp_lib_three_way_comparison
 	virtual bool operator!=(const Self& rhs) const
 	{
 		return !(m_data == rhs.m_data);
 	}
+#endif
 
 	bool operator<(const Self& rhs) = delete;
 	bool operator>(const Self& rhs) = delete;
 	bool operator<=(const Self& rhs) = delete;
 	bool operator>=(const Self& rhs) = delete;
 
+	// ===== DictBase class
+
+	using Base::operator==;
+	using Base::operator!=;
 	using Base::operator<;
 	using Base::operator>;
 	using Base::operator<=;
 	using Base::operator>=;
 
 	// ========== Functions provided by this class ==========
+
+	// ========== iterators ==========
 
 	iterator begin()
 	{
@@ -179,6 +183,8 @@ public:
 		return cend();
 	}
 
+	// ========== value access ==========
+
 	mapped_type& operator[](const key_type& key)
 	{
 		return m_data[key];
@@ -196,6 +202,8 @@ public:
 		}
 	}
 
+	// ========== item searching ==========
+
 	const_iterator find(const key_type& key) const
 	{
 		return ToFrIt<true>(m_data.find(key));
@@ -210,6 +218,8 @@ public:
 	{
 		return m_data.find(key) != m_data.cend();
 	}
+
+	// ========== adding/removing values ==========
 
 	std::pair<iterator, bool> InsertOnly(
 		const key_type& key, const mapped_type& other)
@@ -324,10 +334,14 @@ public:
 
 	// ========== Overrides DictBaseObject ==========
 
+	// ========== capacity ==========
+
 	virtual size_t size() const override
 	{
 		return m_data.size();
 	}
+
+	// ========== iterators ==========
 
 	virtual base_key_iterator KeysBegin() const override
 	{
