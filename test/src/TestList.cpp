@@ -11,6 +11,8 @@
 
 #include <SimpleObjects/SimpleObjects.hpp>
 
+#include "CompareHelpers.hpp"
+
 #ifndef SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE
 using namespace SimpleObjects;
 #else
@@ -147,11 +149,22 @@ GTEST_TEST(TestList, Compare)
 	EXPECT_TRUE(
 		List({Int64(1), Int64(2), Int64(3)}) <
 		List({Int64(3), Int64(2)}));
+	EXPECT_TRUE(
+		List({Int64(1), Int64(2)}) <
+		List({Int64(1), Int64(2), Int64(3)}));
+	EXPECT_THROW(
+		(void)(
+			List({Int64(1), Int64(2), Null()}) <
+			List({Int64(1), Int64(2), Null()})),
+		UnsupportedOperation);
 
 	// >
 	EXPECT_TRUE(
 		List({Int64(3), Int64(2)}) >
 		List({Int64(1), Int64(2), Int64(3)}));
+	EXPECT_TRUE(
+		List({Int64(1), Int64(2), Int64(3)}) >
+		List({Int64(1), Int64(2)}));
 
 	// <=
 	EXPECT_TRUE(
@@ -164,101 +177,95 @@ GTEST_TEST(TestList, Compare)
 		List({Int64(1), Int64(2), Int64(3)}));
 
 	// Base
+	using ListBaseCmp = CompareTestHelpers<ListBaseObj>;
 	// ==
-	EXPECT_FALSE(
-		testLs_12345 ==
-		static_cast<const ListBaseObj&>(testLs_true));
-	EXPECT_FALSE(
-		testLs_12345 ==
-		static_cast<const ListBaseObj&>(testLs_12000));
-	EXPECT_TRUE(
-		testLs_12345 ==
-		static_cast<const ListBaseObj&>(testLs_12345_2));
+	EXPECT_FALSE(ListBaseCmp::Eq(testLs_12345, testLs_true));
+	EXPECT_FALSE(ListBaseCmp::Eq(testLs_12345, testLs_12000));
+	EXPECT_TRUE(ListBaseCmp::Eq(testLs_12345, testLs_12345_2));
 
 	// !=
-	EXPECT_TRUE(
-		testLs_12345 !=
-		static_cast<const ListBaseObj&>(testLs_true));
-	EXPECT_TRUE(
-		testLs_12345 !=
-		static_cast<const ListBaseObj&>(testLs_12000));
-	EXPECT_FALSE(
-		testLs_12345 !=
-		static_cast<const ListBaseObj&>(testLs_12345_2));
+	EXPECT_TRUE(ListBaseCmp::Neq(testLs_12345, testLs_true));
+	EXPECT_TRUE(ListBaseCmp::Neq(testLs_12345, testLs_12000));
+	EXPECT_FALSE(ListBaseCmp::Neq(testLs_12345, testLs_12345_2));
 
 	// <
-	EXPECT_TRUE(
-		List({Int64(1), Int64(2), Int64(3)}) <
-		static_cast<const ListBaseObj&>(List({Int64(3), Int64(2)})));
+	EXPECT_TRUE(ListBaseCmp::Lt(
+		List({Int64(1), Int64(2), Int64(3)}),
+		List({Int64(3), Int64(2)})));
+	EXPECT_THROW(ListBaseCmp::Lt(
+		List({Int64(1), Int64(2), Null()}),
+		List({Int64(1), Int64(2), Null()})),
+		UnsupportedOperation);
 
 	// >
-	EXPECT_TRUE(
-		List({Int64(3), Int64(2)}) >
-		static_cast<const ListBaseObj&>(List({Int64(1), Int64(2), Int64(3)})));
+	EXPECT_TRUE(ListBaseCmp::Gt(
+		List({Int64(3), Int64(2)}),
+		List({Int64(1), Int64(2), Int64(3)})));
+	EXPECT_THROW(ListBaseCmp::Gt(
+		List({Int64(1), Int64(2), Null()}),
+		List({Int64(1), Int64(2), Null()})),
+		UnsupportedOperation);
 
 	// <=
-	EXPECT_TRUE(
-		List({Int64(1), Int64(2), Int64(3)}) <=
-		static_cast<const ListBaseObj&>(List({Int64(3), Int64(2)})));
+	EXPECT_TRUE(ListBaseCmp::Le(
+		List({Int64(1), Int64(2), Int64(3)}),
+		List({Int64(3), Int64(2)})));
 
 	// >=
-	EXPECT_TRUE(
-		List({Int64(3), Int64(2)}) >=
-		static_cast<const ListBaseObj&>(List({Int64(1), Int64(2), Int64(3)})));
+	EXPECT_TRUE(ListBaseCmp::Ge(
+		List({Int64(3), Int64(2)}),
+		List({Int64(1), Int64(2), Int64(3)})));
 
 
 	// BaseBase => BaseObj
+	using BaseObjCmp = CompareTestHelpers<BaseObj>;
 	// ==
-	EXPECT_FALSE(
-		testLs_12345 ==
-		static_cast<const BaseObj&>(testLs_true));
-	EXPECT_FALSE(
-		testLs_12345 ==
-		static_cast<const BaseObj&>(testLs_12000));
-	EXPECT_TRUE(
-		testLs_12345 ==
-		static_cast<const BaseObj&>(testLs_12345_2));
+	EXPECT_FALSE(BaseObjCmp::Eq(testLs_12345, testLs_true));
+	EXPECT_FALSE(BaseObjCmp::Eq(testLs_12345, testLs_12000));
+	EXPECT_TRUE(BaseObjCmp::Eq(testLs_12345, testLs_12345_2));
 
 	// !=
-	EXPECT_TRUE(
-		testLs_12345 !=
-		static_cast<const BaseObj&>(testLs_true));
-	EXPECT_TRUE(
-		testLs_12345 !=
-		static_cast<const BaseObj&>(testLs_12000));
-	EXPECT_FALSE(
-		testLs_12345 !=
-		static_cast<const BaseObj&>(testLs_12345_2));
-	EXPECT_TRUE(
-		List() !=
-		static_cast<const BaseObj&>(Null()));
-	EXPECT_TRUE(
-		List() !=
-		static_cast<const BaseObj&>(String()));
+	EXPECT_TRUE(BaseObjCmp::Neq(testLs_12345, testLs_true));
+	EXPECT_TRUE(BaseObjCmp::Neq(testLs_12345, testLs_12000));
+	EXPECT_FALSE(BaseObjCmp::Neq(testLs_12345, testLs_12345_2));
+	EXPECT_TRUE(BaseObjCmp::Neq(List(), Null()));
+	EXPECT_TRUE(BaseObjCmp::Neq(List(), String()));
 
 	// <
-	EXPECT_TRUE(
-		List({Int64(1), Int64(2), Int64(3)}) <
-		static_cast<const BaseObj&>(List({Int64(3), Int64(2)})));
-	EXPECT_THROW(
-		(void)(List() < String()), UnsupportedOperation);
+	EXPECT_TRUE(BaseObjCmp::Lt(
+		List({Int64(1), Int64(2), Int64(3)}),
+		List({Int64(3), Int64(2)})));
+	EXPECT_TRUE(BaseObjCmp::Lt(
+		List({Int64(1), Int64(2)}),
+		List({Int64(1), Int64(2), Int64(3)})));
+	EXPECT_THROW(BaseObjCmp::Lt(List(), String()), UnsupportedOperation);
+	EXPECT_THROW(BaseObjCmp::Lt(
+		List({Int64(1), Int64(2), Null()}),
+		List({Int64(1), Int64(2), Null()})),
+		UnsupportedOperation);
 
 	// >
-	EXPECT_TRUE(
-		List({Int64(3), Int64(2)}) >
-		static_cast<const BaseObj&>(List({Int64(1), Int64(2), Int64(3)})));
-	EXPECT_THROW(
-		(void)(List() > String()), UnsupportedOperation);
+	EXPECT_TRUE(BaseObjCmp::Gt(
+		List({Int64(3), Int64(2)}),
+		List({Int64(1), Int64(2), Int64(3)})));
+	EXPECT_TRUE(BaseObjCmp::Gt(
+		List({Int64(1), Int64(2), Int64(3)}),
+		List({Int64(1), Int64(2)})));
+	EXPECT_THROW(BaseObjCmp::Gt(List(), String()), UnsupportedOperation);
+	EXPECT_THROW(BaseObjCmp::Gt(
+		List({Int64(1), Int64(2), Null()}),
+		List({Int64(1), Int64(2), Null()})),
+		UnsupportedOperation);
 
 	// <=
-	EXPECT_TRUE(
-		List({Int64(1), Int64(2), Int64(3)}) <=
-		static_cast<const BaseObj&>(List({Int64(3), Int64(2)})));
+	EXPECT_TRUE(BaseObjCmp::Le(
+		List({Int64(1), Int64(2), Int64(3)}),
+		List({Int64(3), Int64(2)})));
 
 	// >=
-	EXPECT_TRUE(
-		List({Int64(3), Int64(2)}) >=
-		static_cast<const BaseObj&>(List({Int64(1), Int64(2), Int64(3)})));
+	EXPECT_TRUE(BaseObjCmp::Ge(
+		List({Int64(3), Int64(2)}),
+		List({Int64(1), Int64(2), Int64(3)})));
 }
 
 GTEST_TEST(TestList, Len)

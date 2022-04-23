@@ -74,7 +74,7 @@ public:
 
 	// ===== This class
 
-	bool operator==(const Self& rhs) const
+	virtual bool DictBaseIsEqual(const Self& rhs) const
 	{
 		// reference: https://github.com/llvm/llvm-project/blob/main/libcxx/include/unordered_map#L1877
 
@@ -96,6 +96,11 @@ public:
 		return true;
 	}
 
+	bool operator==(const Self& rhs) const
+	{
+		return DictBaseIsEqual(rhs);
+	}
+
 #ifndef __cpp_lib_three_way_comparison
 	bool operator!=(const Self& rhs) const
 	{
@@ -110,25 +115,23 @@ public:
 
 	// ===== ObjectBase class
 
-	virtual bool operator==(const Base& rhs) const override
+	virtual bool BaseObjectIsEqual(const Base& rhs) const override
 	{
-		if (rhs.GetCategory() != ObjCategory::Dict)
+		return (rhs.GetCategory() == ObjCategory::Dict) &&
+				DictBaseIsEqual(rhs.AsDict());
+	}
+
+	virtual ObjectOrder BaseObjectCompare(const Base& rhs) const override
+	{
+		switch (rhs.GetCategory())
 		{
-			return false;
+		case ObjCategory::Dict:
+			return DictBaseIsEqual(rhs.AsDict()) ?
+					ObjectOrder::EqualUnordered :
+					ObjectOrder::NotEqualUnordered;
+		default:
+			return ObjectOrder::NotEqualUnordered;
 		}
-		return *this == rhs.AsDict();
-	}
-
-	virtual bool operator<(const Base& rhs) const override
-	{
-		throw UnsupportedOperation("<",
-			this->GetCategoryName(), rhs.GetCategoryName());
-	}
-
-	virtual bool operator>(const Base& rhs) const override
-	{
-		throw UnsupportedOperation(">",
-			this->GetCategoryName(), rhs.GetCategoryName());
 	}
 
 	using Base::operator==;

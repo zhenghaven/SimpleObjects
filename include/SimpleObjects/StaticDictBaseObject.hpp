@@ -107,25 +107,23 @@ public:
 
 	// ===== ObjectBase class
 
-	virtual bool operator==(const Base& rhs) const override
+	virtual bool BaseObjectIsEqual(const Base& rhs) const override
 	{
-		if (rhs.GetCategory() != ObjCategory::StaticDict)
+		return (rhs.GetCategory() == ObjCategory::StaticDict) &&
+				StaticDictBaseEqual(rhs.AsStaticDict());
+	}
+
+	virtual ObjectOrder BaseObjectCompare(const Base& rhs) const override
+	{
+		switch (rhs.GetCategory())
 		{
-			return false;
+		case ObjCategory::StaticDict:
+			return StaticDictBaseEqual(rhs.AsStaticDict()) ?
+					ObjectOrder::EqualUnordered :
+					ObjectOrder::NotEqualUnordered;
+		default:
+			return ObjectOrder::NotEqualUnordered;
 		}
-		return *this == rhs.AsStaticDict();
-	}
-
-	virtual bool operator<(const Base& rhs) const override
-	{
-		throw UnsupportedOperation("<",
-			this->GetCategoryName(), rhs.GetCategoryName());
-	}
-
-	virtual bool operator>(const Base& rhs) const override
-	{
-		throw UnsupportedOperation(">",
-			this->GetCategoryName(), rhs.GetCategoryName());
 	}
 
 	using Base::operator==;

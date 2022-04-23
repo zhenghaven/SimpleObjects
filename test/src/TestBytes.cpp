@@ -13,6 +13,8 @@ using namespace SimpleObjects;
 using namespace SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE;
 #endif
 
+#include "CompareHelpers.hpp"
+
 namespace SimpleObjects_Test
 {
 	extern size_t g_numOfTestFile;
@@ -299,85 +301,61 @@ GTEST_TEST(TestBytes, Compare)
 GTEST_TEST(TestBytes, BaseIsEqual)
 {
 	// Base object
-	auto testBaseObjNE = [](const BaseObj& a, const BaseObj& b) -> bool
-		{
-			return a != b;
-		};
+	using BaseObjCmp = CompareTestHelpers<BaseObj>;
 
-	EXPECT_TRUE(testBaseObjNE(Bytes(), Bool(true)));
-	EXPECT_TRUE(testBaseObjNE(Bytes(), Null()));
+	EXPECT_TRUE(BaseObjCmp::Neq(Bytes(), Bool(true)));
+	EXPECT_TRUE(BaseObjCmp::Neq(Bytes(), Null()));
 
-	EXPECT_TRUE(testBaseObjNE(
+	EXPECT_TRUE(BaseObjCmp::Neq(
 		Bytes({ 0x01U, 0x02U, }), Bytes({ 0x01U, 0x03U, })));
-	EXPECT_FALSE(testBaseObjNE(
+	EXPECT_FALSE(BaseObjCmp::Neq(
 		Bytes({ 0x01U, 0x02U, }), Bytes({ 0x01U, 0x02U, })));
 
 	// Bytes base object
-	auto testBytesBaseObjNE =
-		[](const BytesBaseObj& a, const BytesBaseObj& b) -> bool
-		{
-			return a != b;
-		};
+	using BytesBaseCmp = CompareTestHelpers<BytesBaseObj>;
 
-	EXPECT_TRUE(testBytesBaseObjNE(
+	EXPECT_TRUE(BytesBaseCmp::Neq(
 		Bytes({ 0x01U, 0x02U, }), Bytes({ 0x01U, 0x03U, })));
-	EXPECT_FALSE(testBytesBaseObjNE(
+	EXPECT_FALSE(BytesBaseCmp::Neq(
 		Bytes({ 0x01U, 0x02U, }), Bytes({ 0x01U, 0x02U, })));
 }
 
 GTEST_TEST(TestBytes, BaseCompare)
 {
 	// Base object
-	auto testBaseObjLE = [](const BaseObj& a, const BaseObj& b) -> bool
-		{
-			return a <= b;
-		};
-	auto testBaseObjGE = [](const BaseObj& a, const BaseObj& b) -> bool
-		{
-			return a >= b;
-		};
+	using BaseObjCmp = CompareTestHelpers<BaseObj>;
 
-	EXPECT_THROW(testBaseObjLE(Bytes(), Null()), UnsupportedOperation);
-	EXPECT_THROW(testBaseObjGE(Bytes(), Null()), UnsupportedOperation);
-	EXPECT_THROW(testBaseObjLE(Bytes(), Int32()), UnsupportedOperation);
-	EXPECT_THROW(testBaseObjGE(Bytes(), Int32()), UnsupportedOperation);
+	EXPECT_THROW(BaseObjCmp::Le(Bytes(), Null()), UnsupportedOperation);
+	EXPECT_THROW(BaseObjCmp::Ge(Bytes(), Null()), UnsupportedOperation);
+	EXPECT_THROW(BaseObjCmp::Le(Bytes(), Int32()), UnsupportedOperation);
+	EXPECT_THROW(BaseObjCmp::Ge(Bytes(), Int32()), UnsupportedOperation);
 
-	EXPECT_TRUE(testBaseObjLE(
+	EXPECT_TRUE(BaseObjCmp::Le(
 		Bytes({ 0x01U, 0x02U, }), Bytes({ 0x01U, 0x03U, })));
-	EXPECT_TRUE(testBaseObjGE(
+	EXPECT_TRUE(BaseObjCmp::Ge(
 		Bytes({ 0x01U, 0x03U, }), Bytes({ 0x01U, 0x02U, })));
 
 	// Bytes base object
-	auto testStrBaseObjLE =
-		[](const BytesBaseObj& a, const BytesBaseObj& b) -> bool
-		{
-			return a <= b;
-		};
+	using BytesBaseCmp = CompareTestHelpers<BytesBaseObj>;
 
 	// less or equal to, true
-	EXPECT_TRUE(testStrBaseObjLE(
+	EXPECT_TRUE(BytesBaseCmp::Le(
 		Bytes({ 0x01U, 0x02U, }), Bytes({ 0x01U, 0x02U, 0x03U, })));
-	EXPECT_TRUE(testStrBaseObjLE(
+	EXPECT_TRUE(BytesBaseCmp::Le(
 		Bytes({ 0x01U, 0x02U, }), Bytes({ 0x01U, 0x02U, })));
 
 	// less or equal to, false
-	EXPECT_FALSE(testStrBaseObjLE(
+	EXPECT_FALSE(BytesBaseCmp::Le(
 		Bytes({ 0x01U, 0x02U, 0x03U, }), Bytes({ 0x01U, 0x02U, })));
-
-	auto testStrBaseObjGE =
-		[](const BytesBaseObj& a, const BytesBaseObj& b) -> bool
-		{
-			return a >= b;
-		};
 
 	// greater or equal to, true
-	EXPECT_TRUE(testStrBaseObjGE(
+	EXPECT_TRUE(BytesBaseCmp::Ge(
 		Bytes({ 0x01U, 0x02U, 0x03U, }), Bytes({ 0x01U, 0x02U, })));
-	EXPECT_TRUE(testStrBaseObjGE(
+	EXPECT_TRUE(BytesBaseCmp::Ge(
 		Bytes({ 0x01U, 0x02U, }), Bytes({ 0x01U, 0x02U, })));
 
 	// greater or equal to, false
-	EXPECT_FALSE(testStrBaseObjGE(
+	EXPECT_FALSE(BytesBaseCmp::Ge(
 		Bytes({ 0x01U, 0x02U, }), Bytes({ 0x01U, 0x02U, 0x03U, })));
 }
 

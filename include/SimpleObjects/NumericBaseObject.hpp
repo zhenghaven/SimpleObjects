@@ -114,42 +114,35 @@ public:
 
 	// ===== BaseObject class
 
-	virtual bool operator==(const BaseBase& rhs) const override
+	virtual bool BaseObjectIsEqual(const BaseBase& rhs) const override
 	{
-		const auto rhsCat = rhs.GetCategory();
-		if (rhsCat != ObjCategory::Bool &&
-			rhsCat != ObjCategory::Integer &&
-			rhsCat != ObjCategory::Real)
+		switch (rhs.GetCategory())
 		{
+		case ObjCategory::Bool:
+		case ObjCategory::Integer:
+		case ObjCategory::Real:
+			return RealNumBaseEqual(rhs.AsNumeric());
+		default:
 			return false;
 		}
-		return *this == rhs.AsNumeric();
 	}
 
-	virtual bool operator<(const BaseBase& rhs) const override
+	virtual ObjectOrder BaseObjectCompare(const BaseBase& rhs) const override
 	{
-		const auto rhsCat = rhs.GetCategory();
-		if (rhsCat != ObjCategory::Bool &&
-			rhsCat != ObjCategory::Integer &&
-			rhsCat != ObjCategory::Real)
+		switch (rhs.GetCategory())
 		{
-			throw UnsupportedOperation("<",
-				this->GetCategoryName(), rhs.GetCategoryName());
-		}
-		return *this < rhs.AsNumeric();
-	}
-
-	virtual bool operator>(const BaseBase& rhs) const override
-	{
-		const auto rhsCat = rhs.GetCategory();
-		if (rhsCat != ObjCategory::Bool &&
-			rhsCat != ObjCategory::Integer &&
-			rhsCat != ObjCategory::Real)
+		case ObjCategory::Bool:
+		case ObjCategory::Integer:
+		case ObjCategory::Real:
 		{
-			throw UnsupportedOperation(">",
-				this->GetCategoryName(), rhs.GetCategoryName());
+			auto cmpRes = RealNumBaseCmp(rhs.AsNumeric());
+			return cmpRes == 0 ? ObjectOrder::Equal :
+					(cmpRes < 0 ? ObjectOrder::Less :
+					(ObjectOrder::Greater));
 		}
-		return *this > rhs.AsNumeric();
+		default:
+			return ObjectOrder::NotEqualUnordered;
+		}
 	}
 
 	using Base::operator==;

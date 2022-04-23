@@ -143,38 +143,41 @@ public:
 	}
 #endif
 
-	// ===== BytesBase class
+	// ===== BaseObject class
 
-	virtual bool operator==(const BaseBase& rhs) const override
+	virtual bool BaseObjectIsEqual(const BaseBase& rhs) const override
 	{
-		const auto rhsCat = rhs.GetCategory();
-		if (rhsCat != ObjCategory::Bytes)
+		if(rhs.GetCategory() == ObjCategory::Bytes)
+		{
+			const auto& rhsBytes = rhs.AsBytes();
+			auto rhsBytesData = rhsBytes.data();
+			return BytesBaseEqual(0, size(),
+				rhsBytesData, rhsBytesData + rhsBytes.size());
+		}
+		else
 		{
 			return false;
 		}
-		return *this == rhs.AsBytes();
 	}
 
-	virtual bool operator<(const BaseBase& rhs) const override
+	virtual ObjectOrder BaseObjectCompare(const BaseBase& rhs) const override
 	{
-		const auto rhsCat = rhs.GetCategory();
-		if (rhsCat != ObjCategory::Bytes)
+		switch (rhs.GetCategory())
 		{
-			throw UnsupportedOperation("<",
-				this->GetCategoryName(), rhs.GetCategoryName());
-		}
-		return *this < rhs.AsBytes();
-	}
+		case ObjCategory::Bytes:
+		{
+			const auto& rhsBytes = rhs.AsBytes();
+			auto rhsBytesData = rhsBytes.data();
+			auto cmpRes = BytesBaseCompare(0, size(),
+				rhsBytesData, rhsBytesData + rhsBytes.size());
 
-	virtual bool operator>(const BaseBase& rhs) const override
-	{
-		const auto rhsCat = rhs.GetCategory();
-		if (rhsCat != ObjCategory::Bytes)
-		{
-			throw UnsupportedOperation(">",
-				this->GetCategoryName(), rhs.GetCategoryName());
+			return cmpRes == 0 ? ObjectOrder::Equal :
+					(cmpRes < 0 ? ObjectOrder::Less :
+					(ObjectOrder::Greater));
 		}
-		return *this > rhs.AsBytes();
+		default:
+			return ObjectOrder::NotEqualUnordered;
+		}
 	}
 
 	using Base::operator==;

@@ -129,35 +129,92 @@ public:
 
 	virtual const char* GetCategoryName() const = 0;
 
+	// ========== Comparisons ==========
+
 	/**
 	 * @brief Compare if two objects are the same.
-	 *        If two object are the same category, or they both are numeric types,
-	 *        their equality will be checked by the child class, otherwise,
-	 *        return false
+	 *        Objects in different categories are considered not-equal;
+	 *        Objects in the same categories are further checked by child class
 	 *
 	 * @param rhs The other object to test with
 	 * @return whether two objects are equal
 	 */
-	virtual bool operator==(const Self& rhs) const = 0;
+	virtual bool BaseObjectIsEqual(const Self& rhs) const = 0;
 
-	virtual bool operator!=(const Self& rhs) const
+	virtual ObjectOrder BaseObjectCompare(const Self& rhs) const = 0;
+
+	bool operator==(const Self& rhs) const
+	{
+		return BaseObjectIsEqual(rhs);
+	}
+
+#ifdef __cpp_lib_three_way_comparison
+	std::strong_ordering operator<=>(const Self& rhs) const
+	{
+		auto cmpRes = BaseObjectCompare(rhs);
+		switch (cmpRes)
+		{
+		case ObjectOrder::Less:
+			return std::strong_ordering::less;
+		case ObjectOrder::Equal:
+			return std::strong_ordering::equal;
+		case ObjectOrder::Greater:
+			return std::strong_ordering::greater;
+		case ObjectOrder::EqualUnordered:
+		case ObjectOrder::NotEqualUnordered:
+		default:
+			throw UnsupportedOperation("<=>",
+				this->GetCategoryName(), rhs.GetCategoryName());
+		}
+	}
+#else
+	bool operator!=(const Self& rhs) const
 	{
 		return !((*this) == rhs);
 	}
 
-	virtual bool operator<(const Self& rhs) const = 0;
+	bool operator<(const Self& rhs) const
+	{
+		auto cmpRes = BaseObjectCompare(rhs);
+		switch (cmpRes)
+		{
+		case ObjectOrder::Less:
+			return true;
+		case ObjectOrder::EqualUnordered:
+		case ObjectOrder::NotEqualUnordered:
+			throw UnsupportedOperation("<",
+				this->GetCategoryName(), rhs.GetCategoryName());
+		default:
+			return false;
+		}
+	}
 
-	virtual bool operator>=(const Self& rhs) const
+	bool operator>=(const Self& rhs) const
 	{
 		return !((*this) < rhs);
 	}
 
-	virtual bool operator>(const Self& rhs) const = 0;
+	bool operator>(const Self& rhs) const
+	{
+		auto cmpRes = BaseObjectCompare(rhs);
+		switch (cmpRes)
+		{
+		case ObjectOrder::Greater:
+			return true;
+		case ObjectOrder::EqualUnordered:
+		case ObjectOrder::NotEqualUnordered:
+			throw UnsupportedOperation(">",
+				this->GetCategoryName(), rhs.GetCategoryName());
+		default:
+			return false;
+		}
+	}
 
-	virtual bool operator<=(const Self& rhs) const
+	bool operator<=(const Self& rhs) const
 	{
 		return !((*this) > rhs);
 	}
+#endif
 
 	// TODO:
 	// =

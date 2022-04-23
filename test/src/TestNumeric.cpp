@@ -9,6 +9,8 @@
 
 #include <SimpleObjects/SimpleObjects.hpp>
 
+#include "CompareHelpers.hpp"
+
 #ifndef SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE
 using namespace SimpleObjects;
 #else
@@ -1447,49 +1449,34 @@ struct RealNumComparisonTests
 	template<typename _RhsT>
 	static void TestRealNumBaseLE(const _T& lhs, _RhsT rhs)
 	{
-		auto checkProg = [](
-			const NumericBaseObj& a, const NumericBaseObj& b) -> bool
-		{
-			return a <= b;
-		};
-
 		bool expRes =
 			Internal::RealNumCompare<typename _T::InternalType, _RhsT>::
 				Compare(lhs.GetVal(), rhs) <= 0;
 
-		CheckTestResBool(lhs, rhs, expRes, checkProg);
+		CheckTestResBool(lhs, rhs, expRes,
+			CompareTestHelpers<NumericBaseObj>::Le);
 	}
 
 	template<typename _RhsT>
 	static void TestRealNumBaseGE(const _T& lhs, _RhsT rhs)
 	{
-		auto checkProg = [](
-			const NumericBaseObj& a, const NumericBaseObj& b) -> bool
-		{
-			return a >= b;
-		};
-
 		bool expRes =
 			Internal::RealNumCompare<typename _T::InternalType, _RhsT>::
 				Compare(lhs.GetVal(), rhs) >= 0;
 
-		CheckTestResBool(lhs, rhs, expRes, checkProg);
+		CheckTestResBool(lhs, rhs, expRes,
+			CompareTestHelpers<NumericBaseObj>::Ge);
 	}
 
 	template<typename _RhsT>
 	static void TestRealNumBaseNE(const _T& lhs, _RhsT rhs)
 	{
-		auto checkProgNEq = [](
-			const NumericBaseObj& a, const NumericBaseObj& b) -> bool
-		{
-			return a != b;
-		};
-
 		bool expRes =
 			Internal::RealNumCompare<typename _T::InternalType, _RhsT>::
 				Compare(lhs.GetVal(), rhs) != 0;
 
-		CheckTestResBool(lhs, rhs, expRes, checkProgNEq);
+		CheckTestResBool(lhs, rhs, expRes,
+			CompareTestHelpers<NumericBaseObj>::Neq);
 	}
 }; // struct RealNumComparisonTests
 

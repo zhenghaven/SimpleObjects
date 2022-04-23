@@ -69,4 +69,62 @@ inline int LexicographicalCompareThreeWay(
 }
 
 } // namespace Internal
+
+/**
+ * @brief The compare order for SimpleObjects
+ *
+ */
+enum class ObjectOrder
+{
+	// LHS object is considered *less* than the RHS object
+	Less,
+	// LHS object is considered *equal* to the RHS object
+	Equal,
+	// LHS object is considered *greater* than the RHS object
+	Greater,
+	// Two objects on LHS and RHS are same, meanwhile values in this type
+	// cannot be determined which is less/greater than which
+	EqualUnordered,
+	// Two objects on LHS and RHS are different, and it cannot be determined
+	// which is less/greater than which
+	NotEqualUnordered,
+}; // enum class ObjectOrder
+
+namespace Internal
+{
+
+template<typename _InItA, typename _InItB>
+inline ObjectOrder ObjectRangeCompareThreeWay(
+	_InItA beginA, _InItA endA,
+	_InItB beginB, _InItB endB)
+{
+	auto eqRes = ObjectOrder::Equal;
+	bool isNotEndA = (beginA != endA);
+	bool isNotEndB = (beginB != endB);
+	while (isNotEndA && isNotEndB)
+	{
+		ObjectOrder cmpRes = (*beginA).BaseObjectCompare(*beginB);
+		if ((cmpRes != ObjectOrder::Equal) &&
+			(cmpRes != ObjectOrder::EqualUnordered))
+		{
+			return cmpRes;
+		}
+		if (cmpRes == ObjectOrder::EqualUnordered)
+		{
+			eqRes = ObjectOrder::EqualUnordered;
+		}
+
+		++beginA;
+		++beginB;
+		isNotEndA = (beginA != endA);
+		isNotEndB = (beginB != endB);
+	}
+
+	return isNotEndA ? ObjectOrder::Greater :
+			(isNotEndB ? ObjectOrder::Less :
+						(eqRes));
+}
+
+} // namespace Internal
+
 } // namespace SimpleObjects

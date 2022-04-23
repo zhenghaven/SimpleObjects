@@ -69,7 +69,9 @@ public:
 
 	// ========== operators ==========
 
-	virtual bool operator==(const Self& rhs) const
+	// ===== This class
+
+	virtual bool ListBaseIsEqual(const Self& rhs) const
 	{
 		if (size() != rhs.size())
 		{
@@ -84,74 +86,93 @@ public:
 			itb);
 	}
 
-	virtual bool operator!=(const Self& rhs) const
-	{
-		return !(*this == rhs);
-	}
-
-	virtual bool operator<(const Self& rhs) const
+	virtual ObjectOrder ListBaseCompare(const Self& rhs) const
 	{
 		auto ita  = cbegin();
 		auto itae = cend();
 		auto itb  = rhs.cbegin();
 		auto itbe = rhs.cend();
-		return std::lexicographical_compare(
+
+		return Internal::ObjectRangeCompareThreeWay(
 			ita, itae,
 			itb, itbe);
 	}
 
-	virtual bool operator>(const Self& rhs) const
+	bool operator==(const Self& rhs) const
 	{
-		auto ita  = cbegin();
-		auto itae = cend();
-		auto itb  = rhs.cbegin();
-		auto itbe = rhs.cend();
-		return std::lexicographical_compare(
-			itb, itbe,
-			ita, itae);
+		return ListBaseIsEqual(rhs);
 	}
 
-	virtual bool operator<=(const Self& rhs) const
+	bool operator!=(const Self& rhs) const
+	{
+		return !(*this == rhs);
+	}
+
+	bool operator<(const Self& rhs) const
+	{
+		auto cmpRes = ListBaseCompare(rhs);
+		switch (cmpRes)
+		{
+		case ObjectOrder::Less:
+			return true;
+		case ObjectOrder::EqualUnordered:
+		case ObjectOrder::NotEqualUnordered:
+			throw UnsupportedOperation("<",
+				this->GetCategoryName(), rhs.GetCategoryName());
+		default:
+			return false;
+		}
+	}
+
+	bool operator>(const Self& rhs) const
+	{
+		auto cmpRes = ListBaseCompare(rhs);
+		switch (cmpRes)
+		{
+		case ObjectOrder::Greater:
+			return true;
+		case ObjectOrder::EqualUnordered:
+		case ObjectOrder::NotEqualUnordered:
+			throw UnsupportedOperation(">",
+				this->GetCategoryName(), rhs.GetCategoryName());
+		default:
+			return false;
+		}
+	}
+
+	bool operator<=(const Self& rhs) const
 	{
 		return !(*this > rhs);
 	}
 
-	virtual bool operator>=(const Self& rhs) const
+	bool operator>=(const Self& rhs) const
 	{
 		return !(*this < rhs);
 	}
 
-	virtual bool operator==(const Base& rhs) const override
+	// ===== ObjectBase class
+
+	virtual bool BaseObjectIsEqual(const Base& rhs) const override
 	{
-		if (rhs.GetCategory() != ObjCategory::List)
-		{
-			return false;
-		}
-		return *this == rhs.AsList();
+		return (rhs.GetCategory() == ObjCategory::List) &&
+				ListBaseIsEqual(rhs.AsList());
 	}
 
+	virtual ObjectOrder BaseObjectCompare(const Base& rhs) const override
+	{
+		switch (rhs.GetCategory())
+		{
+		case ObjCategory::List:
+			return ListBaseCompare(rhs.AsList());
+		default:
+			return ObjectOrder::NotEqualUnordered;
+		}
+	}
+
+	using Base::operator==;
 	using Base::operator!=;
-
-	virtual bool operator<(const Base& rhs) const override
-	{
-		if (rhs.GetCategory() != ObjCategory::List)
-		{
-			throw UnsupportedOperation("<",
-				this->GetCategoryName(), rhs.GetCategoryName());
-		}
-		return *this < rhs.AsList();
-	}
-
-	virtual bool operator>(const Base& rhs) const override
-	{
-		if (rhs.GetCategory() != ObjCategory::List)
-		{
-			throw UnsupportedOperation(">",
-				this->GetCategoryName(), rhs.GetCategoryName());
-		}
-		return *this > rhs.AsList();
-	}
-
+	using Base::operator<;
+	using Base::operator>;
 	using Base::operator<=;
 	using Base::operator>=;
 
@@ -168,6 +189,54 @@ public:
 	virtual void Remove(size_t idx) = 0;
 
 	// ========== Functions that involves value_type in prototype ==========
+
+	// ========== value access ==========
+
+	reference operator[](size_t idx)
+	{
+		return ListBaseAt(idx);
+	}
+
+	const_reference operator[](size_t idx) const
+	{
+		return ListBaseAt(idx);
+	}
+
+	// ========== adding/removing values ==========
+
+	void push_back(value_type&& val)
+	{
+		return ListBasePushBack(std::forward<value_type>(val));
+	}
+
+	void push_back(const_reference val)
+	{
+		return ListBasePushBack(val);
+	}
+
+	void Append(const_iterator begin, const_iterator end)
+	{
+		while (begin != end)
+		{
+			push_back(*begin);
+			++begin;
+		}
+	}
+
+	void Append(const Self& other)
+	{
+		Append(other.cbegin(), other.cend());
+	}
+
+	// ========== item searching ==========
+
+	bool Contains(const_reference val) const
+	{
+		auto e = cend();
+		return std::find(cbegin(), e, val) != e;
+	}
+
+	// ========== iterators ==========
 
 	RdIterator<value_type, false> begin()
 	{
@@ -197,46 +266,6 @@ public:
 	RdIterator<value_type, true> end() const
 	{
 		return cend();
-	}
-
-	reference operator[](size_t idx)
-	{
-		return ListBaseAt(idx);
-	}
-
-	const_reference operator[](size_t idx) const
-	{
-		return ListBaseAt(idx);
-	}
-
-	bool Contains(const_reference val) const
-	{
-		auto e = cend();
-		return std::find(cbegin(), e, val) != e;
-	}
-
-	void push_back(value_type&& val)
-	{
-		return ListBasePushBack(std::forward<value_type>(val));
-	}
-
-	void push_back(const_reference val)
-	{
-		return ListBasePushBack(val);
-	}
-
-	void Append(const_iterator begin, const_iterator end)
-	{
-		while (begin != end)
-		{
-			push_back(*begin);
-			++begin;
-		}
-	}
-
-	void Append(const Self& other)
-	{
-		Append(other.cbegin(), other.cend());
 	}
 
 	// ========== Copy and Move ==========

@@ -145,36 +145,39 @@ public:
 
 	// ===== ObjectBase class
 
-	virtual bool operator==(const BaseBase& rhs) const override
+	virtual bool BaseObjectIsEqual(const BaseBase& rhs) const override
 	{
-		const auto rhsCat = rhs.GetCategory();
-		if (rhsCat != ObjCategory::String)
+		if(rhs.GetCategory() == ObjCategory::String)
+		{
+			const auto& rhsStr = rhs.AsString();
+			auto rhsStrData = rhsStr.data();
+			return StringBaseEqual(0, size(),
+				rhsStrData, rhsStrData + rhsStr.size());
+		}
+		else
 		{
 			return false;
 		}
-		return *this == rhs.AsString();
 	}
 
-	virtual bool operator<(const BaseBase& rhs) const override
+	virtual ObjectOrder BaseObjectCompare(const BaseBase& rhs) const override
 	{
-		const auto rhsCat = rhs.GetCategory();
-		if (rhsCat != ObjCategory::String)
+		switch (rhs.GetCategory())
 		{
-			throw UnsupportedOperation("<",
-				this->GetCategoryName(), rhs.GetCategoryName());
-		}
-		return *this < rhs.AsString();
-	}
+		case ObjCategory::String:
+		{
+			const auto& rhsStr = rhs.AsString();
+			auto rhsStrData = rhsStr.data();
+			auto cmpRes = StringBaseCompare(0, size(),
+				rhsStrData, rhsStrData + rhsStr.size());
 
-	virtual bool operator>(const BaseBase& rhs) const override
-	{
-		const auto rhsCat = rhs.GetCategory();
-		if (rhsCat != ObjCategory::String)
-		{
-			throw UnsupportedOperation(">",
-				this->GetCategoryName(), rhs.GetCategoryName());
+			return cmpRes == 0 ? ObjectOrder::Equal :
+					(cmpRes < 0 ? ObjectOrder::Less :
+					(ObjectOrder::Greater));
 		}
-		return *this > rhs.AsString();
+		default:
+			return ObjectOrder::NotEqualUnordered;
+		}
 	}
 
 	using Base::operator==;
