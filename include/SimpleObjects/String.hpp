@@ -209,14 +209,28 @@ public:
 
 	// ========== value access ==========
 
-	virtual value_type& at(size_t idx) override
+	virtual reference operator[](size_t idx) override
 	{
-		return m_data[idx];
+		try
+		{
+			return m_data.at(idx);
+		}
+		catch(const std::out_of_range&)
+		{
+			throw IndexError(idx);
+		}
 	}
 
-	virtual const value_type& at(size_t idx) const override
+	virtual const_reference operator[](size_t idx) const override
 	{
-		return m_data[idx];
+		try
+		{
+			return m_data.at(idx);
+		}
+		catch(const std::out_of_range&)
+		{
+			throw IndexError(idx);
+		}
 	}
 
 	const_pointer data() const override

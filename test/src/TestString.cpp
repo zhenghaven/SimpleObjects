@@ -211,15 +211,36 @@ GTEST_TEST(TestString, Len)
 
 GTEST_TEST(TestString, At)
 {
-	EXPECT_EQ(String("abcdef")[1], std::string("abcdef")[1]);
-	EXPECT_EQ(String("abcdef")[3], std::string("abcdef")[3]);
-	EXPECT_EQ(String("1234567890")[1], std::string("1234567890")[1]);
-	EXPECT_EQ(String("1234567890")[3], std::string("1234567890")[3]);
+	auto testStr1 = String("abcdef");
+	auto testStr2 = String("1234567890");
 
-	const auto testStr1 = String("abcdef");
-	EXPECT_EQ(&testStr1[1], &testStr1[1]);
-	EXPECT_EQ(&testStr1[2], &testStr1[1] + 1);
-	EXPECT_EQ(testStr1[2], testStr1[1] + 1);
+	// const
+	auto prog = [testStr1, testStr2]()
+	{
+		EXPECT_EQ(&testStr1[0], testStr1.data());
+		EXPECT_EQ(testStr1[1], 'b');
+
+		EXPECT_EQ(&testStr2[0], testStr2.data());
+		EXPECT_EQ(testStr2[1], '2');
+
+		EXPECT_THROW(testStr1[7], IndexError);
+		EXPECT_THROW(testStr2[11], IndexError);
+	};
+	prog();
+
+	// mutables
+	EXPECT_EQ(&testStr1[0], testStr1.data());
+	EXPECT_EQ(testStr1[1], 'b');
+	++testStr1[1];
+	EXPECT_EQ(testStr1[1], 'c');
+
+	EXPECT_EQ(&testStr2[0], testStr2.data());
+	EXPECT_EQ(testStr2[1], '2');
+	++testStr2[1];
+	EXPECT_EQ(testStr2[1], '3');
+
+	EXPECT_THROW(testStr1[7], IndexError);
+	EXPECT_THROW(testStr2[11], IndexError);
 }
 
 GTEST_TEST(TestString, StartsWith)

@@ -1485,10 +1485,9 @@ struct RealNumComparisonTests
 GTEST_TEST(TestNumeric, BaseIsEqual)
 {
 	// Base object
-	using ObjPtr = std::unique_ptr<BaseObj>;
-
+	using BaseObjCmp = CompareTestHelpers<BaseObj>;
 	// Other types
-	EXPECT_TRUE(*ObjPtr(new Int8(1)) != *ObjPtr(new Null()));
+	EXPECT_TRUE(BaseObjCmp::Neq(Int8(1), Null()));
 
 	// Bool
 	RealNumComparisonTests<Bool  >::TestRealNumBaseNE(Bool  (true), 1);

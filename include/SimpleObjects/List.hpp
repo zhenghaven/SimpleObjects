@@ -145,6 +145,27 @@ public:
 
 	// ===== ListBase class
 
+	virtual bool ListBaseIsEqual(const Base& rhs) const override
+	{
+		if (m_data.size() != rhs.size())
+		{
+			return false;
+		}
+
+		return std::equal(m_data.cbegin(), m_data.cend(),
+			rhs.cbegin(),
+			[](const BaseBase& a, const BaseBase& b) -> bool
+			{ return a == b; }
+		);
+	}
+
+	virtual ObjectOrder ListBaseCompare(const Base& rhs) const override
+	{
+		return Internal::ObjectRangeCompareThreeWay(
+			cbegin(), cend(),
+			rhs.cbegin(), rhs.cend());
+	}
+
 	using Base::operator==;
 #ifdef __cpp_lib_three_way_comparison
 	using Base::operator<=>;

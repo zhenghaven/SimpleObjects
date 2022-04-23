@@ -71,32 +71,9 @@ public:
 
 	// ===== This class
 
-	virtual bool ListBaseIsEqual(const Self& rhs) const
-	{
-		if (size() != rhs.size())
-		{
-			return false;
-		}
+	virtual bool ListBaseIsEqual(const Self& rhs) const = 0;
 
-		auto ita  = cbegin();
-		auto itae = cend();
-		auto itb  = rhs.cbegin();
-		return std::equal(
-			ita, itae,
-			itb);
-	}
-
-	virtual ObjectOrder ListBaseCompare(const Self& rhs) const
-	{
-		auto ita  = cbegin();
-		auto itae = cend();
-		auto itb  = rhs.cbegin();
-		auto itbe = rhs.cend();
-
-		return Internal::ObjectRangeCompareThreeWay(
-			ita, itae,
-			itb, itbe);
-	}
+	virtual ObjectOrder ListBaseCompare(const Self& rhs) const = 0;
 
 	bool operator==(const Self& rhs) const
 	{

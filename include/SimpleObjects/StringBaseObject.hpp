@@ -201,19 +201,9 @@ public:
 
 	// ========== value access ==========
 
-	virtual reference at(size_t idx) = 0;
+	virtual reference operator[](size_t idx) = 0;
 
-	virtual const_reference at(size_t idx) const = 0;
-
-	virtual reference operator[](size_t idx)
-	{
-		return this->at(idx);
-	}
-
-	virtual const_reference operator[](size_t idx) const
-	{
-		return this->at(idx);
-	}
+	virtual const_reference operator[](size_t idx) const = 0;
 
 	virtual const_pointer c_str() const = 0;
 
