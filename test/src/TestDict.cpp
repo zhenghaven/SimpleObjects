@@ -176,10 +176,10 @@ GTEST_TEST(TestDict, Compare)
 	EXPECT_THROW(BaseObjCmp::Ge(Dict(), Dict()), UnsupportedOperation);
 
 	// < diff obj
-	EXPECT_THROW((void)(Dict() < String()), UnsupportedOperation);
+	EXPECT_THROW(BaseObjCmp::Lt(Dict(), String()), UnsupportedOperation);
 
 	// > diff obj
-	EXPECT_THROW((void)(Dict() < String()), UnsupportedOperation);
+	EXPECT_THROW(BaseObjCmp::Lt(Dict(), String()), UnsupportedOperation);
 }
 
 GTEST_TEST(TestDict, Len)

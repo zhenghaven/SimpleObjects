@@ -138,11 +138,15 @@ public:
 	}
 
 	using Base::operator==;
+#ifdef __cpp_lib_three_way_comparison
+	using Base::operator<=>;
+#else
 	using Base::operator!=;
 	using Base::operator<;
 	using Base::operator>;
 	using Base::operator<=;
 	using Base::operator>=;
+#endif
 
 	// ========== Overrides BaseObject ==========
 

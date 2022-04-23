@@ -143,11 +143,15 @@ public:
 	// ===== DictBase class
 
 	using Base::operator==;
+#ifdef __cpp_lib_three_way_comparison
+	using Base::operator<=>;
+#else
 	using Base::operator!=;
 	using Base::operator<;
 	using Base::operator>;
 	using Base::operator<=;
 	using Base::operator>=;
+#endif
 
 	// ========== Functions provided by this class ==========
 
