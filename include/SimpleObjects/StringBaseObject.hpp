@@ -315,4 +315,4 @@ public:
 
 }; // class StringBaseObject
 
-}//namespace SimpleObjects
+} // namespace SimpleObjects

@@ -829,14 +829,12 @@ private:
 
 	std::unique_ptr<Self> CopyImpl() const
 	{
-		// TODO: make_unique
-		return std::unique_ptr<Self>(new Self(*this));
+		return Internal::make_unique<Self>(*this);
 	}
 
 	std::unique_ptr<Self> MoveImpl()
 	{
-		// TODO: make_unique
-		return std::unique_ptr<Self>(new Self(std::move(*this)));
+		return Internal::make_unique<Self>(std::move(*this));
 	}
 
 	_Tp m_data;

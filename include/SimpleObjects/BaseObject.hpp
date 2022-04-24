@@ -455,4 +455,4 @@ struct AsChildType<true, _Child, _Child>
 
 } // namespace Internal
 
-}//namespace SimpleObjects
+} // namespace SimpleObjects

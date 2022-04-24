@@ -138,4 +138,4 @@ using StaticDict = StaticDictImpl<
 	MapType,
 	ToStringType>;
 
-}//namespace SimpleObjects
+} // namespace SimpleObjects

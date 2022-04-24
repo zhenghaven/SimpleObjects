@@ -271,4 +271,4 @@ public:
 
 }; // class BytesBaseObject
 
-}//namespace SimpleObjects
+} // namespace SimpleObjects

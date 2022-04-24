@@ -127,4 +127,4 @@ inline size_t hash_range(It first, It last)
 }
 
 } //namespace Internal
-} //namespace SimpleObjects
+} // namespace SimpleObjects

@@ -662,14 +662,12 @@ private:
 
 	std::unique_ptr<Self> CopyImpl() const
 	{
-		// TODO: make_unique
-		return std::unique_ptr<Self>(new Self(*this));
+		return Internal::make_unique<Self>(*this);
 	}
 
 	std::unique_ptr<Self> MoveImpl()
 	{
-		// TODO: make_unique
-		return std::unique_ptr<Self>(new Self(std::move(*this)));
+		return Internal::make_unique<Self>(std::move(*this));
 	}
 
 	InternalType m_data;
@@ -881,7 +879,7 @@ inline std::tuple<bool, _RetType> Numeric<_ValType, _ToStringType>::GenericBinar
 	}
 }
 
-}// namespace SimpleObjects
+} // namespace SimpleObjects
 
 // ========== Hash ==========
 namespace std
@@ -908,5 +906,5 @@ namespace std
 		{
 			return _Base::operator()(cnt.m_data);
 		}
-	};
-}
+	}; // struct hash
+} // namespace std
