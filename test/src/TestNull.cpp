@@ -67,7 +67,7 @@ GTEST_TEST(TestNull, Miscs)
 	// Cast
 	const auto kNull = Null();
 	EXPECT_NO_THROW(kNull.AsNull());
-	EXPECT_THROW(kNull.AsNumeric(),    TypeError);
+	EXPECT_THROW(kNull.AsRealNum(),    TypeError);
 	EXPECT_THROW(kNull.AsString(),     TypeError);
 	EXPECT_THROW(kNull.AsList(),       TypeError);
 	EXPECT_THROW(kNull.AsDict(),       TypeError);
@@ -75,7 +75,7 @@ GTEST_TEST(TestNull, Miscs)
 	EXPECT_THROW(kNull.AsBytes(),      TypeError);
 
 	EXPECT_NO_THROW(Null().AsNull());
-	EXPECT_THROW(Null().AsNumeric(),    TypeError);
+	EXPECT_THROW(Null().AsRealNum(),    TypeError);
 	EXPECT_THROW(Null().AsString(),     TypeError);
 	EXPECT_THROW(Null().AsList(),       TypeError);
 	EXPECT_THROW(Null().AsDict(),       TypeError);

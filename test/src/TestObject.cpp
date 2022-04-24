@@ -87,7 +87,7 @@ GTEST_TEST(TestObject, Cast)
 {
 	Object obj;
 	EXPECT_NO_THROW(obj.AsNull());
-	EXPECT_THROW(obj.AsNumeric(), TypeError);
+	EXPECT_THROW(obj.AsRealNum(), TypeError);
 	EXPECT_THROW(obj.AsString(), TypeError);
 	EXPECT_THROW(obj.AsList(), TypeError);
 	EXPECT_THROW(obj.AsDict(), TypeError);
@@ -95,7 +95,7 @@ GTEST_TEST(TestObject, Cast)
 	// test const version
 	[obj](){
 		EXPECT_NO_THROW(obj.AsNull());
-		EXPECT_THROW(obj.AsNumeric(), TypeError);
+		EXPECT_THROW(obj.AsRealNum(), TypeError);
 		EXPECT_THROW(obj.AsString(), TypeError);
 		EXPECT_THROW(obj.AsList(), TypeError);
 		EXPECT_THROW(obj.AsDict(), TypeError);
@@ -104,7 +104,7 @@ GTEST_TEST(TestObject, Cast)
 
 	obj = Bool(true);
 	EXPECT_THROW(obj.AsNull(), TypeError);
-	EXPECT_NO_THROW(obj.AsNumeric());
+	EXPECT_NO_THROW(obj.AsRealNum());
 	EXPECT_THROW(obj.AsString(), TypeError);
 	EXPECT_THROW(obj.AsList(), TypeError);
 	EXPECT_THROW(obj.AsDict(), TypeError);
@@ -112,7 +112,7 @@ GTEST_TEST(TestObject, Cast)
 	// test const version
 	[obj](){
 		EXPECT_THROW(obj.AsNull(), TypeError);
-		EXPECT_NO_THROW(obj.AsNumeric());
+		EXPECT_NO_THROW(obj.AsRealNum());
 		EXPECT_THROW(obj.AsString(), TypeError);
 		EXPECT_THROW(obj.AsList(), TypeError);
 		EXPECT_THROW(obj.AsDict(), TypeError);
@@ -121,7 +121,7 @@ GTEST_TEST(TestObject, Cast)
 
 	obj = String("Test");
 	EXPECT_THROW(obj.AsNull(), TypeError);
-	EXPECT_THROW(obj.AsNumeric(), TypeError);
+	EXPECT_THROW(obj.AsRealNum(), TypeError);
 	EXPECT_NO_THROW(obj.AsString());
 	EXPECT_THROW(obj.AsList(), TypeError);
 	EXPECT_THROW(obj.AsDict(), TypeError);
@@ -129,7 +129,7 @@ GTEST_TEST(TestObject, Cast)
 	// test const version
 	[obj](){
 		EXPECT_THROW(obj.AsNull(), TypeError);
-		EXPECT_THROW(obj.AsNumeric(), TypeError);
+		EXPECT_THROW(obj.AsRealNum(), TypeError);
 		EXPECT_NO_THROW(obj.AsString());
 		EXPECT_THROW(obj.AsList(), TypeError);
 		EXPECT_THROW(obj.AsDict(), TypeError);
@@ -138,7 +138,7 @@ GTEST_TEST(TestObject, Cast)
 
 	obj = List();
 	EXPECT_THROW(obj.AsNull(), TypeError);
-	EXPECT_THROW(obj.AsNumeric(), TypeError);
+	EXPECT_THROW(obj.AsRealNum(), TypeError);
 	EXPECT_THROW(obj.AsString(), TypeError);
 	EXPECT_NO_THROW(obj.AsList());
 	EXPECT_THROW(obj.AsDict(), TypeError);
@@ -146,7 +146,7 @@ GTEST_TEST(TestObject, Cast)
 	// test const version
 	[obj](){
 		EXPECT_THROW(obj.AsNull(), TypeError);
-		EXPECT_THROW(obj.AsNumeric(), TypeError);
+		EXPECT_THROW(obj.AsRealNum(), TypeError);
 		EXPECT_THROW(obj.AsString(), TypeError);
 		EXPECT_NO_THROW(obj.AsList());
 		EXPECT_THROW(obj.AsDict(), TypeError);
@@ -155,7 +155,7 @@ GTEST_TEST(TestObject, Cast)
 
 	obj = Dict();
 	EXPECT_THROW(obj.AsNull(), TypeError);
-	EXPECT_THROW(obj.AsNumeric(), TypeError);
+	EXPECT_THROW(obj.AsRealNum(), TypeError);
 	EXPECT_THROW(obj.AsString(), TypeError);
 	EXPECT_THROW(obj.AsList(), TypeError);
 	EXPECT_NO_THROW(obj.AsDict());
@@ -163,7 +163,7 @@ GTEST_TEST(TestObject, Cast)
 	// test const version
 	[obj](){
 		EXPECT_THROW(obj.AsNull(), TypeError);
-		EXPECT_THROW(obj.AsNumeric(), TypeError);
+		EXPECT_THROW(obj.AsRealNum(), TypeError);
 		EXPECT_THROW(obj.AsString(), TypeError);
 		EXPECT_THROW(obj.AsList(), TypeError);
 		EXPECT_NO_THROW(obj.AsDict());
@@ -172,7 +172,7 @@ GTEST_TEST(TestObject, Cast)
 
 	obj = Bytes();
 	EXPECT_THROW(obj.AsNull(),       TypeError);
-	EXPECT_THROW(obj.AsNumeric(),    TypeError);
+	EXPECT_THROW(obj.AsRealNum(),    TypeError);
 	EXPECT_THROW(obj.AsString(),     TypeError);
 	EXPECT_THROW(obj.AsList(),       TypeError);
 	EXPECT_THROW(obj.AsDict(),       TypeError);
@@ -181,7 +181,7 @@ GTEST_TEST(TestObject, Cast)
 	// test const version
 	[obj](){
 		EXPECT_THROW(obj.AsNull(),       TypeError);
-		EXPECT_THROW(obj.AsNumeric(),    TypeError);
+		EXPECT_THROW(obj.AsRealNum(),    TypeError);
 		EXPECT_THROW(obj.AsString(),     TypeError);
 		EXPECT_THROW(obj.AsList(),       TypeError);
 		EXPECT_THROW(obj.AsDict(),       TypeError);

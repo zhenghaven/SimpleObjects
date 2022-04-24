@@ -307,7 +307,7 @@ GTEST_TEST(TestDict, Insert)
 	auto subTest1 = [&]()
 	{
 		auto res = testDc.InsertOnly(Int64(1), String("test val 1"));
-		EXPECT_TRUE(res.first->first.AsNumeric() == Int64(1));
+		EXPECT_TRUE(res.first->first.AsRealNum() == Int64(1));
 		EXPECT_TRUE(res.first->second.AsString() == String("test val 1"));
 		EXPECT_TRUE(&*res.first == &*testDc.find(Int64(1)));
 		EXPECT_TRUE(res.second == true);
@@ -321,7 +321,7 @@ GTEST_TEST(TestDict, Insert)
 		const auto tmpKey = HashableObject(Int64(2));
 		const auto tmpVal = Object(String("test val 2"));
 		auto res = testDc.InsertOnly(tmpKey, tmpVal);
-		EXPECT_TRUE(res.first->first.AsNumeric() == Int64(2));
+		EXPECT_TRUE(res.first->first.AsRealNum() == Int64(2));
 		EXPECT_TRUE(res.first->second.AsString() == String("test val 2"));
 		EXPECT_TRUE(&*res.first == &*testDc.find(Int64(2)));
 		EXPECT_TRUE(res.second == true);
@@ -334,7 +334,7 @@ GTEST_TEST(TestDict, Insert)
 	auto subTest3 = [&]()
 	{
 		auto res = testDc.InsertOnly(Int64(1), String("test val 1_1"));
-		EXPECT_TRUE(res.first->first.AsNumeric() == Int64(1));
+		EXPECT_TRUE(res.first->first.AsRealNum() == Int64(1));
 		EXPECT_TRUE(res.first->second.AsString() == String("test val 1"));
 		EXPECT_TRUE(&*res.first == &*testDc.find(Int64(1)));
 		EXPECT_TRUE(res.second == false);
@@ -347,7 +347,7 @@ GTEST_TEST(TestDict, Insert)
 		const auto tmpKey = HashableObject(Int64(2));
 		const auto tmpVal = Object(String("test val 2_2"));
 		auto res = testDc.InsertOnly(tmpKey, tmpVal);
-		EXPECT_TRUE(res.first->first.AsNumeric() == Int64(2));
+		EXPECT_TRUE(res.first->first.AsRealNum() == Int64(2));
 		EXPECT_TRUE(res.first->second.AsString() == String("test val 2"));
 		EXPECT_TRUE(&*res.first == &*testDc.find(Int64(2)));
 		EXPECT_TRUE(res.second == false);
@@ -416,7 +416,7 @@ GTEST_TEST(TestDict, Miscs)
 	const auto kDict = Dict();
 	EXPECT_NO_THROW(kDict.AsDict());
 	EXPECT_THROW(kDict.AsNull(),       TypeError);
-	EXPECT_THROW(kDict.AsNumeric(),    TypeError);
+	EXPECT_THROW(kDict.AsRealNum(),    TypeError);
 	EXPECT_THROW(kDict.AsString(),     TypeError);
 	EXPECT_THROW(kDict.AsList(),       TypeError);
 	EXPECT_THROW(kDict.AsStaticDict(), TypeError);
@@ -424,7 +424,7 @@ GTEST_TEST(TestDict, Miscs)
 
 	EXPECT_NO_THROW(Dict().AsDict());
 	EXPECT_THROW(Dict().AsNull(),       TypeError);
-	EXPECT_THROW(Dict().AsNumeric(),    TypeError);
+	EXPECT_THROW(Dict().AsRealNum(),    TypeError);
 	EXPECT_THROW(Dict().AsString(),     TypeError);
 	EXPECT_THROW(Dict().AsList(),       TypeError);
 	EXPECT_THROW(Dict().AsStaticDict(), TypeError);

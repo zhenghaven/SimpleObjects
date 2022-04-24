@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "NumericBaseObject.hpp"
+#include "RealNumBaseObject.hpp"
 
 #include <tuple>
 #include <type_traits>
@@ -13,7 +13,7 @@
 
 #include "CompareRealNum.hpp"
 #include "Exception.hpp"
-#include "NumericTypeInfer.hpp"
+#include "RealNumTypeInfer.hpp"
 #include "ToString.hpp"
 #include "Utils.hpp"
 
@@ -25,15 +25,15 @@ namespace SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE
 {
 
 template<typename _ValType>
-struct NumericTraits
+struct RealNumTraits
 {
 	static constexpr ObjCategory sk_cat();
 	static constexpr const char* sk_catName();
 
-	static constexpr NumericType sk_numType();
+	static constexpr RealNumType sk_numType();
 	static constexpr const char* sk_numTypeName();
 
-}; // struct NumericTraits
+}; // struct RealNumTraits
 
 namespace Internal
 {
@@ -57,19 +57,19 @@ struct NumCompareCmp
 }; // struct NumCompareCmp
 
 template<typename _DstValType, typename _SrcValType>
-struct NumericBinOp;
+struct RealNumBinOp;
 
 template<typename _ValType>
-struct NumericBinOp<_ValType, _ValType>
+struct RealNumBinOp<_ValType, _ValType>
 {
 	static void Set(_ValType& dst, const _ValType& src)
 	{
 		dst = src;
 	}
-}; // struct NumericBinOp
+}; // struct RealNumBinOp
 
 template<typename _DstValType, typename _SrcValType>
-struct NumericBinOp
+struct RealNumBinOp
 {
 	static void Set(_DstValType& dst, const _SrcValType& src)
 	{
@@ -105,28 +105,28 @@ struct NumericBinOp
 				);
 			if (isOutRange)
 			{
-				throw TypeError(NumericTraits<_DstValType>::sk_numTypeName(),
-					NumericTraits<_SrcValType>::sk_numTypeName());
+				throw TypeError(RealNumTraits<_DstValType>::sk_numTypeName(),
+					RealNumTraits<_SrcValType>::sk_numTypeName());
 			}
 		}
 
 		// value range should have passed the check at this point
 		dst = static_cast<_DstValType>(src);
 	}
-}; // struct NumericBinOp
+}; // struct RealNumBinOp
 
 } // namespace Internal
 
 template<typename _ValType, typename _ToStringType>
-class Numeric : public NumericBaseObject<_ToStringType>
+class RealNumImpl : public RealNumBaseObject<_ToStringType>
 {
 public: // Static member:
 
 	using InternalType = _ValType;
 	using ToStringType = _ToStringType;
-	using Self = Numeric<InternalType, ToStringType>;
-	using SelfBool = Numeric<bool, ToStringType>;
-	using Base = NumericBaseObject<ToStringType>;
+	using Self = RealNumImpl<InternalType, ToStringType>;
+	using SelfBool = RealNumImpl<bool, ToStringType>;
+	using Base = RealNumBaseObject<ToStringType>;
 	using BaseBase = typename Base::Base;
 	using BaseBaseBase = typename BaseBase::Base;
 
@@ -136,37 +136,37 @@ public: // Static member:
 		"Expecting Base::Base::Base to be BaseObject class");
 
 	template<typename _OtherInternalType, typename _OtherToStringType>
-	friend class Numeric;
+	friend class RealNumImpl;
 
 	friend struct std::hash<Self>;
 
 	static constexpr ObjCategory sk_cat()
 	{
-		return NumericTraits<InternalType>::sk_cat();
+		return RealNumTraits<InternalType>::sk_cat();
 	}
 
 public:
-	Numeric() :
+	RealNumImpl() :
 		m_data()
 	{}
 
-	explicit Numeric(const InternalType& val) :
+	explicit RealNumImpl(const InternalType& val) :
 		m_data(val)
 	{}
 
-	explicit Numeric(InternalType&& val) noexcept :
+	explicit RealNumImpl(InternalType&& val) noexcept :
 		m_data(std::forward<InternalType>(val))
 	{}
 
-	Numeric(const Self& other) :
+	RealNumImpl(const Self& other) :
 		m_data(other.m_data)
 	{}
 
-	Numeric(Self&& other) noexcept:
+	RealNumImpl(Self&& other) noexcept:
 		m_data(std::forward<InternalType>(other.m_data))
 	{}
 
-	virtual ~Numeric() = default;
+	virtual ~RealNumImpl() = default;
 
 	// operator const InternalType&() const
 	// {
@@ -207,14 +207,14 @@ public:
 	// ===== This class
 
 	template<typename _RhsValType, typename _RhsStringType>
-	int RealNumCmp(const Numeric<_RhsValType, _RhsStringType>& rhs) const
+	int RealNumCmp(const RealNumImpl<_RhsValType, _RhsStringType>& rhs) const
 	{
 		return Internal::RealNumCompare<InternalType, _RhsValType>::Compare(
 			(m_data), (rhs.m_data));
 	}
 
 	template<typename _RhsValType, typename _RhsStringType>
-	bool operator==(const Numeric<_RhsValType, _RhsStringType>& rhs) const
+	bool operator==(const RealNumImpl<_RhsValType, _RhsStringType>& rhs) const
 	{
 		return Internal::RealNumCompare<InternalType, _RhsValType>::Equal(
 			(m_data), (rhs.m_data));
@@ -223,7 +223,7 @@ public:
 #ifdef __cpp_lib_three_way_comparison
 	template<typename _RhsValType, typename _RhsStringType>
 	std::strong_ordering operator<=>(
-		const Numeric<_RhsValType, _RhsStringType>& rhs) const
+		const RealNumImpl<_RhsValType, _RhsStringType>& rhs) const
 	{
 		auto cmpRes = RealNumCmp(rhs);
 		return cmpRes == 0 ? std::strong_ordering::equal :
@@ -232,31 +232,31 @@ public:
 	}
 #else
 	template<typename _RhsValType, typename _RhsStringType>
-	bool operator!=(const Numeric<_RhsValType, _RhsStringType>& rhs) const
+	bool operator!=(const RealNumImpl<_RhsValType, _RhsStringType>& rhs) const
 	{
 		return !(this->operator==(rhs));
 	}
 
 	template<typename _RhsValType, typename _RhsStringType>
-	bool operator<(const Numeric<_RhsValType, _RhsStringType>& rhs) const
+	bool operator<(const RealNumImpl<_RhsValType, _RhsStringType>& rhs) const
 	{
 		return RealNumCmp(rhs) < 0;
 	}
 
 	template<typename _RhsValType, typename _RhsStringType>
-	bool operator>(const Numeric<_RhsValType, _RhsStringType>& rhs) const
+	bool operator>(const RealNumImpl<_RhsValType, _RhsStringType>& rhs) const
 	{
 		return RealNumCmp(rhs) > 0;
 	}
 
 	template<typename _RhsValType, typename _RhsStringType>
-	bool operator<=(const Numeric<_RhsValType, _RhsStringType>& rhs) const
+	bool operator<=(const RealNumImpl<_RhsValType, _RhsStringType>& rhs) const
 	{
 		return RealNumCmp(rhs) <= 0;
 	}
 
 	template<typename _RhsValType, typename _RhsStringType>
-	bool operator>=(const Numeric<_RhsValType, _RhsStringType>& rhs) const
+	bool operator>=(const RealNumImpl<_RhsValType, _RhsStringType>& rhs) const
 	{
 		return RealNumCmp(rhs) >= 0;
 	}
@@ -315,37 +315,37 @@ public:
 		return *this;
 	}
 
-	//     ========== operators for Numeric ==========
+	//     ========== operators for RealNumImpl ==========
 	//     &, |, ^, <<, >>, ~,
 	//     +=, -=, *=, /=, %=, &=, |=, ^=
 	//     ++, --, -
 
 	template<typename _RhsValType, typename _RhsStringType>
-	Self operator&(const Numeric<_RhsValType, _RhsStringType>& rhs) const
+	Self operator&(const RealNumImpl<_RhsValType, _RhsStringType>& rhs) const
 	{
 		return Self(m_data & rhs.m_data);
 	}
 
 	template<typename _RhsValType, typename _RhsStringType>
-	Self operator|(const Numeric<_RhsValType, _RhsStringType>& rhs) const
+	Self operator|(const RealNumImpl<_RhsValType, _RhsStringType>& rhs) const
 	{
 		return Self(m_data | rhs.m_data);
 	}
 
 	template<typename _RhsValType, typename _RhsStringType>
-	Self operator^(const Numeric<_RhsValType, _RhsStringType>& rhs) const
+	Self operator^(const RealNumImpl<_RhsValType, _RhsStringType>& rhs) const
 	{
 		return Self(m_data ^ rhs.m_data);
 	}
 
 	template<typename _RhsValType, typename _RhsStringType>
-	Self operator<<(const Numeric<_RhsValType, _RhsStringType>& rhs) const
+	Self operator<<(const RealNumImpl<_RhsValType, _RhsStringType>& rhs) const
 	{
 		return Self(m_data << rhs.m_data);
 	}
 
 	template<typename _RhsValType, typename _RhsStringType>
-	Self operator>>(const Numeric<_RhsValType, _RhsStringType>& rhs) const
+	Self operator>>(const RealNumImpl<_RhsValType, _RhsStringType>& rhs) const
 	{
 		return Self(m_data >> rhs.m_data);
 	}
@@ -356,28 +356,28 @@ public:
 	}
 
 	template<typename _RhsValType, typename _RhsStringType>
-	Self& operator+=(const Numeric<_RhsValType, _RhsStringType>& rhs)
+	Self& operator+=(const RealNumImpl<_RhsValType, _RhsStringType>& rhs)
 	{
 		m_data = static_cast<InternalType>(m_data + rhs.m_data);
 		return *this;
 	}
 
 	template<typename _RhsValType, typename _RhsStringType>
-	Self& operator-=(const Numeric<_RhsValType, _RhsStringType>& rhs)
+	Self& operator-=(const RealNumImpl<_RhsValType, _RhsStringType>& rhs)
 	{
 		m_data = static_cast<InternalType>(m_data - rhs.m_data);
 		return *this;
 	}
 
 	template<typename _RhsValType, typename _RhsStringType>
-	Self& operator*=(const Numeric<_RhsValType, _RhsStringType>& rhs)
+	Self& operator*=(const RealNumImpl<_RhsValType, _RhsStringType>& rhs)
 	{
 		m_data = static_cast<InternalType>(m_data * rhs.m_data);
 		return *this;
 	}
 
 	template<typename _RhsValType, typename _RhsStringType>
-	Self& operator/=(const Numeric<_RhsValType, _RhsStringType>& rhs)
+	Self& operator/=(const RealNumImpl<_RhsValType, _RhsStringType>& rhs)
 	{
 		m_data = static_cast<InternalType>(m_data / rhs.m_data);
 		return *this;
@@ -408,28 +408,28 @@ public:
 	}
 
 	template<typename _RhsValType, typename _RhsStringType>
-	Self& operator%=(const Numeric<_RhsValType, _RhsStringType>& rhs)
+	Self& operator%=(const RealNumImpl<_RhsValType, _RhsStringType>& rhs)
 	{
 		m_data %= rhs.m_data;
 		return *this;
 	}
 
 	template<typename _RhsValType, typename _RhsStringType>
-	Self& operator&=(const Numeric<_RhsValType, _RhsStringType>& rhs)
+	Self& operator&=(const RealNumImpl<_RhsValType, _RhsStringType>& rhs)
 	{
 		m_data &= rhs.m_data;
 		return *this;
 	}
 
 	template<typename _RhsValType, typename _RhsStringType>
-	Self& operator|=(const Numeric<_RhsValType, _RhsStringType>& rhs)
+	Self& operator|=(const RealNumImpl<_RhsValType, _RhsStringType>& rhs)
 	{
 		m_data |= rhs.m_data;
 		return *this;
 	}
 
 	template<typename _RhsValType, typename _RhsStringType>
-	Self& operator^=(const Numeric<_RhsValType, _RhsStringType>& rhs)
+	Self& operator^=(const RealNumImpl<_RhsValType, _RhsStringType>& rhs)
 	{
 		m_data ^= rhs.m_data;
 		return *this;
@@ -474,7 +474,7 @@ public:
 		catch(const std::bad_cast&)
 		{
 			throw TypeError(
-				NumericTraits<InternalType>::sk_numTypeName(),
+				RealNumTraits<InternalType>::sk_numTypeName(),
 				this->GetCategoryName());
 		}
 	}
@@ -489,49 +489,49 @@ public:
 		catch(const std::bad_cast&)
 		{
 			throw TypeError(
-				NumericTraits<InternalType>::sk_numTypeName(),
+				RealNumTraits<InternalType>::sk_numTypeName(),
 				this->GetCategoryName());
 		}
 	}
 
 	virtual void Set(bool val) override
 	{
-		Internal::NumericBinOp<InternalType, bool>::Set(m_data, val);
+		Internal::RealNumBinOp<InternalType, bool>::Set(m_data, val);
 	}
 
 	virtual void Set(uint8_t val) override
 	{
-		Internal::NumericBinOp<InternalType, uint8_t>::Set(m_data, val);
+		Internal::RealNumBinOp<InternalType, uint8_t>::Set(m_data, val);
 	}
 
 	virtual void Set(int8_t val) override
 	{
-		Internal::NumericBinOp<InternalType, int8_t>::Set(m_data, val);
+		Internal::RealNumBinOp<InternalType, int8_t>::Set(m_data, val);
 	}
 
 	virtual void Set(uint32_t val) override
 	{
-		Internal::NumericBinOp<InternalType, uint32_t>::Set(m_data, val);
+		Internal::RealNumBinOp<InternalType, uint32_t>::Set(m_data, val);
 	}
 
 	virtual void Set(int32_t val) override
 	{
-		Internal::NumericBinOp<InternalType, int32_t>::Set(m_data, val);
+		Internal::RealNumBinOp<InternalType, int32_t>::Set(m_data, val);
 	}
 
 	virtual void Set(uint64_t val) override
 	{
-		Internal::NumericBinOp<InternalType, uint64_t>::Set(m_data, val);
+		Internal::RealNumBinOp<InternalType, uint64_t>::Set(m_data, val);
 	}
 
 	virtual void Set(int64_t val) override
 	{
-		Internal::NumericBinOp<InternalType, int64_t>::Set(m_data, val);
+		Internal::RealNumBinOp<InternalType, int64_t>::Set(m_data, val);
 	}
 
 	virtual void Set(double val) override
 	{
-		Internal::NumericBinOp<InternalType, double>::Set(m_data, val);
+		Internal::RealNumBinOp<InternalType, double>::Set(m_data, val);
 	}
 
 	virtual bool IsTrue() const override
@@ -542,49 +542,49 @@ public:
 	virtual uint8_t AsCppUInt8() const override
 	{
 		uint8_t tmp;
-		Internal::NumericBinOp<uint8_t, InternalType>::Set(tmp, m_data);
+		Internal::RealNumBinOp<uint8_t, InternalType>::Set(tmp, m_data);
 		return tmp;
 	}
 
 	virtual int8_t AsCppInt8() const override
 	{
 		int8_t tmp;
-		Internal::NumericBinOp<int8_t, InternalType>::Set(tmp, m_data);
+		Internal::RealNumBinOp<int8_t, InternalType>::Set(tmp, m_data);
 		return tmp;
 	}
 
 	virtual uint32_t AsCppUInt32() const override
 	{
 		uint32_t tmp;
-		Internal::NumericBinOp<uint32_t, InternalType>::Set(tmp, m_data);
+		Internal::RealNumBinOp<uint32_t, InternalType>::Set(tmp, m_data);
 		return tmp;
 	}
 
 	virtual int32_t AsCppInt32() const override
 	{
 		int32_t tmp;
-		Internal::NumericBinOp<int32_t, InternalType>::Set(tmp, m_data);
+		Internal::RealNumBinOp<int32_t, InternalType>::Set(tmp, m_data);
 		return tmp;
 	}
 
 	virtual uint64_t AsCppUInt64() const override
 	{
 		uint64_t tmp;
-		Internal::NumericBinOp<uint64_t, InternalType>::Set(tmp, m_data);
+		Internal::RealNumBinOp<uint64_t, InternalType>::Set(tmp, m_data);
 		return tmp;
 	}
 
 	virtual int64_t AsCppInt64() const override
 	{
 		int64_t tmp;
-		Internal::NumericBinOp<int64_t, InternalType>::Set(tmp, m_data);
+		Internal::RealNumBinOp<int64_t, InternalType>::Set(tmp, m_data);
 		return tmp;
 	}
 
 	virtual double AsCppDouble() const override
 	{
 		double tmp;
-		Internal::NumericBinOp<double, InternalType>::Set(tmp, m_data);
+		Internal::RealNumBinOp<double, InternalType>::Set(tmp, m_data);
 		return tmp;
 	}
 
@@ -595,7 +595,7 @@ public:
 
 	virtual const char* GetCategoryName() const override
 	{
-		return NumericTraits<InternalType>::sk_catName();
+		return RealNumTraits<InternalType>::sk_catName();
 	}
 
 	// ========== Overrides HashableBaseObject ==========
@@ -605,16 +605,16 @@ public:
 		return std::hash<InternalType>()(m_data);
 	}
 
-	// ========== Overrides NumericBaseObject ==========
+	// ========== Overrides RealNumBaseObject ==========
 
-	virtual NumericType GetNumType() const override
+	virtual RealNumType GetNumType() const override
 	{
-		return NumericTraits<InternalType>::sk_numType();
+		return RealNumTraits<InternalType>::sk_numType();
 	}
 
 	virtual const char* GetNumTypeName() const override
 	{
-		return NumericTraits<InternalType>::sk_numTypeName();
+		return RealNumTraits<InternalType>::sk_numTypeName();
 	}
 
 	// ========== Interface copy/Move ==========
@@ -656,7 +656,7 @@ public:
 
 protected:
 
-	//std::unique_ptr<NumericBase> UnsupportedGenericBinaryOp(const NumericBase& rhs, OperationType opType);
+	//std::unique_ptr<RealNumBase> UnsupportedGenericBinaryOp(const RealNumBase& rhs, OperationType opType);
 
 private:
 
@@ -671,161 +671,161 @@ private:
 	}
 
 	InternalType m_data;
-}; // class Numeric
+}; // class RealNumImpl
 
 // ========== Category specialization ==========
 
 template<>
-inline constexpr ObjCategory NumericTraits<bool    >::sk_cat() { return ObjCategory::Bool; }
+inline constexpr ObjCategory RealNumTraits<bool    >::sk_cat() { return ObjCategory::Bool; }
 template<>
-inline constexpr ObjCategory NumericTraits<int8_t  >::sk_cat() { return ObjCategory::Integer; }
+inline constexpr ObjCategory RealNumTraits<int8_t  >::sk_cat() { return ObjCategory::Integer; }
 template<>
-inline constexpr ObjCategory NumericTraits<int16_t >::sk_cat() { return ObjCategory::Integer; }
+inline constexpr ObjCategory RealNumTraits<int16_t >::sk_cat() { return ObjCategory::Integer; }
 template<>
-inline constexpr ObjCategory NumericTraits<int32_t >::sk_cat() { return ObjCategory::Integer; }
+inline constexpr ObjCategory RealNumTraits<int32_t >::sk_cat() { return ObjCategory::Integer; }
 template<>
-inline constexpr ObjCategory NumericTraits<int64_t >::sk_cat() { return ObjCategory::Integer; }
+inline constexpr ObjCategory RealNumTraits<int64_t >::sk_cat() { return ObjCategory::Integer; }
 template<>
-inline constexpr ObjCategory NumericTraits<uint8_t >::sk_cat() { return ObjCategory::Integer; }
+inline constexpr ObjCategory RealNumTraits<uint8_t >::sk_cat() { return ObjCategory::Integer; }
 template<>
-inline constexpr ObjCategory NumericTraits<uint16_t>::sk_cat() { return ObjCategory::Integer; }
+inline constexpr ObjCategory RealNumTraits<uint16_t>::sk_cat() { return ObjCategory::Integer; }
 template<>
-inline constexpr ObjCategory NumericTraits<uint32_t>::sk_cat() { return ObjCategory::Integer; }
+inline constexpr ObjCategory RealNumTraits<uint32_t>::sk_cat() { return ObjCategory::Integer; }
 template<>
-inline constexpr ObjCategory NumericTraits<uint64_t>::sk_cat() { return ObjCategory::Integer; }
+inline constexpr ObjCategory RealNumTraits<uint64_t>::sk_cat() { return ObjCategory::Integer; }
 template<>
-inline constexpr ObjCategory NumericTraits<float   >::sk_cat() { return ObjCategory::Real; }
+inline constexpr ObjCategory RealNumTraits<float   >::sk_cat() { return ObjCategory::Real; }
 template<>
-inline constexpr ObjCategory NumericTraits<double  >::sk_cat() { return ObjCategory::Real; }
+inline constexpr ObjCategory RealNumTraits<double  >::sk_cat() { return ObjCategory::Real; }
 
 template<>
-inline constexpr const char* NumericTraits<bool    >::sk_catName() { return "Bool";  }
+inline constexpr const char* RealNumTraits<bool    >::sk_catName() { return "Bool";  }
 template<>
-inline constexpr const char* NumericTraits<int8_t  >::sk_catName() { return "Integer";  }
+inline constexpr const char* RealNumTraits<int8_t  >::sk_catName() { return "Integer";  }
 template<>
-inline constexpr const char* NumericTraits<int16_t >::sk_catName() { return "Integer"; }
+inline constexpr const char* RealNumTraits<int16_t >::sk_catName() { return "Integer"; }
 template<>
-inline constexpr const char* NumericTraits<int32_t >::sk_catName() { return "Integer"; }
+inline constexpr const char* RealNumTraits<int32_t >::sk_catName() { return "Integer"; }
 template<>
-inline constexpr const char* NumericTraits<int64_t >::sk_catName() { return "Integer"; }
+inline constexpr const char* RealNumTraits<int64_t >::sk_catName() { return "Integer"; }
 template<>
-inline constexpr const char* NumericTraits<uint8_t >::sk_catName() { return "Integer";  }
+inline constexpr const char* RealNumTraits<uint8_t >::sk_catName() { return "Integer";  }
 template<>
-inline constexpr const char* NumericTraits<uint16_t>::sk_catName() { return "Integer"; }
+inline constexpr const char* RealNumTraits<uint16_t>::sk_catName() { return "Integer"; }
 template<>
-inline constexpr const char* NumericTraits<uint32_t>::sk_catName() { return "Integer"; }
+inline constexpr const char* RealNumTraits<uint32_t>::sk_catName() { return "Integer"; }
 template<>
-inline constexpr const char* NumericTraits<uint64_t>::sk_catName() { return "Integer"; }
+inline constexpr const char* RealNumTraits<uint64_t>::sk_catName() { return "Integer"; }
 template<>
-inline constexpr const char* NumericTraits<float   >::sk_catName() { return "Real";  }
+inline constexpr const char* RealNumTraits<float   >::sk_catName() { return "Real";  }
 template<>
-inline constexpr const char* NumericTraits<double  >::sk_catName() { return "Real"; }
+inline constexpr const char* RealNumTraits<double  >::sk_catName() { return "Real"; }
 
 template<>
-inline constexpr NumericType NumericTraits<bool    >::sk_numType() { return NumericType::Bool;  }
+inline constexpr RealNumType RealNumTraits<bool    >::sk_numType() { return RealNumType::Bool;  }
 template<>
-inline constexpr NumericType NumericTraits<int8_t  >::sk_numType() { return NumericType::Int8;  }
+inline constexpr RealNumType RealNumTraits<int8_t  >::sk_numType() { return RealNumType::Int8;  }
 template<>
-inline constexpr NumericType NumericTraits<int16_t >::sk_numType() { return NumericType::Int16; }
+inline constexpr RealNumType RealNumTraits<int16_t >::sk_numType() { return RealNumType::Int16; }
 template<>
-inline constexpr NumericType NumericTraits<int32_t >::sk_numType() { return NumericType::Int32; }
+inline constexpr RealNumType RealNumTraits<int32_t >::sk_numType() { return RealNumType::Int32; }
 template<>
-inline constexpr NumericType NumericTraits<int64_t >::sk_numType() { return NumericType::Int64; }
+inline constexpr RealNumType RealNumTraits<int64_t >::sk_numType() { return RealNumType::Int64; }
 template<>
-inline constexpr NumericType NumericTraits<uint8_t >::sk_numType() { return NumericType::UInt8;  }
+inline constexpr RealNumType RealNumTraits<uint8_t >::sk_numType() { return RealNumType::UInt8;  }
 template<>
-inline constexpr NumericType NumericTraits<uint16_t>::sk_numType() { return NumericType::UInt16; }
+inline constexpr RealNumType RealNumTraits<uint16_t>::sk_numType() { return RealNumType::UInt16; }
 template<>
-inline constexpr NumericType NumericTraits<uint32_t>::sk_numType() { return NumericType::UInt32; }
+inline constexpr RealNumType RealNumTraits<uint32_t>::sk_numType() { return RealNumType::UInt32; }
 template<>
-inline constexpr NumericType NumericTraits<uint64_t>::sk_numType() { return NumericType::UInt64; }
+inline constexpr RealNumType RealNumTraits<uint64_t>::sk_numType() { return RealNumType::UInt64; }
 template<>
-inline constexpr NumericType NumericTraits<float   >::sk_numType() { return NumericType::Float;  }
+inline constexpr RealNumType RealNumTraits<float   >::sk_numType() { return RealNumType::Float;  }
 template<>
-inline constexpr NumericType NumericTraits<double  >::sk_numType() { return NumericType::Double; }
+inline constexpr RealNumType RealNumTraits<double  >::sk_numType() { return RealNumType::Double; }
 
 template<>
-inline constexpr const char* NumericTraits<bool    >::sk_numTypeName() { return "Bool";  }
+inline constexpr const char* RealNumTraits<bool    >::sk_numTypeName() { return "Bool";  }
 template<>
-inline constexpr const char* NumericTraits<int8_t  >::sk_numTypeName() { return "Int8";  }
+inline constexpr const char* RealNumTraits<int8_t  >::sk_numTypeName() { return "Int8";  }
 template<>
-inline constexpr const char* NumericTraits<int16_t >::sk_numTypeName() { return "Int16"; }
+inline constexpr const char* RealNumTraits<int16_t >::sk_numTypeName() { return "Int16"; }
 template<>
-inline constexpr const char* NumericTraits<int32_t >::sk_numTypeName() { return "Int32"; }
+inline constexpr const char* RealNumTraits<int32_t >::sk_numTypeName() { return "Int32"; }
 template<>
-inline constexpr const char* NumericTraits<int64_t >::sk_numTypeName() { return "Int64"; }
+inline constexpr const char* RealNumTraits<int64_t >::sk_numTypeName() { return "Int64"; }
 template<>
-inline constexpr const char* NumericTraits<uint8_t >::sk_numTypeName() { return "UInt8";  }
+inline constexpr const char* RealNumTraits<uint8_t >::sk_numTypeName() { return "UInt8";  }
 template<>
-inline constexpr const char* NumericTraits<uint16_t>::sk_numTypeName() { return "UInt16"; }
+inline constexpr const char* RealNumTraits<uint16_t>::sk_numTypeName() { return "UInt16"; }
 template<>
-inline constexpr const char* NumericTraits<uint32_t>::sk_numTypeName() { return "UInt32"; }
+inline constexpr const char* RealNumTraits<uint32_t>::sk_numTypeName() { return "UInt32"; }
 template<>
-inline constexpr const char* NumericTraits<uint64_t>::sk_numTypeName() { return "UInt64"; }
+inline constexpr const char* RealNumTraits<uint64_t>::sk_numTypeName() { return "UInt64"; }
 template<>
-inline constexpr const char* NumericTraits<float   >::sk_numTypeName() { return "Float";  }
+inline constexpr const char* RealNumTraits<float   >::sk_numTypeName() { return "Float";  }
 template<>
-inline constexpr const char* NumericTraits<double  >::sk_numTypeName() { return "Double"; }
+inline constexpr const char* RealNumTraits<double  >::sk_numTypeName() { return "Double"; }
 
-// ========== binary operators for Numeric ==========
+// ========== binary operators for RealNumImpl ==========
 
 template<typename _LhsValType, typename _RhsValType, typename _ToStringType>
-inline Numeric<
+inline RealNumImpl<
 	typename Internal::InferBinOpRetType<_LhsValType, _RhsValType>::RetType,
 	_ToStringType>
-operator+(const Numeric<_LhsValType, _ToStringType>& lhs,
-	const Numeric<_RhsValType, _ToStringType>& rhs)
+operator+(const RealNumImpl<_LhsValType, _ToStringType>& lhs,
+	const RealNumImpl<_RhsValType, _ToStringType>& rhs)
 {
 	using RetInternalType = typename Internal::InferBinOpRetType<_LhsValType, _RhsValType>::RetType;
-	using RetType = Numeric<RetInternalType, _ToStringType>;
+	using RetType = RealNumImpl<RetInternalType, _ToStringType>;
 	return RetType(static_cast<RetInternalType>(lhs.GetVal() + rhs.GetVal()));
 }
 
 template<typename _LhsValType, typename _RhsValType, typename _ToStringType>
-inline Numeric<
+inline RealNumImpl<
 	typename Internal::InferBinOpRetType<_LhsValType, _RhsValType>::RetType,
 	_ToStringType>
-operator-(const Numeric<_LhsValType, _ToStringType>& lhs,
-	const Numeric<_RhsValType, _ToStringType>& rhs)
+operator-(const RealNumImpl<_LhsValType, _ToStringType>& lhs,
+	const RealNumImpl<_RhsValType, _ToStringType>& rhs)
 {
 	using RetInternalType = typename Internal::InferBinOpRetType<_LhsValType, _RhsValType>::RetType;
-	using RetType = Numeric<RetInternalType, _ToStringType>;
+	using RetType = RealNumImpl<RetInternalType, _ToStringType>;
 	return RetType(static_cast<RetInternalType>(lhs.GetVal() - rhs.GetVal()));
 }
 
 template<typename _LhsValType, typename _RhsValType, typename _ToStringType>
-inline Numeric<
+inline RealNumImpl<
 	typename Internal::InferBinOpRetType<_LhsValType, _RhsValType>::RetType,
 	_ToStringType>
-operator*(const Numeric<_LhsValType, _ToStringType>& lhs,
-	const Numeric<_RhsValType, _ToStringType>& rhs)
+operator*(const RealNumImpl<_LhsValType, _ToStringType>& lhs,
+	const RealNumImpl<_RhsValType, _ToStringType>& rhs)
 {
 	using RetInternalType = typename Internal::InferBinOpRetType<_LhsValType, _RhsValType>::RetType;
-	using RetType = Numeric<RetInternalType, _ToStringType>;
+	using RetType = RealNumImpl<RetInternalType, _ToStringType>;
 	return RetType(static_cast<RetInternalType>(lhs.GetVal() * rhs.GetVal()));
 }
 
 template<typename _LhsValType, typename _RhsValType, typename _ToStringType>
-inline Numeric<
+inline RealNumImpl<
 	typename Internal::InferBinOpRetType<_LhsValType, _RhsValType>::RetType,
 	_ToStringType>
-operator/(const Numeric<_LhsValType, _ToStringType>& lhs,
-	const Numeric<_RhsValType, _ToStringType>& rhs)
+operator/(const RealNumImpl<_LhsValType, _ToStringType>& lhs,
+	const RealNumImpl<_RhsValType, _ToStringType>& rhs)
 {
 	using RetInternalType = typename Internal::InferBinOpRetType<_LhsValType, _RhsValType>::RetType;
-	using RetType = Numeric<RetInternalType, _ToStringType>;
+	using RetType = RealNumImpl<RetInternalType, _ToStringType>;
 	return RetType(static_cast<RetInternalType>(lhs.GetVal() / rhs.GetVal()));
 }
 
 template<typename _LhsValType, typename _RhsValType, typename _ToStringType>
-inline Numeric<
+inline RealNumImpl<
 	typename Internal::InferBinOpRetType<_LhsValType, _RhsValType>::RetType,
 	_ToStringType>
-operator%(const Numeric<_LhsValType, _ToStringType>& lhs,
-	const Numeric<_RhsValType, _ToStringType>& rhs)
+operator%(const RealNumImpl<_LhsValType, _ToStringType>& lhs,
+	const RealNumImpl<_RhsValType, _ToStringType>& rhs)
 {
 	using RetInternalType = typename Internal::InferBinOpRetType<_LhsValType, _RhsValType>::RetType;
-	using RetType = Numeric<RetInternalType, _ToStringType>;
+	using RetType = RealNumImpl<RetInternalType, _ToStringType>;
 	return RetType(static_cast<RetInternalType>(lhs.GetVal() % rhs.GetVal()));
 }
 
@@ -833,46 +833,46 @@ operator%(const Numeric<_LhsValType, _ToStringType>& lhs,
 
 template<typename _ValType, typename _ToStringType>
 template<typename _RetType, typename _Op>
-inline std::tuple<bool, _RetType> Numeric<_ValType, _ToStringType>::GenericBinaryOp(
-	const NumericBaseObject<_ToStringType>& rhs, _Op op) const
+inline std::tuple<bool, _RetType> RealNumImpl<_ValType, _ToStringType>::GenericBinaryOp(
+	const RealNumBaseObject<_ToStringType>& rhs, _Op op) const
 {
 	using namespace Internal;
-	using _Bool   = Numeric<bool    , _ToStringType>;
-	using _Int8   = Numeric<int8_t  , _ToStringType>;
-	using _Int16  = Numeric<int16_t , _ToStringType>;
-	using _Int32  = Numeric<int32_t , _ToStringType>;
-	using _Int64  = Numeric<int64_t , _ToStringType>;
-	using _UInt8  = Numeric<uint8_t , _ToStringType>;
-	using _UInt16 = Numeric<uint16_t, _ToStringType>;
-	using _UInt32 = Numeric<uint32_t, _ToStringType>;
-	using _UInt64 = Numeric<uint64_t, _ToStringType>;
-	using _Float  = Numeric<float   , _ToStringType>;
-	using _Double = Numeric<double  , _ToStringType>;
+	using _Bool   = RealNumImpl<bool    , _ToStringType>;
+	using _Int8   = RealNumImpl<int8_t  , _ToStringType>;
+	using _Int16  = RealNumImpl<int16_t , _ToStringType>;
+	using _Int32  = RealNumImpl<int32_t , _ToStringType>;
+	using _Int64  = RealNumImpl<int64_t , _ToStringType>;
+	using _UInt8  = RealNumImpl<uint8_t , _ToStringType>;
+	using _UInt16 = RealNumImpl<uint16_t, _ToStringType>;
+	using _UInt32 = RealNumImpl<uint32_t, _ToStringType>;
+	using _UInt64 = RealNumImpl<uint64_t, _ToStringType>;
+	using _Float  = RealNumImpl<float   , _ToStringType>;
+	using _Double = RealNumImpl<double  , _ToStringType>;
 
 	auto rhsType = rhs.GetNumType();
 	switch (rhsType)
 	{
-	case NumericType::Bool:
+	case RealNumType::Bool:
 		return std::make_tuple(true,  _RetType(op((*this) /*RHS*/, DownCast<_Bool  >(rhs) /*LHS*/)));
-	case NumericType::Int8:
+	case RealNumType::Int8:
 		return std::make_tuple(true,  _RetType(op((*this) /*RHS*/, DownCast<_Int8  >(rhs) /*LHS*/)));
-	case NumericType::Int16:
+	case RealNumType::Int16:
 		return std::make_tuple(true,  _RetType(op((*this) /*RHS*/, DownCast<_Int16 >(rhs) /*LHS*/)));
-	case NumericType::Int32:
+	case RealNumType::Int32:
 		return std::make_tuple(true,  _RetType(op((*this) /*RHS*/, DownCast<_Int32 >(rhs) /*LHS*/)));
-	case NumericType::Int64:
+	case RealNumType::Int64:
 		return std::make_tuple(true,  _RetType(op((*this) /*RHS*/, DownCast<_Int64 >(rhs) /*LHS*/)));
-	case NumericType::UInt8:
+	case RealNumType::UInt8:
 		return std::make_tuple(true,  _RetType(op((*this) /*RHS*/, DownCast<_UInt8 >(rhs) /*LHS*/)));
-	case NumericType::UInt16:
+	case RealNumType::UInt16:
 		return std::make_tuple(true,  _RetType(op((*this) /*RHS*/, DownCast<_UInt16>(rhs) /*LHS*/)));
-	case NumericType::UInt32:
+	case RealNumType::UInt32:
 		return std::make_tuple(true,  _RetType(op((*this) /*RHS*/, DownCast<_UInt32>(rhs) /*LHS*/)));
-	case NumericType::UInt64:
+	case RealNumType::UInt64:
 		return std::make_tuple(true,  _RetType(op((*this) /*RHS*/, DownCast<_UInt64>(rhs) /*LHS*/)));
-	case NumericType::Float:
+	case RealNumType::Float:
 		return std::make_tuple(true,  _RetType(op((*this) /*RHS*/, DownCast<_Float >(rhs) /*LHS*/)));
-	case NumericType::Double:
+	case RealNumType::Double:
 		return std::make_tuple(true,  _RetType(op((*this) /*RHS*/, DownCast<_Double>(rhs) /*LHS*/)));
 	default:
 		return std::make_tuple(false, _RetType());
@@ -886,13 +886,13 @@ namespace std
 {
 	template<typename _ValType, typename _ToStringType>
 #ifndef SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE
-	struct hash<SimpleObjects::Numeric<_ValType, _ToStringType> > : hash<_ValType>
+	struct hash<SimpleObjects::RealNumImpl<_ValType, _ToStringType> > : hash<_ValType>
 	{
-		using _ObjType = SimpleObjects::Numeric<_ValType, _ToStringType>;
+		using _ObjType = SimpleObjects::RealNumImpl<_ValType, _ToStringType>;
 #else
-	struct hash<SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE::Numeric<_ValType, _ToStringType> > : hash<_ValType>
+	struct hash<SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE::RealNumImpl<_ValType, _ToStringType> > : hash<_ValType>
 	{
-		using _ObjType = SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE::Numeric<_ValType, _ToStringType>;
+		using _ObjType = SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE::RealNumImpl<_ValType, _ToStringType>;
 #endif
 	public:
 		using _Base = std::hash<_ValType>;

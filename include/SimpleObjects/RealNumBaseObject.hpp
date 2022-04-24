@@ -19,49 +19,49 @@ namespace SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE
  *
  */
 template<typename _ToStringType>
-class NumericBaseObject : public HashableBaseObject<_ToStringType>
+class RealNumBaseObject : public HashableBaseObject<_ToStringType>
 {
 public: // Static Member
 
 	using ToStringType = _ToStringType;
-	using Self = NumericBaseObject<_ToStringType>;
+	using Self = RealNumBaseObject<_ToStringType>;
 	using Base = HashableBaseObject<_ToStringType>;
 	using BaseBase = typename Base::Base;
 
 	static_assert(std::is_same<BaseBase, BaseObject<_ToStringType> >::value,
 		"Expecting Base::Base to be BaseObject class");
 
-	using NumericBase = typename BaseBase::NumericBase;
+	using RealNumBase = typename BaseBase::RealNumBase;
 
 	static constexpr Self* sk_null = nullptr;
 
 public:
-	NumericBaseObject() = default;
+	RealNumBaseObject() = default;
 
 	// LCOV_EXCL_START
 	/**
-	 * @brief Destroy the Numeric Base Object
+	 * @brief Destroy the RealNumImpl Base Object
 	 *
 	 */
-	virtual ~NumericBaseObject() = default;
+	virtual ~RealNumBaseObject() = default;
 	// LCOV_EXCL_STOP
 
-	virtual NumericType GetNumType() const = 0;
+	virtual RealNumType GetNumType() const = 0;
 
 	virtual const char* GetNumTypeName() const = 0;
 
-	virtual NumericBase& AsNumeric() override
+	virtual RealNumBase& AsRealNum() override
 	{
 		return Internal::AsChildType<
-				std::is_same<Self, NumericBase>::value, Self, NumericBase
-			>::AsChild(*this, "Numeric Category", this->GetCategoryName());
+				std::is_same<Self, RealNumBase>::value, Self, RealNumBase
+			>::AsChild(*this, "RealNumImpl Category", this->GetCategoryName());
 	}
 
-	virtual const NumericBase& AsNumeric() const override
+	virtual const RealNumBase& AsRealNum() const override
 	{
 		return Internal::AsChildType<
-				std::is_same<Self, NumericBase>::value, Self, NumericBase
-			>::AsChild(*this, "Numeric Category", this->GetCategoryName());
+				std::is_same<Self, RealNumBase>::value, Self, RealNumBase
+			>::AsChild(*this, "RealNumImpl Category", this->GetCategoryName());
 	}
 
 	// ========== Comparisons ==========
@@ -121,7 +121,7 @@ public:
 		case ObjCategory::Bool:
 		case ObjCategory::Integer:
 		case ObjCategory::Real:
-			return RealNumBaseEqual(rhs.AsNumeric());
+			return RealNumBaseEqual(rhs.AsRealNum());
 		default:
 			return false;
 		}
@@ -135,7 +135,7 @@ public:
 		case ObjCategory::Integer:
 		case ObjCategory::Real:
 		{
-			auto cmpRes = RealNumBaseCmp(rhs.AsNumeric());
+			auto cmpRes = RealNumBaseCmp(rhs.AsRealNum());
 			return cmpRes == 0 ? ObjectOrder::Equal :
 					(cmpRes < 0 ? ObjectOrder::Less :
 					(ObjectOrder::Greater));
@@ -174,6 +174,6 @@ public:
 		return Move(sk_null);
 	}
 
-}; // class NumericBaseObject
+}; // class RealNumBaseObject
 
 } // namespace SimpleObjects

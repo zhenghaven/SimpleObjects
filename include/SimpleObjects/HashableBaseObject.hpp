@@ -28,7 +28,7 @@ public: // Static Member
 	using ToStringType = _ToStringType;
 
 	using NullBase    = typename Base::NullBase;
-	using NumericBase = typename Base::NumericBase;
+	using RealNumBase = typename Base::RealNumBase;
 	using StringBase  = typename Base::StringBase;
 	using ListBase    = typename Base::ListBase;
 	using DictBase    = typename Base::DictBase;

@@ -5,7 +5,7 @@
 
 #include <gtest/gtest.h>
 
-#include <SimpleObjects/NumericTypeInfer.hpp>
+#include <SimpleObjects/RealNumTypeInfer.hpp>
 
 #ifndef SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE
 using namespace SimpleObjects;
@@ -18,13 +18,13 @@ namespace SimpleObjects_Test
 	extern size_t g_numOfTestFile;
 } // namespace SimpleObjects_Test
 
-GTEST_TEST(TestNumericTypeInfer, CountTestFile)
+GTEST_TEST(TestRealNumTypeInfer, CountTestFile)
 {
 	static auto tmp = ++SimpleObjects_Test::g_numOfTestFile;
 	(void)tmp;
 }
 
-GTEST_TEST(TestNumericTypeInfer, InferBinOpRetType)
+GTEST_TEST(TestRealNumTypeInfer, InferBinOpRetType)
 {
 	// same type
 	static_assert(std::is_same<

@@ -691,7 +691,7 @@ GTEST_TEST(TestStaticDict, Miscs)
 	EXPECT_NO_THROW(dict1.AsStaticDict());
 	EXPECT_THROW(dict1.AsDict(),    TypeError);
 	EXPECT_THROW(dict1.AsNull(),    TypeError);
-	EXPECT_THROW(dict1.AsNumeric(), TypeError);
+	EXPECT_THROW(dict1.AsRealNum(), TypeError);
 	EXPECT_THROW(dict1.AsString(),  TypeError);
 	EXPECT_THROW(dict1.AsList(),    TypeError);
 	EXPECT_THROW(dict1.AsBytes(),   TypeError);
@@ -700,7 +700,7 @@ GTEST_TEST(TestStaticDict, Miscs)
 	EXPECT_NO_THROW(kDict1.AsStaticDict());
 	EXPECT_THROW(kDict1.AsDict(),    TypeError);
 	EXPECT_THROW(kDict1.AsNull(),    TypeError);
-	EXPECT_THROW(kDict1.AsNumeric(), TypeError);
+	EXPECT_THROW(kDict1.AsRealNum(), TypeError);
 	EXPECT_THROW(kDict1.AsString(),  TypeError);
 	EXPECT_THROW(kDict1.AsList(),    TypeError);
 	EXPECT_THROW(kDict1.AsBytes(),   TypeError);

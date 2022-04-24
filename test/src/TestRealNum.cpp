@@ -22,13 +22,13 @@ namespace SimpleObjects_Test
 	extern size_t g_numOfTestFile;
 } // namespace SimpleObjects_Test
 
-GTEST_TEST(TestNumeric, CountTestFile)
+GTEST_TEST(TestRealNum, CountTestFile)
 {
 	static auto tmp = ++SimpleObjects_Test::g_numOfTestFile;
 	(void)tmp;
 }
 
-GTEST_TEST(TestNumeric, Construction)
+GTEST_TEST(TestRealNum, Construction)
 {
 	// Default
 	EXPECT_NO_THROW({
@@ -133,7 +133,7 @@ GTEST_TEST(TestNumeric, Construction)
 	EXPECT_EQ(Int32(Int32(testVal2)).GetVal(), testVal2);
 }
 
-GTEST_TEST(TestNumeric, Setter)
+GTEST_TEST(TestRealNum, Setter)
 {
 	Bool   b_l( true);
 	Int8   i8_l(-12);
@@ -582,7 +582,7 @@ GTEST_TEST(TestNumeric, Setter)
 
 }
 
-GTEST_TEST(TestNumeric, Getter)
+GTEST_TEST(TestRealNum, Getter)
 {
 	// bool
 	//      -> int8_t
@@ -858,7 +858,7 @@ GTEST_TEST(TestNumeric, Getter)
 	EXPECT_TRUE(Double(12).AsCppDouble() == static_cast<double  >(12));
 }
 
-GTEST_TEST(TestNumeric, IsTrue)
+GTEST_TEST(TestRealNum, IsTrue)
 {
 	EXPECT_EQ((Bool(true)).IsTrue(), static_cast<bool>(true));
 	EXPECT_EQ(Bool(false).IsTrue(), static_cast<bool>(false));
@@ -919,7 +919,7 @@ GTEST_TEST(TestNumeric, IsTrue)
 		static_cast<bool>(static_cast<double>(-0.0)));
 }
 
-GTEST_TEST(TestNumeric, Assignment)
+GTEST_TEST(TestRealNum, Assignment)
 {
 	Int32 testVar;
 
@@ -936,7 +936,7 @@ GTEST_TEST(TestNumeric, Assignment)
 	EXPECT_EQ((testVar = Int32(testVal2)).GetVal(), testVal2);
 }
 
-GTEST_TEST(TestNumeric, Comparison)
+GTEST_TEST(TestRealNum, Comparison)
 {
 	// ==
 	// same internal type
@@ -1029,7 +1029,7 @@ GTEST_TEST(TestNumeric, Comparison)
 		static_cast<int32_t>(123) > static_cast<double>(1234.0));
 }
 
-GTEST_TEST(TestNumeric, BitwiseOperation)
+GTEST_TEST(TestRealNum, BitwiseOperation)
 {
 	// &
 	EXPECT_EQ((Int32(12345) & Int32(6)).GetVal(),
@@ -1056,7 +1056,7 @@ GTEST_TEST(TestNumeric, BitwiseOperation)
 		~static_cast<int32_t>(12345));
 }
 
-GTEST_TEST(TestNumeric, SelfOperation)
+GTEST_TEST(TestRealNum, SelfOperation)
 {
 	Int32 initObjVal(12345);
 	int32_t initIntVal = 12345;
@@ -1117,7 +1117,7 @@ GTEST_TEST(TestNumeric, SelfOperation)
 		(initIntVal ^= static_cast<int32_t>(12)));
 }
 
-GTEST_TEST(TestNumeric, Increment)
+GTEST_TEST(TestRealNum, Increment)
 {
 	Int32 initObjVal(12345);
 	int32_t initIntVal = 12345;
@@ -1143,7 +1143,7 @@ GTEST_TEST(TestNumeric, Increment)
 	EXPECT_EQ((initObjVal).GetVal(), (initIntVal));
 }
 
-GTEST_TEST(TestNumeric, Operation)
+GTEST_TEST(TestRealNum, Operation)
 {
 	// +
 	// bool, bool
@@ -1174,7 +1174,7 @@ GTEST_TEST(TestNumeric, Operation)
 	EXPECT_EQ(res32n16.GetVal(), static_cast<int32_t>(23) % static_cast<int16_t>(12));
 }
 
-GTEST_TEST(TestNumeric, Category)
+GTEST_TEST(TestRealNum, Category)
 {
 	// ===== Bool
 	static_assert(Bool::sk_cat() == ObjCategory::Bool, "Category failed.");
@@ -1252,7 +1252,7 @@ GTEST_TEST(TestNumeric, Category)
 	EXPECT_EQ(valDlb.GetCategory(), ObjCategory::Real);
 }
 
-GTEST_TEST(TestNumeric, CategoryName)
+GTEST_TEST(TestRealNum, CategoryName)
 {
 	EXPECT_EQ(Bool().GetCategoryName(), std::string("Bool"));
 
@@ -1270,14 +1270,14 @@ GTEST_TEST(TestNumeric, CategoryName)
 	EXPECT_EQ(Double().GetCategoryName(), std::string("Real"));
 }
 
-GTEST_TEST(TestNumeric, Miscs)
+GTEST_TEST(TestRealNum, Miscs)
 {
 	// Is null
 	EXPECT_FALSE(Bool().IsNull());
 
 	// Cast
 	const auto kNum = Int8();
-	EXPECT_NO_THROW(kNum.AsNumeric());
+	EXPECT_NO_THROW(kNum.AsRealNum());
 	EXPECT_THROW(kNum.AsNull(),       TypeError);
 	EXPECT_THROW(kNum.AsString(),     TypeError);
 	EXPECT_THROW(kNum.AsList(),       TypeError);
@@ -1285,7 +1285,7 @@ GTEST_TEST(TestNumeric, Miscs)
 	EXPECT_THROW(kNum.AsStaticDict(), TypeError);
 	EXPECT_THROW(kNum.AsBytes(),      TypeError);
 
-	EXPECT_NO_THROW(Int16().AsNumeric());
+	EXPECT_NO_THROW(Int16().AsRealNum());
 	EXPECT_THROW(Int32().AsNull(),       TypeError);
 	EXPECT_THROW(Int64().AsString(),     TypeError);
 	EXPECT_THROW(Int64().AsList(),       TypeError);
@@ -1296,7 +1296,7 @@ GTEST_TEST(TestNumeric, Miscs)
 	// Copy
 	static_assert(std::is_same<
 		decltype(*Int8().Copy(Int8::Base::sk_null)),
-		NumericBaseObj&>::value, "Failed to test Copy virtual func");
+		RealNumBaseObj&>::value, "Failed to test Copy virtual func");
 	EXPECT_EQ(*Bool(true).Copy(Bool::Base::sk_null), Bool(true));
 	EXPECT_EQ(*Int8(123).Copy(Int8::Base::sk_null), Int8(123));
 	EXPECT_EQ(*Int16(123).Copy(Int16::Base::sk_null), Int16(123));
@@ -1322,7 +1322,7 @@ GTEST_TEST(TestNumeric, Miscs)
 	// Move
 	static_assert(std::is_same<
 		decltype(*Int8().Move(Int8::Base::sk_null)),
-		NumericBaseObj&>::value, "Failed to test Move virtual func");
+		RealNumBaseObj&>::value, "Failed to test Move virtual func");
 	EXPECT_EQ(*Bool(true).Move(Bool::Base::sk_null), Bool(true));
 	EXPECT_EQ(*Int8(123).Move(Int8::Base::sk_null), Int8(123));
 	EXPECT_EQ(*Int16(123).Move(Int16::Base::sk_null), Int16(123));
@@ -1346,7 +1346,7 @@ GTEST_TEST(TestNumeric, Miscs)
 	EXPECT_EQ(*Int8(123).Move(Int8::Base::Base::Base::sk_null), Int8(123));
 }
 
-GTEST_TEST(TestNumeric, Hash)
+GTEST_TEST(TestRealNum, Hash)
 {
 	EXPECT_NE(Bool(true).Hash(), Bool(false).Hash());
 
@@ -1364,24 +1364,24 @@ GTEST_TEST(TestNumeric, Hash)
 	EXPECT_NE(Double(0).Hash(), Double(1).Hash());
 }
 
-GTEST_TEST(TestNumeric, GetNumType)
+GTEST_TEST(TestRealNum, GetNumType)
 {
-	EXPECT_EQ(Bool().GetNumType(), NumericType::Bool);
-	EXPECT_EQ(Int8().GetNumType(), NumericType::Int8);
-	EXPECT_EQ(Int16().GetNumType(), NumericType::Int16);
-	EXPECT_EQ(Int32().GetNumType(), NumericType::Int32);
-	EXPECT_EQ(Int64().GetNumType(), NumericType::Int64);
+	EXPECT_EQ(Bool().GetNumType(), RealNumType::Bool);
+	EXPECT_EQ(Int8().GetNumType(), RealNumType::Int8);
+	EXPECT_EQ(Int16().GetNumType(), RealNumType::Int16);
+	EXPECT_EQ(Int32().GetNumType(), RealNumType::Int32);
+	EXPECT_EQ(Int64().GetNumType(), RealNumType::Int64);
 
-	EXPECT_EQ(UInt8().GetNumType(), NumericType::UInt8);
-	EXPECT_EQ(UInt16().GetNumType(), NumericType::UInt16);
-	EXPECT_EQ(UInt32().GetNumType(), NumericType::UInt32);
-	EXPECT_EQ(UInt64().GetNumType(), NumericType::UInt64);
+	EXPECT_EQ(UInt8().GetNumType(), RealNumType::UInt8);
+	EXPECT_EQ(UInt16().GetNumType(), RealNumType::UInt16);
+	EXPECT_EQ(UInt32().GetNumType(), RealNumType::UInt32);
+	EXPECT_EQ(UInt64().GetNumType(), RealNumType::UInt64);
 
-	EXPECT_EQ(Float().GetNumType(), NumericType::Float);
-	EXPECT_EQ(Double().GetNumType(), NumericType::Double);
+	EXPECT_EQ(Float().GetNumType(), RealNumType::Float);
+	EXPECT_EQ(Double().GetNumType(), RealNumType::Double);
 }
 
-GTEST_TEST(TestNumeric, GetNumTypeName)
+GTEST_TEST(TestRealNum, GetNumTypeName)
 {
 	EXPECT_EQ(Bool().GetNumTypeName(), std::string("Bool"));
 	EXPECT_EQ(Int8().GetNumTypeName(), std::string("Int8"));
@@ -1406,9 +1406,9 @@ class Int8Ext : public Int8
 public:
 	using Int8::Int8;
 
-	virtual NumericType GetNumType() const override
+	virtual RealNumType GetNumType() const override
 	{
-		return NumericType::Other;
+		return RealNumType::Other;
 	}
 
 	virtual const char* GetNumTypeName() const override
@@ -1454,7 +1454,7 @@ struct RealNumComparisonTests
 				Compare(lhs.GetVal(), rhs) <= 0;
 
 		CheckTestResBool(lhs, rhs, expRes,
-			CompareTestHelpers<NumericBaseObj>::Le);
+			CompareTestHelpers<RealNumBaseObj>::Le);
 	}
 
 	template<typename _RhsT>
@@ -1465,7 +1465,7 @@ struct RealNumComparisonTests
 				Compare(lhs.GetVal(), rhs) >= 0;
 
 		CheckTestResBool(lhs, rhs, expRes,
-			CompareTestHelpers<NumericBaseObj>::Ge);
+			CompareTestHelpers<RealNumBaseObj>::Ge);
 	}
 
 	template<typename _RhsT>
@@ -1476,13 +1476,13 @@ struct RealNumComparisonTests
 				Compare(lhs.GetVal(), rhs) != 0;
 
 		CheckTestResBool(lhs, rhs, expRes,
-			CompareTestHelpers<NumericBaseObj>::Neq);
+			CompareTestHelpers<RealNumBaseObj>::Neq);
 	}
 }; // struct RealNumComparisonTests
 
 } // namespace
 
-GTEST_TEST(TestNumeric, BaseIsEqual)
+GTEST_TEST(TestRealNum, BaseIsEqual)
 {
 	// Base object
 	using BaseObjCmp = CompareTestHelpers<BaseObj>;
@@ -1534,7 +1534,7 @@ GTEST_TEST(TestNumeric, BaseIsEqual)
 
 	// Unsupported extensions
 	auto checkProgRealNumBase = [](
-		const NumericBaseObj& a, const NumericBaseObj& b) -> bool
+		const RealNumBaseObj& a, const RealNumBaseObj& b) -> bool
 	{
 		return a != b;
 	};
@@ -1552,7 +1552,7 @@ GTEST_TEST(TestNumeric, BaseIsEqual)
 	EXPECT_TRUE(checkBaseObjNE(Int8(1), Null()));
 }
 
-GTEST_TEST(TestNumeric, BaseIsLessThan)
+GTEST_TEST(TestRealNum, BaseIsLessThan)
 {
 	// <
 	RealNumComparisonTests<Bool  >::TestRealNumBaseLE(Bool  (false), 2);
@@ -1577,7 +1577,7 @@ GTEST_TEST(TestNumeric, BaseIsLessThan)
 	EXPECT_THROW(checkBaseObjLE(Int8(1), Null()), UnsupportedOperation);
 }
 
-GTEST_TEST(TestNumeric, BaseIsGreaterThan)
+GTEST_TEST(TestRealNum, BaseIsGreaterThan)
 {
 	// >
 	RealNumComparisonTests<Bool>::TestRealNumBaseLE(Bool(true), 0);
@@ -1602,7 +1602,7 @@ GTEST_TEST(TestNumeric, BaseIsGreaterThan)
 	EXPECT_THROW(checkBaseObjLE(Int8(1), Null()), UnsupportedOperation);
 }
 
-GTEST_TEST(TestNumeric, ToString)
+GTEST_TEST(TestRealNum, ToString)
 {
 	{
 		const std::string expRes = "true";
