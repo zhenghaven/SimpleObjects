@@ -21,7 +21,7 @@ namespace SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE
 {
 
 template<typename _CtnType, typename _ToStringType>
-class StringCat :
+class StringImpl :
 	public StringBaseObject<
 		typename _CtnType::value_type,
 		_ToStringType>
@@ -30,7 +30,7 @@ public: // Static member:
 
 	using ContainerType = _CtnType;
 	using ToStringType = _ToStringType;
-	using Self = StringCat<ContainerType, ToStringType>;
+	using Self = StringImpl<ContainerType, ToStringType>;
 	using Base = StringBaseObject<
 		typename ContainerType::value_type, ToStringType>;
 	using BaseBase = typename Base::Base;
@@ -70,31 +70,31 @@ public: // Static member:
 
 public:
 
-	StringCat() :
+	StringImpl() :
 		m_data()
 	{}
 
-	StringCat(const ContainerType& str):
+	StringImpl(const ContainerType& str):
 		m_data(str)
 	{}
 
-	StringCat(ContainerType&& str):
+	StringImpl(ContainerType&& str):
 		m_data(std::forward<ContainerType>(str))
 	{}
 
-	StringCat(const_pointer str) :
+	StringImpl(const_pointer str) :
 		m_data(str)
 	{}
 
-	StringCat(const Self& other) :
+	StringImpl(const Self& other) :
 		m_data(other.m_data)
 	{}
 
-	StringCat(Self&& other) :
+	StringImpl(Self&& other) :
 		m_data(std::forward<ContainerType>(other.m_data))
 	{}
 
-	virtual ~StringCat() = default;
+	virtual ~StringImpl() = default;
 
 	Self& operator=(const Self& rhs)
 	{
@@ -442,7 +442,7 @@ private:
 
 	ContainerType m_data;
 
-}; // class StringCat
+}; // class StringImpl
 
 } // namespace SimpleObjects
 
@@ -452,13 +452,13 @@ namespace std
 
 	template<typename _CtnType, typename _ToStringType>
 #ifndef SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE
-	struct hash<SimpleObjects::StringCat<_CtnType, _ToStringType> >
+	struct hash<SimpleObjects::StringImpl<_CtnType, _ToStringType> >
 	{
-		using _ObjType = SimpleObjects::StringCat<_CtnType, _ToStringType>;
+		using _ObjType = SimpleObjects::StringImpl<_CtnType, _ToStringType>;
 #else
-	struct hash<SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE::StringCat<_CtnType, _ToStringType> >
+	struct hash<SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE::StringImpl<_CtnType, _ToStringType> >
 	{
-		using _ObjType = SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE::StringCat<_CtnType, _ToStringType>;
+		using _ObjType = SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE::StringImpl<_CtnType, _ToStringType>;
 #endif
 
 	public:

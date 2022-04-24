@@ -21,7 +21,7 @@ namespace SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE
 {
 
 template<typename _CtnType, typename _ToStringType>
-class DictCat :
+class DictImpl :
 	public DictBaseObject<
 		HashableBaseObject<_ToStringType>,
 		BaseObject<_ToStringType>,
@@ -31,7 +31,7 @@ public: // Static member:
 
 	using ContainerType = _CtnType;
 	using ToStringType = _ToStringType;
-	using Self = DictCat<_CtnType, _ToStringType>;
+	using Self = DictImpl<_CtnType, _ToStringType>;
 	using Base = DictBaseObject<
 		HashableBaseObject<_ToStringType>,
 		BaseObject<_ToStringType>,
@@ -83,23 +83,23 @@ public: // Static member:
 
 public:
 
-	DictCat() :
+	DictImpl() :
 		m_data()
 	{}
 
-	DictCat(std::initializer_list<value_type> l) :
+	DictImpl(std::initializer_list<value_type> l) :
 		m_data(l)
 	{}
 
-	DictCat(const Self& other) :
+	DictImpl(const Self& other) :
 		m_data(other.m_data)
 	{}
 
-	DictCat(Self&& other) :
+	DictImpl(Self&& other) :
 		m_data(std::forward<ContainerType>(other.m_data))
 	{}
 
-	virtual ~DictCat() = default;
+	virtual ~DictImpl() = default;
 
 	Self& operator=(const Self& rhs)
 	{
@@ -603,6 +603,6 @@ private:
 
 	ContainerType m_data;
 
-}; // class DictCat
+}; // class DictImpl
 
 } // namespace SimpleObjects

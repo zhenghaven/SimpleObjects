@@ -19,7 +19,7 @@ namespace SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE
 {
 
 template<typename _CtnType, typename _ToStringType>
-class ListCat :
+class ListImpl :
 	public ListBaseObject<
 		BaseObject<_ToStringType>,
 		_ToStringType>
@@ -28,7 +28,7 @@ public: // Static member:
 
 	using ContainerType = _CtnType;
 	using ToStringType  = _ToStringType;
-	using Self = ListCat<_CtnType, _ToStringType>;
+	using Self = ListImpl<_CtnType, _ToStringType>;
 	using Base = ListBaseObject<BaseObject<_ToStringType>, _ToStringType>;
 	using BaseBase = typename Base::Base;
 
@@ -61,23 +61,23 @@ public: // Static member:
 
 public:
 
-	ListCat() :
+	ListImpl() :
 		m_data()
 	{}
 
-	ListCat(std::initializer_list<value_type> l) :
+	ListImpl(std::initializer_list<value_type> l) :
 		m_data(l)
 	{}
 
-	ListCat(const Self& other) :
+	ListImpl(const Self& other) :
 		m_data(other.m_data)
 	{}
 
-	ListCat(Self&& other) :
+	ListImpl(Self&& other) :
 		m_data(std::forward<ContainerType>(other.m_data))
 	{}
 
-	virtual ~ListCat() = default;
+	virtual ~ListImpl() = default;
 
 	Self& operator=(const Self& rhs)
 	{
@@ -549,6 +549,6 @@ private:
 
 	ContainerType m_data;
 
-}; // class ListCat
+}; // class ListImpl
 
 } // namespace SimpleObjects
