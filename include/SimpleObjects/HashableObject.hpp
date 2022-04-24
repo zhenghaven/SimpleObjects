@@ -34,7 +34,7 @@ public: // Static members
 	using BasePtr = std::unique_ptr<Base>;
 
 	using NullBase     = typename Base::NullBase;
-	using NumericBase  = typename Base::NumericBase;
+	using RealNumBase  = typename Base::RealNumBase;
 	using StringBase   = typename Base::StringBase;
 	using ListBase     = typename Base::ListBase;
 	using DictBase     = typename Base::DictBase;
@@ -242,14 +242,14 @@ public:
 		return m_ptr->AsNull();
 	}
 
-	virtual NumericBase& AsNumeric() override
+	virtual RealNumBase& AsRealNum() override
 	{
-		return m_ptr->AsNumeric();
+		return m_ptr->AsRealNum();
 	}
 
-	virtual const NumericBase& AsNumeric() const override
+	virtual const RealNumBase& AsRealNum() const override
 	{
-		return m_ptr->AsNumeric();
+		return m_ptr->AsRealNum();
 	}
 
 	virtual StringBase& AsString() override

@@ -32,7 +32,7 @@ enum class ObjCategory
 	Bytes,
 };
 
-enum class NumericType
+enum class RealNumType
 {
 	Bool,
 	Int8,
@@ -45,23 +45,16 @@ enum class NumericType
 	UInt64,
 	Float,
 	Double,
-	// All enum type above are RESERVED for Numeric<> class ONLY
+	// All enum type above are RESERVED for RealNumImpl<> class ONLY
 
 	Other,  // for future extensions, use this
 };
-
-inline constexpr bool IsNumericCat(ObjCategory cat)
-{
-	return cat == ObjCategory::Bool ||
-		cat == ObjCategory::Integer ||
-		cat == ObjCategory::Real;
-}
 
 // Forward declarations
 template<typename _ToStringType>
 class NullImpl;
 template<typename _ToStringType>
-class NumericBaseObject;
+class RealNumBaseObject;
 template<typename _CharType, typename _ToStringType>
 class StringBaseObject;
 template<typename _ValBaseType, typename _ToStringType>
@@ -93,7 +86,7 @@ public: // Static members:
 
 	using NullBase    = NullImpl<ToStringType>;
 
-	using NumericBase = NumericBaseObject<ToStringType>;
+	using RealNumBase = RealNumBaseObject<ToStringType>;
 
 	using StringBase  = StringBaseObject<char, ToStringType>;
 
@@ -289,43 +282,43 @@ public:
 	virtual uint8_t AsCppUInt8() const
 	{
 		throw TypeError(
-			"Numeric no larger than uint8_t", this->GetCategoryName());
+			"RealNumImpl no larger than uint8_t", this->GetCategoryName());
 	}
 
 	virtual int8_t AsCppInt8() const
 	{
 		throw TypeError(
-			"Numeric no larger than int8_t", this->GetCategoryName());
+			"RealNumImpl no larger than int8_t", this->GetCategoryName());
 	}
 
 	virtual uint32_t AsCppUInt32() const
 	{
 		throw TypeError(
-			"Numeric no larger than uint32_t", this->GetCategoryName());
+			"RealNumImpl no larger than uint32_t", this->GetCategoryName());
 	}
 
 	virtual int32_t AsCppInt32() const
 	{
 		throw TypeError(
-			"Numeric no larger than int32_t", this->GetCategoryName());
+			"RealNumImpl no larger than int32_t", this->GetCategoryName());
 	}
 
 	virtual uint64_t AsCppUInt64() const
 	{
 		throw TypeError(
-			"Numeric no larger than uint64_t", this->GetCategoryName());
+			"RealNumImpl no larger than uint64_t", this->GetCategoryName());
 	}
 
 	virtual int64_t AsCppInt64() const
 	{
 		throw TypeError(
-			"Numeric no larger than int64_t", this->GetCategoryName());
+			"RealNumImpl no larger than int64_t", this->GetCategoryName());
 	}
 
 	virtual double AsCppDouble() const
 	{
 		throw TypeError(
-			"Numeric", this->GetCategoryName());
+			"RealNumImpl", this->GetCategoryName());
 	}
 
 	virtual NullBase& AsNull()
@@ -338,14 +331,14 @@ public:
 		throw TypeError("Null", this->GetCategoryName());
 	}
 
-	virtual NumericBase& AsNumeric()
+	virtual RealNumBase& AsRealNum()
 	{
-		throw TypeError("Numeric Category", this->GetCategoryName());
+		throw TypeError("RealNumImpl Category", this->GetCategoryName());
 	}
 
-	virtual const NumericBase& AsNumeric() const
+	virtual const RealNumBase& AsRealNum() const
 	{
-		throw TypeError("Numeric Category", this->GetCategoryName());
+		throw TypeError("RealNumImpl Category", this->GetCategoryName());
 	}
 
 	virtual StringBase& AsString()

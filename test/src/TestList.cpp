@@ -416,7 +416,7 @@ GTEST_TEST(TestList, Miscs)
 	const auto kList = List();
 	EXPECT_NO_THROW(kList.AsList());
 	EXPECT_THROW(kList.AsNull(),       TypeError);
-	EXPECT_THROW(kList.AsNumeric(),    TypeError);
+	EXPECT_THROW(kList.AsRealNum(),    TypeError);
 	EXPECT_THROW(kList.AsString(),     TypeError);
 	EXPECT_THROW(kList.AsDict(),       TypeError);
 	EXPECT_THROW(kList.AsStaticDict(), TypeError);
@@ -424,7 +424,7 @@ GTEST_TEST(TestList, Miscs)
 
 	EXPECT_NO_THROW(List().AsList());
 	EXPECT_THROW(List().AsNull(),       TypeError);
-	EXPECT_THROW(List().AsNumeric(),    TypeError);
+	EXPECT_THROW(List().AsRealNum(),    TypeError);
 	EXPECT_THROW(List().AsString(),     TypeError);
 	EXPECT_THROW(List().AsDict(),       TypeError);
 	EXPECT_THROW(List().AsStaticDict(), TypeError);

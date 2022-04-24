@@ -97,7 +97,7 @@ GTEST_TEST(TestString, Miscs)
 	const auto kStr = String();
 	EXPECT_NO_THROW(kStr.AsString());
 	EXPECT_THROW(kStr.AsNull(),       TypeError);
-	EXPECT_THROW(kStr.AsNumeric(),    TypeError);
+	EXPECT_THROW(kStr.AsRealNum(),    TypeError);
 	EXPECT_THROW(kStr.AsList(),       TypeError);
 	EXPECT_THROW(kStr.AsDict(),       TypeError);
 	EXPECT_THROW(kStr.AsStaticDict(), TypeError);
@@ -105,7 +105,7 @@ GTEST_TEST(TestString, Miscs)
 
 	EXPECT_NO_THROW(String().AsString());
 	EXPECT_THROW(String().AsNull(),       TypeError);
-	EXPECT_THROW(String().AsNumeric(),    TypeError);
+	EXPECT_THROW(String().AsRealNum(),    TypeError);
 	EXPECT_THROW(String().AsList(),       TypeError);
 	EXPECT_THROW(String().AsDict(),       TypeError);
 	EXPECT_THROW(String().AsStaticDict(), TypeError);

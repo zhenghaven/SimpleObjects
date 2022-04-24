@@ -11,7 +11,7 @@
 #include <functional>
 
 #include "Null.hpp"
-#include "Numeric.hpp"
+#include "RealNum.hpp"
 #include "String.hpp"
 #include "List.hpp"
 #include "Dict.hpp"
@@ -52,10 +52,10 @@ inline const Null& None()
 	return n;
 }
 
-// ========== Convenient types of Numeric ==========
+// ========== Convenient types of RealNumImpl ==========
 
 template<typename _ValType>
-using RealNumT = Numeric<_ValType, ToStringType>;
+using RealNumT = RealNumImpl<_ValType, ToStringType>;
 
 using Bool   = RealNumT<bool    >;
 
@@ -108,7 +108,7 @@ using Bytes = BytesImpl<std::vector<uint8_t>, ToStringType>;
 using BaseObj = BaseObject<ToStringType>;
 using HashableBaseObj = HashableBaseObject<ToStringType>;
 
-using NumericBaseObj = NumericBaseObject<ToStringType>;
+using RealNumBaseObj = RealNumBaseObject<ToStringType>;
 using StringBaseObj = StringBaseObject<char, ToStringType>;
 using ListBaseObj = ListBaseObject<BaseObj, ToStringType>;
 using DictBaseObj = DictBaseObject<HashableBaseObj, BaseObj, ToStringType>;
