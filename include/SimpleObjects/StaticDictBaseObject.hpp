@@ -82,61 +82,70 @@ public:
 			>::AsChild(*this, "StaticDict", this->GetCategoryName());
 	}
 
-	virtual bool operator==(const Self& rhs) const = 0;
+	// ========== Comparisons ==========
 
-	virtual bool operator!=(const Self& rhs) const
+	// ===== This class
+
+	virtual bool StaticDictBaseEqual(const Self& rhs) const = 0;
+
+	bool operator==(const Self& rhs) const
+	{
+		return StaticDictBaseEqual(rhs);
+	}
+
+#ifndef __cpp_lib_three_way_comparison
+	bool operator!=(const Self& rhs) const
 	{
 		return !(*this == rhs);
 	}
+#endif
 
 	bool operator<(const Self& rhs) = delete;
 	bool operator>(const Self& rhs) = delete;
 	bool operator<=(const Self& rhs) = delete;
 	bool operator>=(const Self& rhs) = delete;
 
-	virtual bool operator==(const Base& rhs) const override
+	// ===== ObjectBase class
+
+	virtual bool BaseObjectIsEqual(const Base& rhs) const override
 	{
-		if (rhs.GetCategory() != ObjCategory::StaticDict)
+		return (rhs.GetCategory() == ObjCategory::StaticDict) &&
+				StaticDictBaseEqual(rhs.AsStaticDict());
+	}
+
+	virtual ObjectOrder BaseObjectCompare(const Base& rhs) const override
+	{
+		switch (rhs.GetCategory())
 		{
-			return false;
+		case ObjCategory::StaticDict:
+			return StaticDictBaseEqual(rhs.AsStaticDict()) ?
+					ObjectOrder::EqualUnordered :
+					ObjectOrder::NotEqualUnordered;
+		default:
+			return ObjectOrder::NotEqualUnordered;
 		}
-		return *this == rhs.AsStaticDict();
 	}
 
+	using Base::operator==;
+#ifdef __cpp_lib_three_way_comparison
+	using Base::operator<=>;
+#else
 	using Base::operator!=;
-
-	virtual bool operator<(const Base& rhs) const override
-	{
-		throw UnsupportedOperation("<",
-			this->GetCategoryName(), rhs.GetCategoryName());
-	}
-
-	virtual bool operator>(const Base& rhs) const override
-	{
-		throw UnsupportedOperation(">",
-			this->GetCategoryName(), rhs.GetCategoryName());
-	}
-
+	using Base::operator<;
+	using Base::operator>;
 	using Base::operator<=;
 	using Base::operator>=;
+#endif
 
-	virtual iterator begin() = 0;
-	virtual iterator end() = 0;
-
-	virtual const_iterator cbegin() const = 0;
-	virtual const_iterator cend() const = 0;
-
-	virtual const_iterator begin() const
-	{
-		return this->cbegin();
-	}
-
-	virtual const_iterator end() const
-	{
-		return this->cend();
-	}
+	// ========== capacity ==========
 
 	virtual size_t size() const = 0;
+
+	// ========== member testing ==========
+
+	virtual bool HasKey(const key_type& key) const = 0;
+
+	// ========== value access ==========
 
 	virtual mapped_type& at(const key_type& key) = 0;
 
@@ -154,7 +163,25 @@ public:
 
 	virtual const mapped_type& operator[](size_t idx) const = 0;
 
-	virtual bool HasKey(const key_type& key) const = 0;
+	// ========== iterators ==========
+
+	virtual iterator begin() = 0;
+	virtual iterator end() = 0;
+
+	virtual const_iterator cbegin() const = 0;
+	virtual const_iterator cend() const = 0;
+
+	virtual const_iterator begin() const
+	{
+		return this->cbegin();
+	}
+
+	virtual const_iterator end() const
+	{
+		return this->cend();
+	}
+
+	// ========== Interface copy/Move ==========
 
 	virtual std::unique_ptr<Self> Copy(const Self* /*unused*/) const = 0;
 

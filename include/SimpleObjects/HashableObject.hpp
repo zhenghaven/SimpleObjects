@@ -88,35 +88,42 @@ public:
 		return *this;
 	}
 
-	virtual bool operator==(const Self& rhs) const
+	bool operator==(const Self& rhs) const
 	{
 		return *m_ptr == *(rhs.m_ptr);
 	}
 
-	virtual bool operator!=(const Self& rhs) const
+#ifdef __cpp_lib_three_way_comparison
+	auto operator<=>(const Self& rhs) const
+	{
+		return *m_ptr <=> *(rhs.m_ptr);
+	}
+#else
+	bool operator!=(const Self& rhs) const
 	{
 		return *m_ptr != *(rhs.m_ptr);
 	}
 
-	virtual bool operator<(const Self& rhs) const
+	bool operator<(const Self& rhs) const
 	{
 		return *m_ptr < *(rhs.m_ptr);
 	}
 
-	virtual bool operator>(const Self& rhs) const
+	bool operator>(const Self& rhs) const
 	{
 		return *m_ptr > *(rhs.m_ptr);
 	}
 
-	virtual bool operator<=(const Self& rhs) const
+	bool operator<=(const Self& rhs) const
 	{
 		return *m_ptr <= *(rhs.m_ptr);
 	}
 
-	virtual bool operator>=(const Self& rhs) const
+	bool operator>=(const Self& rhs) const
 	{
 		return *m_ptr >= *(rhs.m_ptr);
 	}
+#endif
 
 	// ========== Overrides BaseObject ==========
 
@@ -295,25 +302,26 @@ public:
 		return m_ptr->AsBytes();
 	}
 
-	virtual bool operator==(const BaseBase& rhs) const override
+	virtual bool BaseObjectIsEqual(const BaseBase& rhs) const override
 	{
-		return m_ptr->operator==(rhs);
+		return m_ptr->BaseObjectIsEqual(rhs);
 	}
 
+	virtual ObjectOrder BaseObjectCompare(const BaseBase& rhs) const override
+	{
+		return m_ptr->BaseObjectCompare(rhs);
+	}
+
+	using Base::operator==;
+#ifdef __cpp_lib_three_way_comparison
+	using Base::operator<=>;
+#else
 	using Base::operator!=;
-
-	virtual bool operator<(const BaseBase& rhs) const override
-	{
-		return m_ptr->operator<(rhs);
-	}
-
-	virtual bool operator>(const BaseBase& rhs) const override
-	{
-		return m_ptr->operator>(rhs);
-	}
-
+	using Base::operator<;
+	using Base::operator>;
 	using Base::operator<=;
 	using Base::operator>=;
+#endif
 
 	// ========== Overrides HashableBaseObject ==========
 

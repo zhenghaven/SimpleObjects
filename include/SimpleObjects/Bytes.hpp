@@ -9,7 +9,7 @@
 
 #include "Internal/hash.hpp"
 
-#include "PrimitiveCmp.hpp"
+#include "Compare.hpp"
 #include "ToString.hpp"
 
 #ifndef SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE
@@ -119,85 +119,72 @@ public:
 
 	// ========== Comparisons ==========
 
-	virtual bool operator==(const Self& rhs) const
+	// ===== This class
+
+	bool operator==(const Self& rhs) const
 	{
 		return m_data == rhs.m_data;
 	}
-	virtual bool operator!=(const Self& rhs) const
+#ifdef __cpp_lib_three_way_comparison
+	auto operator<=>(const Self& rhs) const
+	{
+		return m_data <=> rhs.m_data;
+	}
+#else
+	bool operator!=(const Self& rhs) const
 	{
 		return m_data != rhs.m_data;
 	}
-	virtual bool operator<(const Self& rhs) const
+	bool operator<(const Self& rhs) const
 	{
 		return m_data < rhs.m_data;
 	}
-	virtual bool operator>(const Self& rhs) const
+	bool operator>(const Self& rhs) const
 	{
 		return m_data > rhs.m_data;
 	}
-	virtual bool operator<=(const Self& rhs) const
+	bool operator<=(const Self& rhs) const
 	{
 		return m_data <= rhs.m_data;
 	}
-	virtual bool operator>=(const Self& rhs) const
+	bool operator>=(const Self& rhs) const
 	{
 		return m_data >= rhs.m_data;
 	}
+#endif
 
-	virtual bool operator==(const Base& rhs) const override
+	// ===== BytesBase class
+
+	virtual bool BytesBaseEqual(size_t pos1, size_t count1,
+		const_pointer begin, const_pointer end) const override
 	{
-		auto ptr = m_data.data();
-		return rhs.Equal(0, rhs.size(), ptr, ptr + size());
+		auto ptrDiff = end - begin;
+		return Internal::RealNumCompare<decltype(ptrDiff), size_t>::Equal(
+				ptrDiff, count1) ?
+			std::equal(
+				m_data.data() + pos1, m_data.data() + pos1 + count1,
+				begin) :
+			false;
 	}
 
-	virtual bool operator<(const Base& rhs) const override
+	virtual int BytesBaseCompare(size_t pos1, size_t count1,
+		const_pointer begin, const_pointer end) const override
 	{
-		auto ptr = m_data.data();
-		// this < rhs ==> rhs > this
-		return rhs.GreaterThan(0, rhs.size(), ptr, ptr + size());
-	}
-
-	virtual bool operator>(const Base& rhs) const override
-	{
-		auto ptr = m_data.data();
-		// this > rhs ==> rhs < this
-		return rhs.LessThan(0, rhs.size(), ptr, ptr + size());
+		return Internal::LexicographicalCompareThreeWay(
+			m_data.data() + pos1, m_data.data() + pos1 + count1,
+			begin, end);
 	}
 
 	using Base::operator==;
+#ifdef __cpp_lib_three_way_comparison
+	using Base::operator<=>;
+#else
 	using Base::operator!=;
 	using Base::operator<;
 	using Base::operator>;
 	using Base::operator<=;
 	using Base::operator>=;
-
-	virtual bool LessThan(size_t pos1, size_t count1,
-		const_pointer begin, const_pointer end) const override
-	{
-		// m_data < (begin, end)
-		return std::lexicographical_compare(
-			&m_data[pos1], &m_data[pos1 + count1],
-			begin, end);
-	}
-
-	virtual bool GreaterThan(size_t pos1, size_t count1,
-		const_pointer begin, const_pointer end) const override
-	{
-		// m_data > (begin, end) ==> (begin, end) < m_data
-		return std::lexicographical_compare(
-			begin, end,
-			&m_data[pos1], &m_data[pos1 + count1]);
-	}
-
-	virtual bool Equal(size_t pos1, size_t count1,
-		const_pointer begin, const_pointer end) const override
-	{
-		auto ptrDiff = end - begin;
-		return Internal::Compare<decltype(ptrDiff), size_t>::Equal(
-				ptrDiff, m_data.size()) ?
-			std::equal(&m_data[pos1], &m_data[pos1 + count1], begin) :
-			false;
-	}
+#endif
 
 	// ========== Overrides BaseObject ==========
 

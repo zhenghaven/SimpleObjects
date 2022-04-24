@@ -519,8 +519,28 @@ public:
 
 	// ========== operators ==========
 
-	// overrides Base::operator==
-	virtual bool operator==(const Base& rhs) const override
+	// ===== This class
+
+	bool operator==(const Self& rhs) const
+	{
+		return m_data == rhs.m_data;
+	}
+
+#ifndef __cpp_lib_three_way_comparison
+	bool operator!=(const Self& rhs) const
+	{
+		return m_data != rhs.m_data;
+	}
+#endif
+
+	bool operator<(const Self& rhs) const = delete;
+	bool operator>(const Self& rhs) const = delete;
+	bool operator<=(const Self& rhs) const = delete;
+	bool operator>=(const Self& rhs) const = delete;
+
+	// ===== StaticDictBase class
+
+	virtual bool StaticDictBaseEqual(const Base& rhs) const override
 	{
 		if (sk_size != rhs.size())
 		{
@@ -542,27 +562,16 @@ public:
 		return true;
 	}
 
+	using Base::operator==;
+#ifdef __cpp_lib_three_way_comparison
+	using Base::operator<=>;
+#else
 	using Base::operator!=;
-
-	using BaseBase::operator<;
-	using BaseBase::operator>;
-	using BaseBase::operator<=;
-	using BaseBase::operator>=;
-
-	virtual bool operator==(const Self& rhs) const
-	{
-		return m_data == rhs.m_data;
-	}
-
-	virtual bool operator!=(const Self& rhs) const
-	{
-		return m_data != rhs.m_data;
-	}
-
-	bool operator<(const Self& rhs) const = delete;
-	bool operator>(const Self& rhs) const = delete;
-	bool operator<=(const Self& rhs) const = delete;
-	bool operator>=(const Self& rhs) const = delete;
+	using Base::operator<;
+	using Base::operator>;
+	using Base::operator<=;
+	using Base::operator>=;
+#endif
 
 	// ========== Overrides BaseObject ==========
 
@@ -606,32 +615,21 @@ public:
 
 	// ========== Overrides StaticDictBaseObject ==========
 
-	using Base::begin;
-	virtual iterator begin() override
-	{
-		return ToRdIt<true>(m_refArray.cbegin());
-	}
-
-	using Base::end;
-	virtual iterator end() override
-	{
-		return ToRdIt<true>(m_refArray.cend());
-	}
-
-	virtual const_iterator cbegin() const override
-	{
-		return ToRdIt<true>(m_krefArray.cbegin());
-	}
-
-	virtual const_iterator cend() const override
-	{
-		return ToRdIt<true>(m_krefArray.cend());
-	}
+	// ========== capacity ==========
 
 	virtual size_t size() const override
 	{
 		return sk_size;
 	}
+
+	// ========== member testing ==========
+
+	virtual bool HasKey(const key_type& key) const override
+	{
+		return m_refmap.find(key) != m_refmap.cend();
+	}
+
+	// ========== value access ==========
 
 	virtual mapped_type& at(const key_type& key) override
 	{
@@ -701,9 +699,29 @@ public:
 		return at(idx);
 	}
 
-	virtual bool HasKey(const key_type& key) const override
+	// ========== iterators ==========
+
+	using Base::begin;
+	using Base::end;
+
+	virtual iterator begin() override
 	{
-		return m_refmap.find(key) != m_refmap.cend();
+		return ToRdIt<true>(m_refArray.cbegin());
+	}
+
+	virtual iterator end() override
+	{
+		return ToRdIt<true>(m_refArray.cend());
+	}
+
+	virtual const_iterator cbegin() const override
+	{
+		return ToRdIt<true>(m_krefArray.cbegin());
+	}
+
+	virtual const_iterator cend() const override
+	{
+		return ToRdIt<true>(m_krefArray.cend());
 	}
 
 	// ========== Interface copy/Move ==========

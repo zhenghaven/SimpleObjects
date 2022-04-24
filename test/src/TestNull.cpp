@@ -9,6 +9,8 @@
 
 #include <SimpleObjects/SimpleObjects.hpp>
 
+#include "CompareHelpers.hpp"
+
 #ifndef SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE
 using namespace SimpleObjects;
 #else
@@ -110,16 +112,12 @@ GTEST_TEST(TestNull, Compare)
 	EXPECT_FALSE(Null() != Null());
 
 	// Base
-	using ObjPtr = std::unique_ptr<BaseObj>;
+	using BaseObjCmp = CompareTestHelpers<BaseObj>;
 
-	EXPECT_EQ(*ObjPtr(new Null()) != *ObjPtr(new Null()), nullptr != nullptr);
+	EXPECT_EQ(BaseObjCmp::Neq(Null(), Null()), nullptr != nullptr);
 
-	EXPECT_THROW(
-		(void)(*ObjPtr(new Null()) >= *ObjPtr(new Null())),
-		UnsupportedOperation);
-	EXPECT_THROW(
-		(void)(*ObjPtr(new Null()) <= *ObjPtr(new Null())),
-		UnsupportedOperation);
+	EXPECT_THROW(BaseObjCmp::Ge(Null(), Null()), UnsupportedOperation);
+	EXPECT_THROW(BaseObjCmp::Le(Null(), Null()), UnsupportedOperation);
 }
 
 GTEST_TEST(TestNull, ToString)

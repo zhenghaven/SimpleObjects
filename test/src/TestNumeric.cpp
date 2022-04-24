@@ -9,6 +9,8 @@
 
 #include <SimpleObjects/SimpleObjects.hpp>
 
+#include "CompareHelpers.hpp"
+
 #ifndef SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE
 using namespace SimpleObjects;
 #else
@@ -1398,604 +1400,206 @@ GTEST_TEST(TestNumeric, GetNumTypeName)
 
 namespace
 {
-	class Int8Ext : public Int8
+
+class Int8Ext : public Int8
+{
+public:
+	using Int8::Int8;
+
+	virtual NumericType GetNumType() const override
 	{
-	public:
-		using Int8::Int8;
+		return NumericType::Other;
+	}
 
-		virtual NumericType GetNumType() const override
-		{
-			return NumericType::Other;
-		}
+	virtual const char* GetNumTypeName() const override
+	{
+		return "Int8Ext";
+	}
+};
 
-		virtual const char* GetNumTypeName() const override
-		{
-			return "Int8Ext";
-		}
-	};
+template<typename _RhsObjT, typename _RhsT>
+static _RhsObjT ConstructRhs(_RhsT rhs)
+{
+	return _RhsObjT(static_cast<typename _RhsObjT::InternalType>(rhs));
 }
+
+template<typename _LhsT, typename _RhsT, typename CheckProgT>
+static void CheckTestResBool(_LhsT lhs, _RhsT rhs, bool expRes, CheckProgT prog)
+{
+	bool rhsBool =
+		Internal::RealNumCompare<_RhsT, int>::Compare(rhs, 0) != 0 ?
+		true : false;
+
+	EXPECT_EQ(prog(lhs, Bool  (rhsBool)), expRes);
+	EXPECT_EQ(prog(lhs, ConstructRhs<Int8  >(rhs)), expRes);
+	EXPECT_EQ(prog(lhs, ConstructRhs<Int16 >(rhs)), expRes);
+	EXPECT_EQ(prog(lhs, ConstructRhs<Int32 >(rhs)), expRes);
+	EXPECT_EQ(prog(lhs, ConstructRhs<Int64 >(rhs)), expRes);
+	EXPECT_EQ(prog(lhs, ConstructRhs<UInt8 >(rhs)), expRes);
+	EXPECT_EQ(prog(lhs, ConstructRhs<UInt16>(rhs)), expRes);
+	EXPECT_EQ(prog(lhs, ConstructRhs<UInt32>(rhs)), expRes);
+	EXPECT_EQ(prog(lhs, ConstructRhs<UInt64>(rhs)), expRes);
+	EXPECT_EQ(prog(lhs, ConstructRhs<Float >(rhs)), expRes);
+	EXPECT_EQ(prog(lhs, ConstructRhs<Double>(rhs)), expRes);
+}
+
+template<typename _T>
+struct RealNumComparisonTests
+{
+	template<typename _RhsT>
+	static void TestRealNumBaseLE(const _T& lhs, _RhsT rhs)
+	{
+		bool expRes =
+			Internal::RealNumCompare<typename _T::InternalType, _RhsT>::
+				Compare(lhs.GetVal(), rhs) <= 0;
+
+		CheckTestResBool(lhs, rhs, expRes,
+			CompareTestHelpers<NumericBaseObj>::Le);
+	}
+
+	template<typename _RhsT>
+	static void TestRealNumBaseGE(const _T& lhs, _RhsT rhs)
+	{
+		bool expRes =
+			Internal::RealNumCompare<typename _T::InternalType, _RhsT>::
+				Compare(lhs.GetVal(), rhs) >= 0;
+
+		CheckTestResBool(lhs, rhs, expRes,
+			CompareTestHelpers<NumericBaseObj>::Ge);
+	}
+
+	template<typename _RhsT>
+	static void TestRealNumBaseNE(const _T& lhs, _RhsT rhs)
+	{
+		bool expRes =
+			Internal::RealNumCompare<typename _T::InternalType, _RhsT>::
+				Compare(lhs.GetVal(), rhs) != 0;
+
+		CheckTestResBool(lhs, rhs, expRes,
+			CompareTestHelpers<NumericBaseObj>::Neq);
+	}
+}; // struct RealNumComparisonTests
+
+} // namespace
 
 GTEST_TEST(TestNumeric, BaseIsEqual)
 {
 	// Base object
-	using ObjPtr = std::unique_ptr<BaseObj>;
-
+	using BaseObjCmp = CompareTestHelpers<BaseObj>;
 	// Other types
-	EXPECT_TRUE(*ObjPtr(new Int8(1)) != *ObjPtr(new Null()));
+	EXPECT_TRUE(BaseObjCmp::Neq(Int8(1), Null()));
 
 	// Bool
-	EXPECT_EQ(*ObjPtr(new Bool(true)) != *ObjPtr(new Bool(true)), true != true);
-	EXPECT_EQ(*ObjPtr(new Bool(true)) != *ObjPtr(new Bool(false)), true != false);
-	EXPECT_EQ(*ObjPtr(new Bool(true)) != *ObjPtr(new Int8(1)), 1 != 1);
-	EXPECT_EQ(*ObjPtr(new Int8(1)) != *ObjPtr(new Bool(true)), 1 != 1);
-	EXPECT_EQ(*ObjPtr(new Int8(2)) != *ObjPtr(new Bool(true)), 2 != 1);
-	EXPECT_EQ(*ObjPtr(new Bool(true)) != *ObjPtr(new Int8(2)), 1 != 2);
-	EXPECT_EQ(*ObjPtr(new Bool(true)) != *ObjPtr(new Int16(1)), 1 != 1);
-	EXPECT_EQ(*ObjPtr(new Int16(1)) != *ObjPtr(new Bool(true)), 1 != 1);
-	EXPECT_EQ(*ObjPtr(new Int16(2)) != *ObjPtr(new Bool(true)), 2 != 1);
-	EXPECT_EQ(*ObjPtr(new Bool(true)) != *ObjPtr(new Int16(2)), 1 != 2);
-	EXPECT_EQ(*ObjPtr(new Bool(true)) != *ObjPtr(new Int32(1)), 1 != 1);
-	EXPECT_EQ(*ObjPtr(new Int32(1)) != *ObjPtr(new Bool(true)), 1 != 1);
-	EXPECT_EQ(*ObjPtr(new Int32(2)) != *ObjPtr(new Bool(true)), 2 != 1);
-	EXPECT_EQ(*ObjPtr(new Bool(true)) != *ObjPtr(new Int32(2)), 1 != 2);
-	EXPECT_EQ(*ObjPtr(new Bool(true)) != *ObjPtr(new Int64(1)), 1 != 1);
-	EXPECT_EQ(*ObjPtr(new Int64(1)) != *ObjPtr(new Bool(true)), 1 != 1);
-	EXPECT_EQ(*ObjPtr(new Int64(2)) != *ObjPtr(new Bool(true)), 2 != 1);
-	EXPECT_EQ(*ObjPtr(new Bool(true)) != *ObjPtr(new Int64(2)), 1 != 2);
-	EXPECT_EQ(*ObjPtr(new Bool(true)) != *ObjPtr(new UInt8(1)), 1 != 1);
-	EXPECT_EQ(*ObjPtr(new UInt8(1)) != *ObjPtr(new Bool(true)), 1 != 1);
-	EXPECT_EQ(*ObjPtr(new UInt8(2)) != *ObjPtr(new Bool(true)), 2 != 1);
-	EXPECT_EQ(*ObjPtr(new Bool(true)) != *ObjPtr(new UInt8(2)), 1 != 2);
-	EXPECT_EQ(*ObjPtr(new Bool(true)) != *ObjPtr(new UInt16(1)), 1 != 1);
-	EXPECT_EQ(*ObjPtr(new UInt16(1)) != *ObjPtr(new Bool(true)), 1 != 1);
-	EXPECT_EQ(*ObjPtr(new UInt16(2)) != *ObjPtr(new Bool(true)), 2 != 1);
-	EXPECT_EQ(*ObjPtr(new Bool(true)) != *ObjPtr(new UInt16(2)), 1 != 2);
-	EXPECT_EQ(*ObjPtr(new Bool(true)) != *ObjPtr(new UInt32(1)), 1 != 1);
-	EXPECT_EQ(*ObjPtr(new UInt32(1)) != *ObjPtr(new Bool(true)), 1 != 1);
-	EXPECT_EQ(*ObjPtr(new UInt32(2)) != *ObjPtr(new Bool(true)), 2 != 1);
-	EXPECT_EQ(*ObjPtr(new Bool(true)) != *ObjPtr(new UInt32(2)), 1 != 2);
-	EXPECT_EQ(*ObjPtr(new Bool(true)) != *ObjPtr(new UInt64(1)), 1 != 1);
-	EXPECT_EQ(*ObjPtr(new UInt64(1)) != *ObjPtr(new Bool(true)), 1 != 1);
-	EXPECT_EQ(*ObjPtr(new UInt64(2)) != *ObjPtr(new Bool(true)), 2 != 1);
-	EXPECT_EQ(*ObjPtr(new Bool(true)) != *ObjPtr(new UInt64(2)), 1 != 2);
-	EXPECT_EQ(*ObjPtr(new Bool(true)) != *ObjPtr(new Float(1.0)), 1 != 1.0);
-	EXPECT_EQ(*ObjPtr(new Float(1.0)) != *ObjPtr(new Bool(true)), 1.0 != 1);
-	EXPECT_EQ(*ObjPtr(new Float(2.0)) != *ObjPtr(new Bool(true)), 2.0 != 1);
-	EXPECT_EQ(*ObjPtr(new Bool(true)) != *ObjPtr(new Float(2.0)), 1 != 2.0);
-	EXPECT_EQ(*ObjPtr(new Bool(true)) != *ObjPtr(new Double(1.0)), 1 != 1.0);
-	EXPECT_EQ(*ObjPtr(new Double(1.0)) != *ObjPtr(new Bool(true)), 1.0 != 1);
-	EXPECT_EQ(*ObjPtr(new Double(2.0)) != *ObjPtr(new Bool(true)), 2.0 != 1);
-	EXPECT_EQ(*ObjPtr(new Bool(true)) != *ObjPtr(new Double(2.0)), 1 != 2.0);
+	RealNumComparisonTests<Bool  >::TestRealNumBaseNE(Bool  (true), 1);
+	RealNumComparisonTests<Bool  >::TestRealNumBaseNE(Bool  (true), 0);
 
 	// Int8
-	EXPECT_EQ(*ObjPtr(new Int8(1)) != *ObjPtr(new Int8(1)), 1 != 1);
-	EXPECT_EQ(*ObjPtr(new Int8(1)) != *ObjPtr(new Int8(2)), 1 != 2);
-	EXPECT_EQ(*ObjPtr(new Int8(1)) != *ObjPtr(new Int16(1)), 1 != 1);
-	EXPECT_EQ(*ObjPtr(new Int8(1)) != *ObjPtr(new Int16(2)), 1 != 2);
-	EXPECT_EQ(*ObjPtr(new Int16(1)) != *ObjPtr(new Int8(1)), 1 != 1);
-	EXPECT_EQ(*ObjPtr(new Int16(1)) != *ObjPtr(new Int8(2)), 1 != 2);
-	EXPECT_EQ(*ObjPtr(new Int8(1)) != *ObjPtr(new Int32(1)), 1 != 1);
-	EXPECT_EQ(*ObjPtr(new Int8(1)) != *ObjPtr(new Int32(2)), 1 != 2);
-	EXPECT_EQ(*ObjPtr(new Int32(1)) != *ObjPtr(new Int8(1)), 1 != 1);
-	EXPECT_EQ(*ObjPtr(new Int32(1)) != *ObjPtr(new Int8(2)), 1 != 2);
-	EXPECT_EQ(*ObjPtr(new Int8(1)) != *ObjPtr(new Int64(1)), 1 != 1);
-	EXPECT_EQ(*ObjPtr(new Int8(1)) != *ObjPtr(new Int64(2)), 1 != 2);
-	EXPECT_EQ(*ObjPtr(new Int64(1)) != *ObjPtr(new Int8(1)), 1 != 1);
-	EXPECT_EQ(*ObjPtr(new Int64(1)) != *ObjPtr(new Int8(2)), 1 != 2);
-	EXPECT_EQ(*ObjPtr(new Int8(1)) != *ObjPtr(new UInt8(1)), 1 != 1);
-	EXPECT_EQ(*ObjPtr(new Int8(1)) != *ObjPtr(new UInt8(2)), 1 != 2);
-	EXPECT_EQ(*ObjPtr(new UInt8(1)) != *ObjPtr(new Int8(1)), 1 != 1);
-	EXPECT_EQ(*ObjPtr(new UInt8(1)) != *ObjPtr(new Int8(2)), 1 != 2);
-	EXPECT_EQ(*ObjPtr(new Int8(1)) != *ObjPtr(new UInt16(1)), 1 != 1);
-	EXPECT_EQ(*ObjPtr(new Int8(1)) != *ObjPtr(new UInt16(2)), 1 != 2);
-	EXPECT_EQ(*ObjPtr(new UInt16(1)) != *ObjPtr(new Int8(1)), 1 != 1);
-	EXPECT_EQ(*ObjPtr(new UInt16(1)) != *ObjPtr(new Int8(2)), 1 != 2);
-	EXPECT_EQ(*ObjPtr(new Int8(1)) != *ObjPtr(new UInt32(1)), 1 != 1);
-	EXPECT_EQ(*ObjPtr(new Int8(1)) != *ObjPtr(new UInt32(2)), 1 != 2);
-	EXPECT_EQ(*ObjPtr(new UInt32(1)) != *ObjPtr(new Int8(1)), 1 != 1);
-	EXPECT_EQ(*ObjPtr(new UInt32(1)) != *ObjPtr(new Int8(2)), 1 != 2);
-	EXPECT_EQ(*ObjPtr(new Int8(1)) != *ObjPtr(new UInt64(1)), 1 != 1);
-	EXPECT_EQ(*ObjPtr(new Int8(1)) != *ObjPtr(new UInt64(2)), 1 != 2);
-	EXPECT_EQ(*ObjPtr(new UInt64(1)) != *ObjPtr(new Int8(1)), 1 != 1);
-	EXPECT_EQ(*ObjPtr(new UInt64(1)) != *ObjPtr(new Int8(2)), 1 != 2);
-	EXPECT_EQ(*ObjPtr(new Int8(1)) != *ObjPtr(new Float(1.0)), 1 != 1.0);
-	EXPECT_EQ(*ObjPtr(new Int8(1)) != *ObjPtr(new Float(2.0)), 1 != 2.0);
-	EXPECT_EQ(*ObjPtr(new Float(1.0)) != *ObjPtr(new Int8(1)), 1.0 != 1);
-	EXPECT_EQ(*ObjPtr(new Float(1.0)) != *ObjPtr(new Int8(2)), 1.0 != 2);
-	EXPECT_EQ(*ObjPtr(new Int8(1)) != *ObjPtr(new Double(1.0)), 1 != 1.0);
-	EXPECT_EQ(*ObjPtr(new Int8(1)) != *ObjPtr(new Double(2.0)), 1 != 2.0);
-	EXPECT_EQ(*ObjPtr(new Double(1.0)) != *ObjPtr(new Int8(1)), 1.0 != 1);
-	EXPECT_EQ(*ObjPtr(new Double(1.0)) != *ObjPtr(new Int8(2)), 1.0 != 2);
-
+	RealNumComparisonTests<Int8  >::TestRealNumBaseNE(Int8  (1), 1);
+	RealNumComparisonTests<Int8  >::TestRealNumBaseNE(Int8  (1), 0);
 	// Int16
-	EXPECT_EQ(*ObjPtr(new Int16(1)) != *ObjPtr(new Int16(1)), 1 != 1);
-	EXPECT_EQ(*ObjPtr(new Int16(1)) != *ObjPtr(new Int16(2)), 1 != 2);
-	EXPECT_EQ(*ObjPtr(new Int16(1)) != *ObjPtr(new Int32(1)), 1 != 1);
-	EXPECT_EQ(*ObjPtr(new Int16(1)) != *ObjPtr(new Int32(2)), 1 != 2);
-	EXPECT_EQ(*ObjPtr(new Int32(1)) != *ObjPtr(new Int16(1)), 1 != 1);
-	EXPECT_EQ(*ObjPtr(new Int32(1)) != *ObjPtr(new Int16(2)), 1 != 2);
-	EXPECT_EQ(*ObjPtr(new Int16(1)) != *ObjPtr(new Int64(1)), 1 != 1);
-	EXPECT_EQ(*ObjPtr(new Int16(1)) != *ObjPtr(new Int64(2)), 1 != 2);
-	EXPECT_EQ(*ObjPtr(new Int64(1)) != *ObjPtr(new Int16(1)), 1 != 1);
-	EXPECT_EQ(*ObjPtr(new Int64(1)) != *ObjPtr(new Int16(2)), 1 != 2);
-	EXPECT_EQ(*ObjPtr(new Int16(1)) != *ObjPtr(new UInt8(1)), 1 != 1);
-	EXPECT_EQ(*ObjPtr(new Int16(1)) != *ObjPtr(new UInt8(2)), 1 != 2);
-	EXPECT_EQ(*ObjPtr(new UInt8(1)) != *ObjPtr(new Int16(1)), 1 != 1);
-	EXPECT_EQ(*ObjPtr(new UInt8(1)) != *ObjPtr(new Int16(2)), 1 != 2);
-	EXPECT_EQ(*ObjPtr(new Int16(1)) != *ObjPtr(new UInt16(1)), 1 != 1);
-	EXPECT_EQ(*ObjPtr(new Int16(1)) != *ObjPtr(new UInt16(2)), 1 != 2);
-	EXPECT_EQ(*ObjPtr(new UInt16(1)) != *ObjPtr(new Int16(1)), 1 != 1);
-	EXPECT_EQ(*ObjPtr(new UInt16(1)) != *ObjPtr(new Int16(2)), 1 != 2);
-	EXPECT_EQ(*ObjPtr(new Int16(1)) != *ObjPtr(new UInt32(1)), 1 != 1);
-	EXPECT_EQ(*ObjPtr(new Int16(1)) != *ObjPtr(new UInt32(2)), 1 != 2);
-	EXPECT_EQ(*ObjPtr(new UInt32(1)) != *ObjPtr(new Int16(1)), 1 != 1);
-	EXPECT_EQ(*ObjPtr(new UInt32(1)) != *ObjPtr(new Int16(2)), 1 != 2);
-	EXPECT_EQ(*ObjPtr(new Int16(1)) != *ObjPtr(new UInt64(1)), 1 != 1);
-	EXPECT_EQ(*ObjPtr(new Int16(1)) != *ObjPtr(new UInt64(2)), 1 != 2);
-	EXPECT_EQ(*ObjPtr(new UInt64(1)) != *ObjPtr(new Int16(1)), 1 != 1);
-	EXPECT_EQ(*ObjPtr(new UInt64(1)) != *ObjPtr(new Int16(2)), 1 != 2);
-	EXPECT_EQ(*ObjPtr(new Int16(1)) != *ObjPtr(new Float(1.0)), 1 != 1.0);
-	EXPECT_EQ(*ObjPtr(new Int16(1)) != *ObjPtr(new Float(2.0)), 1 != 2.0);
-	EXPECT_EQ(*ObjPtr(new Float(1.0)) != *ObjPtr(new Int16(1)), 1.0 != 1);
-	EXPECT_EQ(*ObjPtr(new Float(1.0)) != *ObjPtr(new Int16(2)), 1.0 != 2);
-	EXPECT_EQ(*ObjPtr(new Int16(1)) != *ObjPtr(new Double(1.0)), 1 != 1.0);
-	EXPECT_EQ(*ObjPtr(new Int16(1)) != *ObjPtr(new Double(2.0)), 1 != 2.0);
-	EXPECT_EQ(*ObjPtr(new Double(1.0)) != *ObjPtr(new Int16(1)), 1.0 != 1);
-	EXPECT_EQ(*ObjPtr(new Double(1.0)) != *ObjPtr(new Int16(2)), 1.0 != 2);
+	RealNumComparisonTests<Int16 >::TestRealNumBaseNE(Int16 (1), 1);
+	RealNumComparisonTests<Int16 >::TestRealNumBaseNE(Int16 (1), 0);
 
 	// Int32
-	EXPECT_EQ(*ObjPtr(new Int32(1)) != *ObjPtr(new Int32(1)), 1 != 1);
-	EXPECT_EQ(*ObjPtr(new Int32(1)) != *ObjPtr(new Int32(2)), 1 != 2);
-	EXPECT_EQ(*ObjPtr(new Int32(1)) != *ObjPtr(new Int64(1)), 1 != 1);
-	EXPECT_EQ(*ObjPtr(new Int32(1)) != *ObjPtr(new Int64(2)), 1 != 2);
-	EXPECT_EQ(*ObjPtr(new Int64(1)) != *ObjPtr(new Int32(1)), 1 != 1);
-	EXPECT_EQ(*ObjPtr(new Int64(1)) != *ObjPtr(new Int32(2)), 1 != 2);
-	EXPECT_EQ(*ObjPtr(new Int32(1)) != *ObjPtr(new UInt8(1)), 1 != 1);
-	EXPECT_EQ(*ObjPtr(new Int32(1)) != *ObjPtr(new UInt8(2)), 1 != 2);
-	EXPECT_EQ(*ObjPtr(new UInt8(1)) != *ObjPtr(new Int32(1)), 1 != 1);
-	EXPECT_EQ(*ObjPtr(new UInt8(1)) != *ObjPtr(new Int32(2)), 1 != 2);
-	EXPECT_EQ(*ObjPtr(new Int32(1)) != *ObjPtr(new UInt16(1)), 1 != 1);
-	EXPECT_EQ(*ObjPtr(new Int32(1)) != *ObjPtr(new UInt16(2)), 1 != 2);
-	EXPECT_EQ(*ObjPtr(new UInt16(1)) != *ObjPtr(new Int32(1)), 1 != 1);
-	EXPECT_EQ(*ObjPtr(new UInt16(1)) != *ObjPtr(new Int32(2)), 1 != 2);
-	EXPECT_EQ(*ObjPtr(new Int32(1)) != *ObjPtr(new UInt32(1)), 1 != 1);
-	EXPECT_EQ(*ObjPtr(new Int32(1)) != *ObjPtr(new UInt32(2)), 1 != 2);
-	EXPECT_EQ(*ObjPtr(new UInt32(1)) != *ObjPtr(new Int32(1)), 1 != 1);
-	EXPECT_EQ(*ObjPtr(new UInt32(1)) != *ObjPtr(new Int32(2)), 1 != 2);
-	EXPECT_EQ(*ObjPtr(new Int32(1)) != *ObjPtr(new UInt64(1)), 1 != 1);
-	EXPECT_EQ(*ObjPtr(new Int32(1)) != *ObjPtr(new UInt64(2)), 1 != 2);
-	EXPECT_EQ(*ObjPtr(new UInt64(1)) != *ObjPtr(new Int32(1)), 1 != 1);
-	EXPECT_EQ(*ObjPtr(new UInt64(1)) != *ObjPtr(new Int32(2)), 1 != 2);
-	EXPECT_EQ(*ObjPtr(new Int32(1)) != *ObjPtr(new Float(1.0)), 1 != 1.0);
-	EXPECT_EQ(*ObjPtr(new Int32(1)) != *ObjPtr(new Float(2.0)), 1 != 2.0);
-	EXPECT_EQ(*ObjPtr(new Float(1.0)) != *ObjPtr(new Int32(1)), 1.0 != 1);
-	EXPECT_EQ(*ObjPtr(new Float(1.0)) != *ObjPtr(new Int32(2)), 1.0 != 2);
-	EXPECT_EQ(*ObjPtr(new Int32(1)) != *ObjPtr(new Double(1.0)), 1 != 1.0);
-	EXPECT_EQ(*ObjPtr(new Int32(1)) != *ObjPtr(new Double(2.0)), 1 != 2.0);
-	EXPECT_EQ(*ObjPtr(new Double(1.0)) != *ObjPtr(new Int32(1)), 1.0 != 1);
-	EXPECT_EQ(*ObjPtr(new Double(1.0)) != *ObjPtr(new Int32(2)), 1.0 != 2);
+	RealNumComparisonTests<Int32 >::TestRealNumBaseNE(Int32 (1), 1);
+	RealNumComparisonTests<Int32 >::TestRealNumBaseNE(Int32 (1), 0);
 
 	// Int64
-	EXPECT_EQ(*ObjPtr(new Int64(1)) != *ObjPtr(new Int64(1)), 1 != 1);
-	EXPECT_EQ(*ObjPtr(new Int64(1)) != *ObjPtr(new Int64(2)), 1 != 2);
-	EXPECT_EQ(*ObjPtr(new Int64(1)) != *ObjPtr(new UInt8(1)), 1 != 1);
-	EXPECT_EQ(*ObjPtr(new Int64(1)) != *ObjPtr(new UInt8(2)), 1 != 2);
-	EXPECT_EQ(*ObjPtr(new UInt8(1)) != *ObjPtr(new Int64(1)), 1 != 1);
-	EXPECT_EQ(*ObjPtr(new UInt8(1)) != *ObjPtr(new Int64(2)), 1 != 2);
-	EXPECT_EQ(*ObjPtr(new Int64(1)) != *ObjPtr(new UInt16(1)), 1 != 1);
-	EXPECT_EQ(*ObjPtr(new Int64(1)) != *ObjPtr(new UInt16(2)), 1 != 2);
-	EXPECT_EQ(*ObjPtr(new UInt16(1)) != *ObjPtr(new Int64(1)), 1 != 1);
-	EXPECT_EQ(*ObjPtr(new UInt16(1)) != *ObjPtr(new Int64(2)), 1 != 2);
-	EXPECT_EQ(*ObjPtr(new Int64(1)) != *ObjPtr(new UInt32(1)), 1 != 1);
-	EXPECT_EQ(*ObjPtr(new Int64(1)) != *ObjPtr(new UInt32(2)), 1 != 2);
-	EXPECT_EQ(*ObjPtr(new UInt32(1)) != *ObjPtr(new Int64(1)), 1 != 1);
-	EXPECT_EQ(*ObjPtr(new UInt32(1)) != *ObjPtr(new Int64(2)), 1 != 2);
-	EXPECT_EQ(*ObjPtr(new Int64(1)) != *ObjPtr(new UInt64(1)), 1 != 1);
-	EXPECT_EQ(*ObjPtr(new Int64(1)) != *ObjPtr(new UInt64(2)), 1 != 2);
-	EXPECT_EQ(*ObjPtr(new UInt64(1)) != *ObjPtr(new Int64(1)), 1 != 1);
-	EXPECT_EQ(*ObjPtr(new UInt64(1)) != *ObjPtr(new Int64(2)), 1 != 2);
-	EXPECT_EQ(*ObjPtr(new Int64(1)) != *ObjPtr(new Float(1.0)), 1 != 1.0);
-	EXPECT_EQ(*ObjPtr(new Int64(1)) != *ObjPtr(new Float(2.0)), 1 != 2.0);
-	EXPECT_EQ(*ObjPtr(new Float(1.0)) != *ObjPtr(new Int64(1)), 1.0 != 1);
-	EXPECT_EQ(*ObjPtr(new Float(1.0)) != *ObjPtr(new Int64(2)), 1.0 != 2);
-	EXPECT_EQ(*ObjPtr(new Int64(1)) != *ObjPtr(new Double(1.0)), 1 != 1.0);
-	EXPECT_EQ(*ObjPtr(new Int64(1)) != *ObjPtr(new Double(2.0)), 1 != 2.0);
-	EXPECT_EQ(*ObjPtr(new Double(1.0)) != *ObjPtr(new Int64(1)), 1.0 != 1);
-	EXPECT_EQ(*ObjPtr(new Double(1.0)) != *ObjPtr(new Int64(2)), 1.0 != 2);
+	RealNumComparisonTests<Int64 >::TestRealNumBaseNE(Int64 (1), 1);
+	RealNumComparisonTests<Int64 >::TestRealNumBaseNE(Int64 (1), 0);
 
 	// UInt8
-	EXPECT_EQ(*ObjPtr(new UInt8(1)) != *ObjPtr(new UInt8(1)), 1 != 1);
-	EXPECT_EQ(*ObjPtr(new UInt8(1)) != *ObjPtr(new UInt8(2)), 1 != 2);
-	EXPECT_EQ(*ObjPtr(new UInt8(1)) != *ObjPtr(new UInt16(1)), 1 != 1);
-	EXPECT_EQ(*ObjPtr(new UInt8(1)) != *ObjPtr(new UInt16(2)), 1 != 2);
-	EXPECT_EQ(*ObjPtr(new UInt16(1)) != *ObjPtr(new UInt8(1)), 1 != 1);
-	EXPECT_EQ(*ObjPtr(new UInt16(1)) != *ObjPtr(new UInt8(2)), 1 != 2);
-	EXPECT_EQ(*ObjPtr(new UInt8(1)) != *ObjPtr(new UInt32(1)), 1 != 1);
-	EXPECT_EQ(*ObjPtr(new UInt8(1)) != *ObjPtr(new UInt32(2)), 1 != 2);
-	EXPECT_EQ(*ObjPtr(new UInt32(1)) != *ObjPtr(new UInt8(1)), 1 != 1);
-	EXPECT_EQ(*ObjPtr(new UInt32(1)) != *ObjPtr(new UInt8(2)), 1 != 2);
-	EXPECT_EQ(*ObjPtr(new UInt8(1)) != *ObjPtr(new UInt64(1)), 1 != 1);
-	EXPECT_EQ(*ObjPtr(new UInt8(1)) != *ObjPtr(new UInt64(2)), 1 != 2);
-	EXPECT_EQ(*ObjPtr(new UInt64(1)) != *ObjPtr(new UInt8(1)), 1 != 1);
-	EXPECT_EQ(*ObjPtr(new UInt64(1)) != *ObjPtr(new UInt8(2)), 1 != 2);
-	EXPECT_EQ(*ObjPtr(new UInt8(1)) != *ObjPtr(new Float(1.0)), 1 != 1.0);
-	EXPECT_EQ(*ObjPtr(new UInt8(1)) != *ObjPtr(new Float(2.0)), 1 != 2.0);
-	EXPECT_EQ(*ObjPtr(new Float(1.0)) != *ObjPtr(new UInt8(1)), 1.0 != 1);
-	EXPECT_EQ(*ObjPtr(new Float(1.0)) != *ObjPtr(new UInt8(2)), 1.0 != 2);
-	EXPECT_EQ(*ObjPtr(new UInt8(1)) != *ObjPtr(new Double(1.0)), 1 != 1.0);
-	EXPECT_EQ(*ObjPtr(new UInt8(1)) != *ObjPtr(new Double(2.0)), 1 != 2.0);
-	EXPECT_EQ(*ObjPtr(new Double(1.0)) != *ObjPtr(new UInt8(1)), 1.0 != 1);
-	EXPECT_EQ(*ObjPtr(new Double(1.0)) != *ObjPtr(new UInt8(2)), 1.0 != 2);
+	RealNumComparisonTests<UInt8 >::TestRealNumBaseNE(UInt8 (1), 1);
+	RealNumComparisonTests<UInt8 >::TestRealNumBaseNE(UInt8 (1), 0);
 
 	// UInt16
-	EXPECT_EQ(*ObjPtr(new UInt16(1)) != *ObjPtr(new UInt16(1)), 1 != 1);
-	EXPECT_EQ(*ObjPtr(new UInt16(1)) != *ObjPtr(new UInt16(2)), 1 != 2);
-	EXPECT_EQ(*ObjPtr(new UInt16(1)) != *ObjPtr(new UInt32(1)), 1 != 1);
-	EXPECT_EQ(*ObjPtr(new UInt16(1)) != *ObjPtr(new UInt32(2)), 1 != 2);
-	EXPECT_EQ(*ObjPtr(new UInt32(1)) != *ObjPtr(new UInt16(1)), 1 != 1);
-	EXPECT_EQ(*ObjPtr(new UInt32(1)) != *ObjPtr(new UInt16(2)), 1 != 2);
-	EXPECT_EQ(*ObjPtr(new UInt16(1)) != *ObjPtr(new UInt64(1)), 1 != 1);
-	EXPECT_EQ(*ObjPtr(new UInt16(1)) != *ObjPtr(new UInt64(2)), 1 != 2);
-	EXPECT_EQ(*ObjPtr(new UInt64(1)) != *ObjPtr(new UInt16(1)), 1 != 1);
-	EXPECT_EQ(*ObjPtr(new UInt64(1)) != *ObjPtr(new UInt16(2)), 1 != 2);
-	EXPECT_EQ(*ObjPtr(new UInt16(1)) != *ObjPtr(new Float(1.0)), 1 != 1.0);
-	EXPECT_EQ(*ObjPtr(new UInt16(1)) != *ObjPtr(new Float(2.0)), 1 != 2.0);
-	EXPECT_EQ(*ObjPtr(new Float(1.0)) != *ObjPtr(new UInt16(1)), 1.0 != 1);
-	EXPECT_EQ(*ObjPtr(new Float(1.0)) != *ObjPtr(new UInt16(2)), 1.0 != 2);
-	EXPECT_EQ(*ObjPtr(new UInt16(1)) != *ObjPtr(new Double(1.0)), 1 != 1.0);
-	EXPECT_EQ(*ObjPtr(new UInt16(1)) != *ObjPtr(new Double(2.0)), 1 != 2.0);
-	EXPECT_EQ(*ObjPtr(new Double(1.0)) != *ObjPtr(new UInt16(1)), 1.0 != 1);
-	EXPECT_EQ(*ObjPtr(new Double(1.0)) != *ObjPtr(new UInt16(2)), 1.0 != 2);
+	RealNumComparisonTests<UInt16>::TestRealNumBaseNE(UInt16(1), 1);
+	RealNumComparisonTests<UInt16>::TestRealNumBaseNE(UInt16(1), 0);
 
 	// UInt32
-	EXPECT_EQ(*ObjPtr(new UInt32(1)) != *ObjPtr(new UInt32(1)), 1 != 1);
-	EXPECT_EQ(*ObjPtr(new UInt32(1)) != *ObjPtr(new UInt32(2)), 1 != 2);
-	EXPECT_EQ(*ObjPtr(new UInt32(1)) != *ObjPtr(new UInt64(1)), 1 != 1);
-	EXPECT_EQ(*ObjPtr(new UInt32(1)) != *ObjPtr(new UInt64(2)), 1 != 2);
-	EXPECT_EQ(*ObjPtr(new UInt64(1)) != *ObjPtr(new UInt32(1)), 1 != 1);
-	EXPECT_EQ(*ObjPtr(new UInt64(1)) != *ObjPtr(new UInt32(2)), 1 != 2);
-	EXPECT_EQ(*ObjPtr(new UInt32(1)) != *ObjPtr(new Float(1.0)), 1 != 1.0);
-	EXPECT_EQ(*ObjPtr(new UInt32(1)) != *ObjPtr(new Float(2.0)), 1 != 2.0);
-	EXPECT_EQ(*ObjPtr(new Float(1.0)) != *ObjPtr(new UInt32(1)), 1.0 != 1);
-	EXPECT_EQ(*ObjPtr(new Float(1.0)) != *ObjPtr(new UInt32(2)), 1.0 != 2);
-	EXPECT_EQ(*ObjPtr(new UInt32(1)) != *ObjPtr(new Double(1.0)), 1 != 1.0);
-	EXPECT_EQ(*ObjPtr(new UInt32(1)) != *ObjPtr(new Double(2.0)), 1 != 2.0);
-	EXPECT_EQ(*ObjPtr(new Double(1.0)) != *ObjPtr(new UInt32(1)), 1.0 != 1);
-	EXPECT_EQ(*ObjPtr(new Double(1.0)) != *ObjPtr(new UInt32(2)), 1.0 != 2);
+	RealNumComparisonTests<UInt32>::TestRealNumBaseNE(UInt32(1), 1);
+	RealNumComparisonTests<UInt32>::TestRealNumBaseNE(UInt32(1), 0);
 
 	// UInt64
-	EXPECT_EQ(*ObjPtr(new UInt64(1)) != *ObjPtr(new UInt64(1)), 1 != 1);
-	EXPECT_EQ(*ObjPtr(new UInt64(1)) != *ObjPtr(new UInt64(2)), 1 != 2);
-	EXPECT_EQ(*ObjPtr(new UInt64(1)) != *ObjPtr(new Float(1.0)), 1 != 1.0);
-	EXPECT_EQ(*ObjPtr(new UInt64(1)) != *ObjPtr(new Float(2.0)), 1 != 2.0);
-	EXPECT_EQ(*ObjPtr(new Float(1.0)) != *ObjPtr(new UInt64(1)), 1.0 != 1);
-	EXPECT_EQ(*ObjPtr(new Float(1.0)) != *ObjPtr(new UInt64(2)), 1.0 != 2);
-	EXPECT_EQ(*ObjPtr(new UInt64(1)) != *ObjPtr(new Double(1.0)), 1 != 1.0);
-	EXPECT_EQ(*ObjPtr(new UInt64(1)) != *ObjPtr(new Double(2.0)), 1 != 2.0);
-	EXPECT_EQ(*ObjPtr(new Double(1.0)) != *ObjPtr(new UInt64(1)), 1.0 != 1);
-	EXPECT_EQ(*ObjPtr(new Double(1.0)) != *ObjPtr(new UInt64(2)), 1.0 != 2);
+	RealNumComparisonTests<UInt64>::TestRealNumBaseNE(UInt64(1), 1);
+	RealNumComparisonTests<UInt64>::TestRealNumBaseNE(UInt64(1), 0);
 
 	// Float
-	EXPECT_EQ(*ObjPtr(new Float(1.0)) != *ObjPtr(new Float(1.0)), 1.0 != 1.0);
-	EXPECT_EQ(*ObjPtr(new Float(1.0)) != *ObjPtr(new Float(2.0)), 1.0 != 2.0);
-	EXPECT_EQ(*ObjPtr(new Float(1.0)) != *ObjPtr(new Double(1.0)), 1.0 != 1.0);
-	EXPECT_EQ(*ObjPtr(new Float(1.0)) != *ObjPtr(new Double(2.0)), 1.0 != 2.0);
-	EXPECT_EQ(*ObjPtr(new Double(1.0)) != *ObjPtr(new Float(1.0)), 1.0 != 1.0);
-	EXPECT_EQ(*ObjPtr(new Double(1.0)) != *ObjPtr(new Float(2.0)), 1.0 != 2.0);
+	RealNumComparisonTests<Float>::TestRealNumBaseNE(Float(1), 1);
+	RealNumComparisonTests<Float>::TestRealNumBaseNE(Float(1), 0);
 
 	// Double
-	EXPECT_EQ(*ObjPtr(new Double(1.0)) != *ObjPtr(new Double(1.0)), 1.0 != 1.0);
-	EXPECT_EQ(*ObjPtr(new Double(1.0)) != *ObjPtr(new Double(2.0)), 1.0 != 2.0);
+	RealNumComparisonTests<Double>::TestRealNumBaseNE(Double(1), 1);
+	RealNumComparisonTests<Double>::TestRealNumBaseNE(Double(1), 0);
 
 	// Unsupported extensions
-	EXPECT_THROW(
-		(void)(*ObjPtr(new Int8(1)) != *ObjPtr(new Int8Ext(1))),
+	auto checkProgRealNumBase = [](
+		const NumericBaseObj& a, const NumericBaseObj& b) -> bool
+	{
+		return a != b;
+	};
+	EXPECT_THROW(checkProgRealNumBase(Int8(1), Int8Ext(1)),
 		UnsupportedOperation);
 
-	// different objs
-	EXPECT_TRUE(*ObjPtr(new Int8(1)) != *ObjPtr(new Null()));
+	auto checkBaseObjNE = [](const BaseObj& a, const BaseObj& b) -> bool
+	{
+		return a != b;
+	};
 
+	EXPECT_TRUE(checkBaseObjNE(Int64(10), Int8(2)));
+	EXPECT_FALSE(checkBaseObjNE(Int64(2), Int8(2)));
 
-
-	// Numeric base object
-	using NumPtr = std::unique_ptr<NumericBaseObj>;
-
-	EXPECT_EQ(*NumPtr(new Int8(1)) != *NumPtr(new Int8(1)), 1 != 1);
-	EXPECT_EQ(*NumPtr(new Int8(1)) != *NumPtr(new Int8(2)), 1 != 2);
+	EXPECT_TRUE(checkBaseObjNE(Int8(1), Null()));
 }
 
 GTEST_TEST(TestNumeric, BaseIsLessThan)
 {
-	using NumPtr = std::unique_ptr<NumericBaseObj>;
-
 	// <
-	EXPECT_FALSE(*NumPtr(new Bool(false)) >= *NumPtr(new Bool(true)));
-	EXPECT_FALSE(*NumPtr(new Bool(false)) >= *NumPtr(new Int8(2)));
-	EXPECT_FALSE(*NumPtr(new Bool(false)) >= *NumPtr(new Int16(2)));
-	EXPECT_FALSE(*NumPtr(new Bool(false)) >= *NumPtr(new Int32(2)));
-	EXPECT_FALSE(*NumPtr(new Bool(false)) >= *NumPtr(new Int64(2)));
-	EXPECT_FALSE(*NumPtr(new Bool(false)) >= *NumPtr(new UInt8(2)));
-	EXPECT_FALSE(*NumPtr(new Bool(false)) >= *NumPtr(new UInt16(2)));
-	EXPECT_FALSE(*NumPtr(new Bool(false)) >= *NumPtr(new UInt32(2)));
-	EXPECT_FALSE(*NumPtr(new Bool(false)) >= *NumPtr(new UInt64(2)));
-	EXPECT_FALSE(*NumPtr(new Bool(false)) >= *NumPtr(new Float(2.0)));
-	EXPECT_FALSE(*NumPtr(new Bool(false)) >= *NumPtr(new Double(2.0)));
+	RealNumComparisonTests<Bool  >::TestRealNumBaseLE(Bool  (false), 2);
+	RealNumComparisonTests<Int8  >::TestRealNumBaseLE(Int8  (0), 2);
+	RealNumComparisonTests<Int16 >::TestRealNumBaseLE(Int16 (0), 2);
+	RealNumComparisonTests<Int32 >::TestRealNumBaseLE(Int32 (0), 2);
+	RealNumComparisonTests<Int64 >::TestRealNumBaseLE(Int64 (0), 2);
+	RealNumComparisonTests<UInt8 >::TestRealNumBaseLE(UInt8 (0), 2);
+	RealNumComparisonTests<UInt16>::TestRealNumBaseLE(UInt16(0), 2);
+	RealNumComparisonTests<UInt32>::TestRealNumBaseLE(UInt32(0), 2);
+	RealNumComparisonTests<UInt64>::TestRealNumBaseLE(UInt64(0), 2);
+	RealNumComparisonTests<Float >::TestRealNumBaseLE(Float (0.0), 2);
+	RealNumComparisonTests<Double>::TestRealNumBaseLE(Double(0.0), 2);
 
-	EXPECT_FALSE(*NumPtr(new Int8(0)) >= *NumPtr(new Bool(true)));
-	EXPECT_FALSE(*NumPtr(new Int8(1)) >= *NumPtr(new Int8(2)));
-	EXPECT_FALSE(*NumPtr(new Int8(1)) >= *NumPtr(new Int16(2)));
-	EXPECT_FALSE(*NumPtr(new Int8(1)) >= *NumPtr(new Int32(2)));
-	EXPECT_FALSE(*NumPtr(new Int8(1)) >= *NumPtr(new Int64(2)));
-	EXPECT_FALSE(*NumPtr(new Int8(1)) >= *NumPtr(new UInt8(2)));
-	EXPECT_FALSE(*NumPtr(new Int8(1)) >= *NumPtr(new UInt16(2)));
-	EXPECT_FALSE(*NumPtr(new Int8(1)) >= *NumPtr(new UInt32(2)));
-	EXPECT_FALSE(*NumPtr(new Int8(1)) >= *NumPtr(new UInt64(2)));
-	EXPECT_FALSE(*NumPtr(new Int8(1)) >= *NumPtr(new Float(2.0)));
-	EXPECT_FALSE(*NumPtr(new Int8(1)) >= *NumPtr(new Double(2.0)));
+	auto checkBaseObjLE = [](const BaseObj& a, const BaseObj& b) -> bool
+	{
+		return a >= b;
+	};
 
-	EXPECT_FALSE(*NumPtr(new Int16(0)) >= *NumPtr(new Bool(true)));
-	EXPECT_FALSE(*NumPtr(new Int16(1)) >= *NumPtr(new Int8(2)));
-	EXPECT_FALSE(*NumPtr(new Int16(1)) >= *NumPtr(new Int16(2)));
-	EXPECT_FALSE(*NumPtr(new Int16(1)) >= *NumPtr(new Int32(2)));
-	EXPECT_FALSE(*NumPtr(new Int16(1)) >= *NumPtr(new Int64(2)));
-	EXPECT_FALSE(*NumPtr(new Int16(1)) >= *NumPtr(new UInt8(2)));
-	EXPECT_FALSE(*NumPtr(new Int16(1)) >= *NumPtr(new UInt16(2)));
-	EXPECT_FALSE(*NumPtr(new Int16(1)) >= *NumPtr(new UInt32(2)));
-	EXPECT_FALSE(*NumPtr(new Int16(1)) >= *NumPtr(new UInt64(2)));
-	EXPECT_FALSE(*NumPtr(new Int16(1)) >= *NumPtr(new Float(2.0)));
-	EXPECT_FALSE(*NumPtr(new Int16(1)) >= *NumPtr(new Double(2.0)));
+	EXPECT_FALSE(checkBaseObjLE(Bool(false), Int8(2)));
 
-	EXPECT_FALSE(*NumPtr(new Int32(0)) >= *NumPtr(new Bool(true)));
-	EXPECT_FALSE(*NumPtr(new Int32(1)) >= *NumPtr(new Int8(2)));
-	EXPECT_FALSE(*NumPtr(new Int32(1)) >= *NumPtr(new Int16(2)));
-	EXPECT_FALSE(*NumPtr(new Int32(1)) >= *NumPtr(new Int32(2)));
-	EXPECT_FALSE(*NumPtr(new Int32(1)) >= *NumPtr(new Int64(2)));
-	EXPECT_FALSE(*NumPtr(new Int32(1)) >= *NumPtr(new UInt8(2)));
-	EXPECT_FALSE(*NumPtr(new Int32(1)) >= *NumPtr(new UInt16(2)));
-	EXPECT_FALSE(*NumPtr(new Int32(1)) >= *NumPtr(new UInt32(2)));
-	EXPECT_FALSE(*NumPtr(new Int32(1)) >= *NumPtr(new UInt64(2)));
-	EXPECT_FALSE(*NumPtr(new Int32(1)) >= *NumPtr(new Float(2.0)));
-	EXPECT_FALSE(*NumPtr(new Int32(1)) >= *NumPtr(new Double(2.0)));
-
-	EXPECT_FALSE(*NumPtr(new Int64(0)) >= *NumPtr(new Bool(true)));
-	EXPECT_FALSE(*NumPtr(new Int64(1)) >= *NumPtr(new Int8(2)));
-	EXPECT_FALSE(*NumPtr(new Int64(1)) >= *NumPtr(new Int16(2)));
-	EXPECT_FALSE(*NumPtr(new Int64(1)) >= *NumPtr(new Int32(2)));
-	EXPECT_FALSE(*NumPtr(new Int64(1)) >= *NumPtr(new Int64(2)));
-	EXPECT_FALSE(*NumPtr(new Int64(1)) >= *NumPtr(new UInt8(2)));
-	EXPECT_FALSE(*NumPtr(new Int64(1)) >= *NumPtr(new UInt16(2)));
-	EXPECT_FALSE(*NumPtr(new Int64(1)) >= *NumPtr(new UInt32(2)));
-	EXPECT_FALSE(*NumPtr(new Int64(1)) >= *NumPtr(new UInt64(2)));
-	EXPECT_FALSE(*NumPtr(new Int64(1)) >= *NumPtr(new Float(2.0)));
-	EXPECT_FALSE(*NumPtr(new Int64(1)) >= *NumPtr(new Double(2.0)));
-
-	EXPECT_FALSE(*NumPtr(new UInt8(0)) >= *NumPtr(new Bool(true)));
-	EXPECT_FALSE(*NumPtr(new UInt8(1)) >= *NumPtr(new Int8(2)));
-	EXPECT_FALSE(*NumPtr(new UInt8(1)) >= *NumPtr(new Int16(2)));
-	EXPECT_FALSE(*NumPtr(new UInt8(1)) >= *NumPtr(new Int32(2)));
-	EXPECT_FALSE(*NumPtr(new UInt8(1)) >= *NumPtr(new Int64(2)));
-	EXPECT_FALSE(*NumPtr(new UInt8(1)) >= *NumPtr(new UInt8(2)));
-	EXPECT_FALSE(*NumPtr(new UInt8(1)) >= *NumPtr(new UInt16(2)));
-	EXPECT_FALSE(*NumPtr(new UInt8(1)) >= *NumPtr(new UInt32(2)));
-	EXPECT_FALSE(*NumPtr(new UInt8(1)) >= *NumPtr(new UInt64(2)));
-	EXPECT_FALSE(*NumPtr(new UInt8(1)) >= *NumPtr(new Float(2.0)));
-	EXPECT_FALSE(*NumPtr(new UInt8(1)) >= *NumPtr(new Double(2.0)));
-
-	EXPECT_FALSE(*NumPtr(new UInt16(0)) >= *NumPtr(new Bool(true)));
-	EXPECT_FALSE(*NumPtr(new UInt16(1)) >= *NumPtr(new Int8(2)));
-	EXPECT_FALSE(*NumPtr(new UInt16(1)) >= *NumPtr(new Int16(2)));
-	EXPECT_FALSE(*NumPtr(new UInt16(1)) >= *NumPtr(new Int32(2)));
-	EXPECT_FALSE(*NumPtr(new UInt16(1)) >= *NumPtr(new Int64(2)));
-	EXPECT_FALSE(*NumPtr(new UInt16(1)) >= *NumPtr(new UInt8(2)));
-	EXPECT_FALSE(*NumPtr(new UInt16(1)) >= *NumPtr(new UInt16(2)));
-	EXPECT_FALSE(*NumPtr(new UInt16(1)) >= *NumPtr(new UInt32(2)));
-	EXPECT_FALSE(*NumPtr(new UInt16(1)) >= *NumPtr(new UInt64(2)));
-	EXPECT_FALSE(*NumPtr(new UInt16(1)) >= *NumPtr(new Float(2.0)));
-	EXPECT_FALSE(*NumPtr(new UInt16(1)) >= *NumPtr(new Double(2.0)));
-
-	EXPECT_FALSE(*NumPtr(new UInt32(0)) >= *NumPtr(new Bool(true)));
-	EXPECT_FALSE(*NumPtr(new UInt32(1)) >= *NumPtr(new Int8(2)));
-	EXPECT_FALSE(*NumPtr(new UInt32(1)) >= *NumPtr(new Int16(2)));
-	EXPECT_FALSE(*NumPtr(new UInt32(1)) >= *NumPtr(new Int32(2)));
-	EXPECT_FALSE(*NumPtr(new UInt32(1)) >= *NumPtr(new Int64(2)));
-	EXPECT_FALSE(*NumPtr(new UInt32(1)) >= *NumPtr(new UInt8(2)));
-	EXPECT_FALSE(*NumPtr(new UInt32(1)) >= *NumPtr(new UInt16(2)));
-	EXPECT_FALSE(*NumPtr(new UInt32(1)) >= *NumPtr(new UInt32(2)));
-	EXPECT_FALSE(*NumPtr(new UInt32(1)) >= *NumPtr(new UInt64(2)));
-	EXPECT_FALSE(*NumPtr(new UInt32(1)) >= *NumPtr(new Float(2.0)));
-	EXPECT_FALSE(*NumPtr(new UInt32(1)) >= *NumPtr(new Double(2.0)));
-
-	EXPECT_FALSE(*NumPtr(new UInt64(0)) >= *NumPtr(new Bool(true)));
-	EXPECT_FALSE(*NumPtr(new UInt64(1)) >= *NumPtr(new Int8(2)));
-	EXPECT_FALSE(*NumPtr(new UInt64(1)) >= *NumPtr(new Int16(2)));
-	EXPECT_FALSE(*NumPtr(new UInt64(1)) >= *NumPtr(new Int32(2)));
-	EXPECT_FALSE(*NumPtr(new UInt64(1)) >= *NumPtr(new Int64(2)));
-	EXPECT_FALSE(*NumPtr(new UInt64(1)) >= *NumPtr(new UInt8(2)));
-	EXPECT_FALSE(*NumPtr(new UInt64(1)) >= *NumPtr(new UInt16(2)));
-	EXPECT_FALSE(*NumPtr(new UInt64(1)) >= *NumPtr(new UInt32(2)));
-	EXPECT_FALSE(*NumPtr(new UInt64(1)) >= *NumPtr(new UInt64(2)));
-	EXPECT_FALSE(*NumPtr(new UInt64(1)) >= *NumPtr(new Float(2.0)));
-	EXPECT_FALSE(*NumPtr(new UInt64(1)) >= *NumPtr(new Double(2.0)));
-
-	EXPECT_FALSE(*NumPtr(new Float(0.0)) >= *NumPtr(new Bool(true)));
-	EXPECT_FALSE(*NumPtr(new Float(1.0)) >= *NumPtr(new Int8(2)));
-	EXPECT_FALSE(*NumPtr(new Float(1.0)) >= *NumPtr(new Int16(2)));
-	EXPECT_FALSE(*NumPtr(new Float(1.0)) >= *NumPtr(new Int32(2)));
-	EXPECT_FALSE(*NumPtr(new Float(1.0)) >= *NumPtr(new Int64(2)));
-	EXPECT_FALSE(*NumPtr(new Float(1.0)) >= *NumPtr(new UInt8(2)));
-	EXPECT_FALSE(*NumPtr(new Float(1.0)) >= *NumPtr(new UInt16(2)));
-	EXPECT_FALSE(*NumPtr(new Float(1.0)) >= *NumPtr(new UInt32(2)));
-	EXPECT_FALSE(*NumPtr(new Float(1.0)) >= *NumPtr(new UInt64(2)));
-	EXPECT_FALSE(*NumPtr(new Float(1.0)) >= *NumPtr(new Float(2.0)));
-	EXPECT_FALSE(*NumPtr(new Float(1.0)) >= *NumPtr(new Double(2.0)));
-
-	EXPECT_FALSE(*NumPtr(new Double(0.0)) >= *NumPtr(new Bool(true)));
-	EXPECT_FALSE(*NumPtr(new Double(1.0)) >= *NumPtr(new Int8(2)));
-	EXPECT_FALSE(*NumPtr(new Double(1.0)) >= *NumPtr(new Int16(2)));
-	EXPECT_FALSE(*NumPtr(new Double(1.0)) >= *NumPtr(new Int32(2)));
-	EXPECT_FALSE(*NumPtr(new Double(1.0)) >= *NumPtr(new Int64(2)));
-	EXPECT_FALSE(*NumPtr(new Double(1.0)) >= *NumPtr(new UInt8(2)));
-	EXPECT_FALSE(*NumPtr(new Double(1.0)) >= *NumPtr(new UInt16(2)));
-	EXPECT_FALSE(*NumPtr(new Double(1.0)) >= *NumPtr(new UInt32(2)));
-	EXPECT_FALSE(*NumPtr(new Double(1.0)) >= *NumPtr(new UInt64(2)));
-	EXPECT_FALSE(*NumPtr(new Double(1.0)) >= *NumPtr(new Float(2.0)));
-	EXPECT_FALSE(*NumPtr(new Double(1.0)) >= *NumPtr(new Double(2.0)));
-
-	using ObjPtr = std::unique_ptr<BaseObj>;
-
-	EXPECT_FALSE(*ObjPtr(new Bool(false)) >= *ObjPtr(new Int8(2)));
-
-	// different objs
-	EXPECT_THROW(
-		(void)(*ObjPtr(new Int8(1)) >= *ObjPtr(new Null())),
-		UnsupportedOperation);
+	EXPECT_THROW(checkBaseObjLE(Int8(1), Null()), UnsupportedOperation);
 }
 
 GTEST_TEST(TestNumeric, BaseIsGreaterThan)
 {
-	using NumPtr = std::unique_ptr<NumericBaseObj>;
-
 	// >
-	EXPECT_FALSE(*NumPtr(new Bool(true)) <= *NumPtr(new Bool(false)));
-	EXPECT_FALSE(*NumPtr(new Bool(true)) <= *NumPtr(new Int8(0)));
-	EXPECT_FALSE(*NumPtr(new Bool(true)) <= *NumPtr(new Int16(0)));
-	EXPECT_FALSE(*NumPtr(new Bool(true)) <= *NumPtr(new Int32(0)));
-	EXPECT_FALSE(*NumPtr(new Bool(true)) <= *NumPtr(new Int64(0)));
-	EXPECT_FALSE(*NumPtr(new Bool(true)) <= *NumPtr(new UInt8(0)));
-	EXPECT_FALSE(*NumPtr(new Bool(true)) <= *NumPtr(new UInt16(0)));
-	EXPECT_FALSE(*NumPtr(new Bool(true)) <= *NumPtr(new UInt32(0)));
-	EXPECT_FALSE(*NumPtr(new Bool(true)) <= *NumPtr(new UInt64(0)));
-	EXPECT_FALSE(*NumPtr(new Bool(true)) <= *NumPtr(new Float(0.0)));
-	EXPECT_FALSE(*NumPtr(new Bool(true)) <= *NumPtr(new Double(0.0)));
+	RealNumComparisonTests<Bool>::TestRealNumBaseLE(Bool(true), 0);
+	RealNumComparisonTests<Int8>::TestRealNumBaseLE(Int8(5), 2);
+	RealNumComparisonTests<Int16>::TestRealNumBaseLE(Int16(5), 2);
+	RealNumComparisonTests<Int32>::TestRealNumBaseLE(Int32(5), 2);
+	RealNumComparisonTests<Int64>::TestRealNumBaseLE(Int64(5), 2);
+	RealNumComparisonTests<UInt8>::TestRealNumBaseLE(UInt8(5), 2);
+	RealNumComparisonTests<UInt16>::TestRealNumBaseLE(UInt16(5), 2);
+	RealNumComparisonTests<UInt32>::TestRealNumBaseLE(UInt32(5), 2);
+	RealNumComparisonTests<UInt64>::TestRealNumBaseLE(UInt64(5), 2);
+	RealNumComparisonTests<Float>::TestRealNumBaseLE(Float(5.0), 2);
+	RealNumComparisonTests<Double>::TestRealNumBaseLE(Double(5.0), 2);
 
-	EXPECT_FALSE(*NumPtr(new Int8(5)) <= *NumPtr(new Bool(true)));
-	EXPECT_FALSE(*NumPtr(new Int8(5)) <= *NumPtr(new Int8(2)));
-	EXPECT_FALSE(*NumPtr(new Int8(5)) <= *NumPtr(new Int16(2)));
-	EXPECT_FALSE(*NumPtr(new Int8(5)) <= *NumPtr(new Int32(2)));
-	EXPECT_FALSE(*NumPtr(new Int8(5)) <= *NumPtr(new Int64(2)));
-	EXPECT_FALSE(*NumPtr(new Int8(5)) <= *NumPtr(new UInt8(2)));
-	EXPECT_FALSE(*NumPtr(new Int8(5)) <= *NumPtr(new UInt16(2)));
-	EXPECT_FALSE(*NumPtr(new Int8(5)) <= *NumPtr(new UInt32(2)));
-	EXPECT_FALSE(*NumPtr(new Int8(5)) <= *NumPtr(new UInt64(2)));
-	EXPECT_FALSE(*NumPtr(new Int8(5)) <= *NumPtr(new Float(2.0)));
-	EXPECT_FALSE(*NumPtr(new Int8(5)) <= *NumPtr(new Double(2.0)));
+	auto checkBaseObjLE = [](const BaseObj& a, const BaseObj& b) -> bool
+	{
+		return a <= b;
+	};
 
-	EXPECT_FALSE(*NumPtr(new Int16(5)) <= *NumPtr(new Bool(true)));
-	EXPECT_FALSE(*NumPtr(new Int16(5)) <= *NumPtr(new Int8(2)));
-	EXPECT_FALSE(*NumPtr(new Int16(5)) <= *NumPtr(new Int16(2)));
-	EXPECT_FALSE(*NumPtr(new Int16(5)) <= *NumPtr(new Int32(2)));
-	EXPECT_FALSE(*NumPtr(new Int16(5)) <= *NumPtr(new Int64(2)));
-	EXPECT_FALSE(*NumPtr(new Int16(5)) <= *NumPtr(new UInt8(2)));
-	EXPECT_FALSE(*NumPtr(new Int16(5)) <= *NumPtr(new UInt16(2)));
-	EXPECT_FALSE(*NumPtr(new Int16(5)) <= *NumPtr(new UInt32(2)));
-	EXPECT_FALSE(*NumPtr(new Int16(5)) <= *NumPtr(new UInt64(2)));
-	EXPECT_FALSE(*NumPtr(new Int16(5)) <= *NumPtr(new Float(2.0)));
-	EXPECT_FALSE(*NumPtr(new Int16(5)) <= *NumPtr(new Double(2.0)));
+	EXPECT_FALSE(checkBaseObjLE(Bool(true), Int8(0)));
 
-	EXPECT_FALSE(*NumPtr(new Int32(5)) <= *NumPtr(new Bool(true)));
-	EXPECT_FALSE(*NumPtr(new Int32(5)) <= *NumPtr(new Int8(2)));
-	EXPECT_FALSE(*NumPtr(new Int32(5)) <= *NumPtr(new Int16(2)));
-	EXPECT_FALSE(*NumPtr(new Int32(5)) <= *NumPtr(new Int32(2)));
-	EXPECT_FALSE(*NumPtr(new Int32(5)) <= *NumPtr(new Int64(2)));
-	EXPECT_FALSE(*NumPtr(new Int32(5)) <= *NumPtr(new UInt8(2)));
-	EXPECT_FALSE(*NumPtr(new Int32(5)) <= *NumPtr(new UInt16(2)));
-	EXPECT_FALSE(*NumPtr(new Int32(5)) <= *NumPtr(new UInt32(2)));
-	EXPECT_FALSE(*NumPtr(new Int32(5)) <= *NumPtr(new UInt64(2)));
-	EXPECT_FALSE(*NumPtr(new Int32(5)) <= *NumPtr(new Float(2.0)));
-	EXPECT_FALSE(*NumPtr(new Int32(5)) <= *NumPtr(new Double(2.0)));
-
-	EXPECT_FALSE(*NumPtr(new Int64(5)) <= *NumPtr(new Bool(true)));
-	EXPECT_FALSE(*NumPtr(new Int64(5)) <= *NumPtr(new Int8(2)));
-	EXPECT_FALSE(*NumPtr(new Int64(5)) <= *NumPtr(new Int16(2)));
-	EXPECT_FALSE(*NumPtr(new Int64(5)) <= *NumPtr(new Int32(2)));
-	EXPECT_FALSE(*NumPtr(new Int64(5)) <= *NumPtr(new Int64(2)));
-	EXPECT_FALSE(*NumPtr(new Int64(5)) <= *NumPtr(new UInt8(2)));
-	EXPECT_FALSE(*NumPtr(new Int64(5)) <= *NumPtr(new UInt16(2)));
-	EXPECT_FALSE(*NumPtr(new Int64(5)) <= *NumPtr(new UInt32(2)));
-	EXPECT_FALSE(*NumPtr(new Int64(5)) <= *NumPtr(new UInt64(2)));
-	EXPECT_FALSE(*NumPtr(new Int64(5)) <= *NumPtr(new Float(2.0)));
-	EXPECT_FALSE(*NumPtr(new Int64(5)) <= *NumPtr(new Double(2.0)));
-
-	EXPECT_FALSE(*NumPtr(new UInt8(5)) <= *NumPtr(new Bool(true)));
-	EXPECT_FALSE(*NumPtr(new UInt8(5)) <= *NumPtr(new Int8(2)));
-	EXPECT_FALSE(*NumPtr(new UInt8(5)) <= *NumPtr(new Int16(2)));
-	EXPECT_FALSE(*NumPtr(new UInt8(5)) <= *NumPtr(new Int32(2)));
-	EXPECT_FALSE(*NumPtr(new UInt8(5)) <= *NumPtr(new Int64(2)));
-	EXPECT_FALSE(*NumPtr(new UInt8(5)) <= *NumPtr(new UInt8(2)));
-	EXPECT_FALSE(*NumPtr(new UInt8(5)) <= *NumPtr(new UInt16(2)));
-	EXPECT_FALSE(*NumPtr(new UInt8(5)) <= *NumPtr(new UInt32(2)));
-	EXPECT_FALSE(*NumPtr(new UInt8(5)) <= *NumPtr(new UInt64(2)));
-	EXPECT_FALSE(*NumPtr(new UInt8(5)) <= *NumPtr(new Float(2.0)));
-	EXPECT_FALSE(*NumPtr(new UInt8(5)) <= *NumPtr(new Double(2.0)));
-
-	EXPECT_FALSE(*NumPtr(new UInt16(5)) <= *NumPtr(new Bool(true)));
-	EXPECT_FALSE(*NumPtr(new UInt16(5)) <= *NumPtr(new Int8(2)));
-	EXPECT_FALSE(*NumPtr(new UInt16(5)) <= *NumPtr(new Int16(2)));
-	EXPECT_FALSE(*NumPtr(new UInt16(5)) <= *NumPtr(new Int32(2)));
-	EXPECT_FALSE(*NumPtr(new UInt16(5)) <= *NumPtr(new Int64(2)));
-	EXPECT_FALSE(*NumPtr(new UInt16(5)) <= *NumPtr(new UInt8(2)));
-	EXPECT_FALSE(*NumPtr(new UInt16(5)) <= *NumPtr(new UInt16(2)));
-	EXPECT_FALSE(*NumPtr(new UInt16(5)) <= *NumPtr(new UInt32(2)));
-	EXPECT_FALSE(*NumPtr(new UInt16(5)) <= *NumPtr(new UInt64(2)));
-	EXPECT_FALSE(*NumPtr(new UInt16(5)) <= *NumPtr(new Float(2.0)));
-	EXPECT_FALSE(*NumPtr(new UInt16(5)) <= *NumPtr(new Double(2.0)));
-
-	EXPECT_FALSE(*NumPtr(new UInt32(5)) <= *NumPtr(new Bool(true)));
-	EXPECT_FALSE(*NumPtr(new UInt32(5)) <= *NumPtr(new Int8(2)));
-	EXPECT_FALSE(*NumPtr(new UInt32(5)) <= *NumPtr(new Int16(2)));
-	EXPECT_FALSE(*NumPtr(new UInt32(5)) <= *NumPtr(new Int32(2)));
-	EXPECT_FALSE(*NumPtr(new UInt32(5)) <= *NumPtr(new Int64(2)));
-	EXPECT_FALSE(*NumPtr(new UInt32(5)) <= *NumPtr(new UInt8(2)));
-	EXPECT_FALSE(*NumPtr(new UInt32(5)) <= *NumPtr(new UInt16(2)));
-	EXPECT_FALSE(*NumPtr(new UInt32(5)) <= *NumPtr(new UInt32(2)));
-	EXPECT_FALSE(*NumPtr(new UInt32(5)) <= *NumPtr(new UInt64(2)));
-	EXPECT_FALSE(*NumPtr(new UInt32(5)) <= *NumPtr(new Float(2.0)));
-	EXPECT_FALSE(*NumPtr(new UInt32(5)) <= *NumPtr(new Double(2.0)));
-
-	EXPECT_FALSE(*NumPtr(new UInt64(5)) <= *NumPtr(new Bool(true)));
-	EXPECT_FALSE(*NumPtr(new UInt64(5)) <= *NumPtr(new Int8(2)));
-	EXPECT_FALSE(*NumPtr(new UInt64(5)) <= *NumPtr(new Int16(2)));
-	EXPECT_FALSE(*NumPtr(new UInt64(5)) <= *NumPtr(new Int32(2)));
-	EXPECT_FALSE(*NumPtr(new UInt64(5)) <= *NumPtr(new Int64(2)));
-	EXPECT_FALSE(*NumPtr(new UInt64(5)) <= *NumPtr(new UInt8(2)));
-	EXPECT_FALSE(*NumPtr(new UInt64(5)) <= *NumPtr(new UInt16(2)));
-	EXPECT_FALSE(*NumPtr(new UInt64(5)) <= *NumPtr(new UInt32(2)));
-	EXPECT_FALSE(*NumPtr(new UInt64(5)) <= *NumPtr(new UInt64(2)));
-	EXPECT_FALSE(*NumPtr(new UInt64(5)) <= *NumPtr(new Float(2.0)));
-	EXPECT_FALSE(*NumPtr(new UInt64(5)) <= *NumPtr(new Double(2.0)));
-
-	EXPECT_FALSE(*NumPtr(new Float(5.0)) <= *NumPtr(new Bool(true)));
-	EXPECT_FALSE(*NumPtr(new Float(5.0)) <= *NumPtr(new Int8(2)));
-	EXPECT_FALSE(*NumPtr(new Float(5.0)) <= *NumPtr(new Int16(2)));
-	EXPECT_FALSE(*NumPtr(new Float(5.0)) <= *NumPtr(new Int32(2)));
-	EXPECT_FALSE(*NumPtr(new Float(5.0)) <= *NumPtr(new Int64(2)));
-	EXPECT_FALSE(*NumPtr(new Float(5.0)) <= *NumPtr(new UInt8(2)));
-	EXPECT_FALSE(*NumPtr(new Float(5.0)) <= *NumPtr(new UInt16(2)));
-	EXPECT_FALSE(*NumPtr(new Float(5.0)) <= *NumPtr(new UInt32(2)));
-	EXPECT_FALSE(*NumPtr(new Float(5.0)) <= *NumPtr(new UInt64(2)));
-	EXPECT_FALSE(*NumPtr(new Float(5.0)) <= *NumPtr(new Float(2.0)));
-	EXPECT_FALSE(*NumPtr(new Float(5.0)) <= *NumPtr(new Double(2.0)));
-
-	EXPECT_FALSE(*NumPtr(new Double(5.0)) <= *NumPtr(new Bool(true)));
-	EXPECT_FALSE(*NumPtr(new Double(5.0)) <= *NumPtr(new Int8(2)));
-	EXPECT_FALSE(*NumPtr(new Double(5.0)) <= *NumPtr(new Int16(2)));
-	EXPECT_FALSE(*NumPtr(new Double(5.0)) <= *NumPtr(new Int32(2)));
-	EXPECT_FALSE(*NumPtr(new Double(5.0)) <= *NumPtr(new Int64(2)));
-	EXPECT_FALSE(*NumPtr(new Double(5.0)) <= *NumPtr(new UInt8(2)));
-	EXPECT_FALSE(*NumPtr(new Double(5.0)) <= *NumPtr(new UInt16(2)));
-	EXPECT_FALSE(*NumPtr(new Double(5.0)) <= *NumPtr(new UInt32(2)));
-	EXPECT_FALSE(*NumPtr(new Double(5.0)) <= *NumPtr(new UInt64(2)));
-	EXPECT_FALSE(*NumPtr(new Double(5.0)) <= *NumPtr(new Float(2.0)));
-	EXPECT_FALSE(*NumPtr(new Double(5.0)) <= *NumPtr(new Double(2.0)));
-
-	using ObjPtr = std::unique_ptr<BaseObj>;
-
-	EXPECT_FALSE(*ObjPtr(new Bool(true)) <= *ObjPtr(new Int8(0)));
-
-	// different objs
-	EXPECT_THROW(
-		(void)(*ObjPtr(new Int8(1)) <= *ObjPtr(new Null())),
-		UnsupportedOperation);
+	EXPECT_THROW(checkBaseObjLE(Int8(1), Null()), UnsupportedOperation);
 }
 
 GTEST_TEST(TestNumeric, ToString)

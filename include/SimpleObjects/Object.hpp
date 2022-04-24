@@ -86,55 +86,67 @@ public:
 
 	// ========== operators ==========
 
-	virtual bool operator==(const Self& rhs) const
+	// ===== This class
+
+	bool operator==(const Self& rhs) const
 	{
 		return *m_ptr == *(rhs.m_ptr);
 	}
 
-	virtual bool operator!=(const Self& rhs) const
+#ifdef __cpp_lib_three_way_comparison
+	auto operator<=>(const Self& rhs) const
+	{
+		return *m_ptr <=> *(rhs.m_ptr);
+	}
+#else
+	bool operator!=(const Self& rhs) const
 	{
 		return *m_ptr != *(rhs.m_ptr);
 	}
 
-	virtual bool operator<(const Self& rhs) const
+	bool operator<(const Self& rhs) const
 	{
 		return *m_ptr < *(rhs.m_ptr);
 	}
 
-	virtual bool operator>(const Self& rhs) const
+	bool operator>(const Self& rhs) const
 	{
 		return *m_ptr > *(rhs.m_ptr);
 	}
 
-	virtual bool operator<=(const Self& rhs) const
+	bool operator<=(const Self& rhs) const
 	{
 		return *m_ptr <= *(rhs.m_ptr);
 	}
 
-	virtual bool operator>=(const Self& rhs) const
+	bool operator>=(const Self& rhs) const
 	{
 		return *m_ptr >= *(rhs.m_ptr);
 	}
+#endif
 
-	virtual bool operator==(const Base& rhs) const override
+	// ===== BaseObject class
+
+	virtual bool BaseObjectIsEqual(const Base& rhs) const override
 	{
-		return m_ptr->operator==(rhs);
+		return m_ptr->BaseObjectIsEqual(rhs);
 	}
 
+	virtual ObjectOrder BaseObjectCompare(const Base& rhs) const override
+	{
+		return m_ptr->BaseObjectCompare(rhs);
+	}
+
+	using Base::operator==;
+#ifdef __cpp_lib_three_way_comparison
+	using Base::operator<=>;
+#else
 	using Base::operator!=;
-
-	virtual bool operator<(const Base& rhs) const override
-	{
-		return m_ptr->operator<(rhs);
-	}
-
-	virtual bool operator>(const Base& rhs) const override
-	{
-		return m_ptr->operator>(rhs);
-	}
-
+	using Base::operator<;
+	using Base::operator>;
 	using Base::operator<=;
 	using Base::operator>=;
+#endif
 
 	// ========== Overrides BaseObject ==========
 

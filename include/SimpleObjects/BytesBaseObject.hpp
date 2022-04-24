@@ -78,68 +78,7 @@ public:
 
 	// ========== comparison ==========
 
-	virtual bool operator==(const Self& rhs) const = 0;
-
-	virtual bool operator>(const Self& rhs) const = 0;
-
-	virtual bool operator<(const Self& rhs) const = 0;
-
-	virtual bool operator!=(const Self& rhs) const
-	{
-		return !(*this == rhs);
-	}
-
-	virtual bool operator<=(const Self& rhs) const
-	{
-		return !(*this > rhs);
-	}
-
-	virtual bool operator>=(const Self& rhs) const
-	{
-		return !(*this < rhs);
-	}
-
-	virtual bool operator==(const BaseBase& rhs) const override
-	{
-		const auto rhsCat = rhs.GetCategory();
-		if (rhsCat != ObjCategory::Bytes)
-		{
-			return false;
-		}
-		return *this == rhs.AsBytes();
-	}
-
-	virtual bool operator<(const BaseBase& rhs) const override
-	{
-		const auto rhsCat = rhs.GetCategory();
-		if (rhsCat != ObjCategory::Bytes)
-		{
-			throw UnsupportedOperation("<",
-				this->GetCategoryName(), rhs.GetCategoryName());
-		}
-		return *this < rhs.AsBytes();
-	}
-
-	virtual bool operator>(const BaseBase& rhs) const override
-	{
-		const auto rhsCat = rhs.GetCategory();
-		if (rhsCat != ObjCategory::Bytes)
-		{
-			throw UnsupportedOperation(">",
-				this->GetCategoryName(), rhs.GetCategoryName());
-		}
-		return *this > rhs.AsBytes();
-	}
-
-	using Base::operator!=;
-	using Base::operator<=;
-	using Base::operator>=;
-
-	virtual Self& operator+=(const Self& rhs)
-	{
-		this->Append(rhs);
-		return *this;
-	}
+	// ===== This class
 
 	/**
 	 * @brief lexicographical compare this bytes with the other
@@ -150,14 +89,107 @@ public:
 	 * @param end    the end of the other bytes
 	 * @return compare result
 	 */
-	virtual bool LessThan(size_t pos1, size_t count1,
+	virtual bool BytesBaseEqual(size_t pos1, size_t count1,
 		const_pointer begin, const_pointer end) const = 0;
 
-	virtual bool GreaterThan(size_t pos1, size_t count1,
+	virtual int BytesBaseCompare(size_t pos1, size_t count1,
 		const_pointer begin, const_pointer end) const = 0;
 
-	virtual bool Equal(size_t pos1, size_t count1,
-		const_pointer begin, const_pointer end) const = 0;
+	bool operator==(const Self& rhs) const
+	{
+		return BytesBaseEqual(
+			0, size(),
+			rhs.data(), rhs.data() + rhs.size());
+	}
+
+#ifdef __cpp_lib_three_way_comparison
+	std::strong_ordering operator<=>(const Self& rhs) const
+	{
+		auto cmpRes = BytesBaseCompare(
+			0, size(),
+			rhs.data(), rhs.data() + rhs.size());
+		return cmpRes == 0 ? std::strong_ordering::equal :
+				(cmpRes < 0 ? std::strong_ordering::less :
+				(std::strong_ordering::greater));
+	}
+#else
+	bool operator!=(const Self& rhs) const
+	{
+		return !(*this == rhs);
+	}
+
+	bool operator<(const Self& rhs) const
+	{
+		return BytesBaseCompare(
+			0, size(),
+			rhs.data(), rhs.data() + rhs.size()) < 0;
+	}
+
+	bool operator>(const Self& rhs) const
+	{
+		return BytesBaseCompare(
+			0, size(),
+			rhs.data(), rhs.data() + rhs.size()) > 0;
+	}
+
+	bool operator<=(const Self& rhs) const
+	{
+		return !(*this > rhs);
+	}
+
+	bool operator>=(const Self& rhs) const
+	{
+		return !(*this < rhs);
+	}
+#endif
+
+	// ===== BaseObject class
+
+	virtual bool BaseObjectIsEqual(const BaseBase& rhs) const override
+	{
+		if(rhs.GetCategory() == ObjCategory::Bytes)
+		{
+			const auto& rhsBytes = rhs.AsBytes();
+			auto rhsBytesData = rhsBytes.data();
+			return BytesBaseEqual(0, size(),
+				rhsBytesData, rhsBytesData + rhsBytes.size());
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	virtual ObjectOrder BaseObjectCompare(const BaseBase& rhs) const override
+	{
+		switch (rhs.GetCategory())
+		{
+		case ObjCategory::Bytes:
+		{
+			const auto& rhsBytes = rhs.AsBytes();
+			auto rhsBytesData = rhsBytes.data();
+			auto cmpRes = BytesBaseCompare(0, size(),
+				rhsBytesData, rhsBytesData + rhsBytes.size());
+
+			return cmpRes == 0 ? ObjectOrder::Equal :
+					(cmpRes < 0 ? ObjectOrder::Less :
+					(ObjectOrder::Greater));
+		}
+		default:
+			return ObjectOrder::NotEqualUnordered;
+		}
+	}
+
+	using Base::operator==;
+#ifdef __cpp_lib_three_way_comparison
+	using Base::operator<=>;
+#else
+	using Base::operator!=;
+	using Base::operator<;
+	using Base::operator>;
+	using Base::operator<=;
+	using Base::operator>=;
+#endif
 
 	// ========== capacity ==========
 
@@ -187,6 +219,12 @@ public:
 	virtual void Append(const Self& other)
 	{
 		return this->Append(other.cbegin(), other.cend());
+	}
+
+	virtual Self& operator+=(const Self& rhs)
+	{
+		this->Append(rhs);
+		return *this;
 	}
 
 	// ========== iterators ==========

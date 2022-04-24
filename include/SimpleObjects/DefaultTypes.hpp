@@ -34,6 +34,8 @@ namespace SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE
 
 // ========== Basic Type Controll ==========
 
+using ToStringType = std::string;
+
 template<typename _KeyType, typename _ValType>
 using MapType = std::unordered_map<_KeyType, _ValType>;
 
@@ -42,7 +44,7 @@ using VecType = std::vector<_ValType>;
 
 // ========== Convenient types of Null ==========
 
-using Null = NullImpl<std::string>;
+using Null = NullImpl<ToStringType>;
 
 inline const Null& None()
 {
@@ -52,67 +54,70 @@ inline const Null& None()
 
 // ========== Convenient types of Numeric ==========
 
-using Bool   = Numeric<bool    , std::string>;
+template<typename _ValType>
+using RealNumT = Numeric<_ValType, ToStringType>;
 
-using Int8   = Numeric<int8_t  , std::string>;
-using Int16  = Numeric<int16_t , std::string>;
-using Int32  = Numeric<int32_t , std::string>;
-using Int64  = Numeric<int64_t , std::string>;
+using Bool   = RealNumT<bool    >;
 
-using UInt8  = Numeric<uint8_t , std::string>;
-using UInt16 = Numeric<uint16_t, std::string>;
-using UInt32 = Numeric<uint32_t, std::string>;
-using UInt64 = Numeric<uint64_t, std::string>;
+using Int8   = RealNumT<int8_t  >;
+using Int16  = RealNumT<int16_t >;
+using Int32  = RealNumT<int32_t >;
+using Int64  = RealNumT<int64_t >;
 
-using Float  = Numeric<float   , std::string>;
-using Double = Numeric<double  , std::string>;
+using UInt8  = RealNumT<uint8_t >;
+using UInt16 = RealNumT<uint16_t>;
+using UInt32 = RealNumT<uint32_t>;
+using UInt64 = RealNumT<uint64_t>;
+
+using Float  = RealNumT<float   >;
+using Double = RealNumT<double  >;
 
 // ========== Convenient types of String ==========
 
-using String = StringCat<std::string, std::string>;
+using String = StringCat<std::string, ToStringType>;
 
 // ========== Convenient types of Object ==========
 
-using Object = ObjectImpl<std::string>;
+using Object = ObjectImpl<ToStringType>;
 
 // ========== Convenient types of HashableObject ==========
 
-using HashableObject = HashableObjectImpl<std::string>;
+using HashableObject = HashableObjectImpl<ToStringType>;
 
 // ========== Convenient types of List ==========
 
 template<typename _ValType>
-using ListT = ListCat<VecType<_ValType>, std::string>;
+using ListT = ListCat<VecType<_ValType>, ToStringType>;
 
 using List = ListT<Object>;
 
 // ========== Convenient types of Dict ==========
 
 template<typename _KeyType, typename _Valtype>
-using DictT = DictCat<MapType<_KeyType, _Valtype>, std::string>;
+using DictT = DictCat<MapType<_KeyType, _Valtype>, ToStringType>;
 
 using Dict = DictT<HashableObject, Object>;
 
 // ========== Convenient types of Bytes ==========
 
-using BytesBaseObj = BytesBaseObject<uint8_t, std::string>;
-using Bytes = BytesImpl<std::vector<uint8_t>, std::string>;
+using BytesBaseObj = BytesBaseObject<uint8_t, ToStringType>;
+using Bytes = BytesImpl<std::vector<uint8_t>, ToStringType>;
 
 // ========== Convenient types of base classes ==========
 
-using BaseObj = BaseObject<std::string>;
-using HashableBaseObj = HashableBaseObject<std::string>;
+using BaseObj = BaseObject<ToStringType>;
+using HashableBaseObj = HashableBaseObject<ToStringType>;
 
-using NumericBaseObj = NumericBaseObject<std::string>;
-using StringBaseObj = StringBaseObject<char, std::string>;
-using ListBaseObj = ListBaseObject<BaseObj, std::string>;
-using DictBaseObj = DictBaseObject<HashableBaseObj, BaseObj, std::string>;
+using NumericBaseObj = NumericBaseObject<ToStringType>;
+using StringBaseObj = StringBaseObject<char, ToStringType>;
+using ListBaseObj = ListBaseObject<BaseObj, ToStringType>;
+using DictBaseObj = DictBaseObject<HashableBaseObj, BaseObj, ToStringType>;
 using StaticDictBaseObj = StaticDictBaseObject<
 	HashableBaseObj,
 	BaseObj,
 	HashableReferenceWrapper,
 	std::reference_wrapper,
-	std::string>;
+	ToStringType>;
 
 // ========== Convenient types of static Dict ==========
 
@@ -131,6 +136,6 @@ using StaticDict = StaticDictImpl<
 	HashableReferenceWrapper,
 	std::reference_wrapper,
 	MapType,
-	std::string>;
+	ToStringType>;
 
 }//namespace SimpleObjects

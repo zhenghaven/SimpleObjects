@@ -64,69 +64,99 @@ public:
 			>::AsChild(*this, "Numeric Category", this->GetCategoryName());
 	}
 
-	virtual bool operator==(const Self& rhs) const = 0;
+	// ========== Comparisons ==========
 
-	virtual bool operator!=(const Self& rhs) const
+	// ===== This class
+
+	virtual bool RealNumBaseEqual(const Self& rhs) const = 0;
+
+	virtual int RealNumBaseCmp(const Self& rhs) const = 0;
+
+	bool operator==(const Self& rhs) const
+	{
+		return RealNumBaseEqual(rhs);
+	}
+
+#ifdef __cpp_lib_three_way_comparison
+	std::strong_ordering operator<=>(const Self& rhs) const
+	{
+		auto cmpRes = RealNumBaseCmp(rhs);
+		return cmpRes == 0 ? std::strong_ordering::equal :
+				(cmpRes < 0 ? std::strong_ordering::less :
+				(std::strong_ordering::greater));
+	}
+#else
+	bool operator!=(const Self& rhs) const
 	{
 		return !(*this == rhs);
 	}
 
-	virtual bool operator<(const Self& rhs) const = 0;
-
-	virtual bool operator>=(const Self& rhs) const
+	bool operator<(const Self& rhs) const
 	{
-		return !(*this < rhs);
+		return RealNumBaseCmp(rhs) < 0;
 	}
 
-	virtual bool operator>(const Self& rhs) const = 0;
+	bool operator>(const Self& rhs) const
+	{
+		return RealNumBaseCmp(rhs) > 0;
+	}
 
-	virtual bool operator<=(const Self& rhs) const
+	bool operator<=(const Self& rhs) const
 	{
 		return !(*this > rhs);
 	}
 
-	virtual bool operator==(const BaseBase& rhs) const override
+	bool operator>=(const Self& rhs) const
 	{
-		const auto rhsCat = rhs.GetCategory();
-		if (rhsCat != ObjCategory::Bool &&
-			rhsCat != ObjCategory::Integer &&
-			rhsCat != ObjCategory::Real)
+		return !(*this < rhs);
+	}
+#endif
+
+	// ===== BaseObject class
+
+	virtual bool BaseObjectIsEqual(const BaseBase& rhs) const override
+	{
+		switch (rhs.GetCategory())
 		{
+		case ObjCategory::Bool:
+		case ObjCategory::Integer:
+		case ObjCategory::Real:
+			return RealNumBaseEqual(rhs.AsNumeric());
+		default:
 			return false;
 		}
-		return *this == rhs.AsNumeric();
 	}
 
-	using BaseBase::operator!=;
-
-	virtual bool operator<(const BaseBase& rhs) const override
+	virtual ObjectOrder BaseObjectCompare(const BaseBase& rhs) const override
 	{
-		const auto rhsCat = rhs.GetCategory();
-		if (rhsCat != ObjCategory::Bool &&
-			rhsCat != ObjCategory::Integer &&
-			rhsCat != ObjCategory::Real)
+		switch (rhs.GetCategory())
 		{
-			throw UnsupportedOperation("<",
-				this->GetCategoryName(), rhs.GetCategoryName());
+		case ObjCategory::Bool:
+		case ObjCategory::Integer:
+		case ObjCategory::Real:
+		{
+			auto cmpRes = RealNumBaseCmp(rhs.AsNumeric());
+			return cmpRes == 0 ? ObjectOrder::Equal :
+					(cmpRes < 0 ? ObjectOrder::Less :
+					(ObjectOrder::Greater));
 		}
-		return *this < rhs.AsNumeric();
+		default:
+			return ObjectOrder::NotEqualUnordered;
+		}
 	}
 
-	virtual bool operator>(const BaseBase& rhs) const override
-	{
-		const auto rhsCat = rhs.GetCategory();
-		if (rhsCat != ObjCategory::Bool &&
-			rhsCat != ObjCategory::Integer &&
-			rhsCat != ObjCategory::Real)
-		{
-			throw UnsupportedOperation(">",
-				this->GetCategoryName(), rhs.GetCategoryName());
-		}
-		return *this > rhs.AsNumeric();
-	}
+	using Base::operator==;
+#ifdef __cpp_lib_three_way_comparison
+	using Base::operator<=>;
+#else
+	using Base::operator!=;
+	using Base::operator<;
+	using Base::operator>;
+	using Base::operator<=;
+	using Base::operator>=;
+#endif
 
-	using BaseBase::operator<=;
-	using BaseBase::operator>=;
+	// ========== Interface copy/Move ==========
 
 	virtual std::unique_ptr<Self> Copy(const Self* /*unused*/) const = 0;
 

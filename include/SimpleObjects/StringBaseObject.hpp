@@ -76,59 +76,164 @@ public:
 			>::AsChild(*this, "String", this->GetCategoryName());
 	}
 
-	virtual std::unique_ptr<Self> Copy(const Self* /*unused*/) const = 0;
+	// ========== Comparisons ==========
 
-	virtual std::unique_ptr<Self> Move(const Self* /*unused*/) = 0;
+	// ===== This class
 
-	using Base::Copy;
-	virtual std::unique_ptr<Base> Copy(const Base* /*unused*/) const override
+	/**
+	 * @brief lexicographical compare this string with the other
+	 *
+	 * @param pos1   the begin position of this string
+	 * @param count1 the length since the begin position to be compared
+	 * @param begin  the begin of the other string
+	 * @param end    the end of the other string
+	 * @return compare result
+	 */
+	virtual bool StringBaseEqual(size_t pos1, size_t count1,
+		const_pointer begin, const_pointer end) const = 0;
+
+	virtual int StringBaseCompare(size_t pos1, size_t count1,
+		const_pointer begin, const_pointer end) const = 0;
+
+	bool operator==(const Self& rhs) const
 	{
-		return Copy(sk_null);
+		return StringBaseEqual(
+			0, size(),
+			rhs.data(), rhs.data() + rhs.size());
 	}
 
-	using Base::Move;
-	virtual std::unique_ptr<Base> Move(const Base* /*unused*/) override
+#ifdef __cpp_lib_three_way_comparison
+	std::strong_ordering operator<=>(const Self& rhs) const
 	{
-		return Move(sk_null);
+		auto cmpRes = StringBaseCompare(
+			0, size(),
+			rhs.data(), rhs.data() + rhs.size());
+		return cmpRes == 0 ? std::strong_ordering::equal :
+				(cmpRes < 0 ? std::strong_ordering::less :
+				(std::strong_ordering::greater));
 	}
+#else
+	bool operator!=(const Self& rhs) const
+	{
+		return !(*this == rhs);
+	}
+
+	bool operator<(const Self& rhs) const
+	{
+		return StringBaseCompare(
+			0, size(),
+			rhs.data(), rhs.data() + rhs.size()) < 0;
+	}
+
+	bool operator>(const Self& rhs) const
+	{
+		return StringBaseCompare(
+			0, size(),
+			rhs.data(), rhs.data() + rhs.size()) > 0;
+	}
+
+	bool operator<=(const Self& rhs) const
+	{
+		return !(*this > rhs);
+	}
+
+	bool operator>=(const Self& rhs) const
+	{
+		return !(*this < rhs);
+	}
+#endif
+
+	// ===== ObjectBase class
+
+	virtual bool BaseObjectIsEqual(const BaseBase& rhs) const override
+	{
+		if(rhs.GetCategory() == ObjCategory::String)
+		{
+			const auto& rhsStr = rhs.AsString();
+			auto rhsStrData = rhsStr.data();
+			return StringBaseEqual(0, size(),
+				rhsStrData, rhsStrData + rhsStr.size());
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	virtual ObjectOrder BaseObjectCompare(const BaseBase& rhs) const override
+	{
+		switch (rhs.GetCategory())
+		{
+		case ObjCategory::String:
+		{
+			const auto& rhsStr = rhs.AsString();
+			auto rhsStrData = rhsStr.data();
+			auto cmpRes = StringBaseCompare(0, size(),
+				rhsStrData, rhsStrData + rhsStr.size());
+
+			return cmpRes == 0 ? ObjectOrder::Equal :
+					(cmpRes < 0 ? ObjectOrder::Less :
+					(ObjectOrder::Greater));
+		}
+		default:
+			return ObjectOrder::NotEqualUnordered;
+		}
+	}
+
+	using Base::operator==;
+#ifdef __cpp_lib_three_way_comparison
+	using Base::operator<=>;
+#else
+	using Base::operator!=;
+	using Base::operator<;
+	using Base::operator>;
+	using Base::operator<=;
+	using Base::operator>=;
+#endif
+
+	// ========== capacity ==========
 
 	virtual size_t size() const = 0;
 
-	virtual iterator begin() = 0;
-	virtual iterator end() = 0;
+	virtual void resize(size_t len) = 0;
 
-	virtual const_iterator cbegin() const = 0;
-	virtual const_iterator cend() const = 0;
+	virtual void reserve(size_t len) = 0;
 
-	virtual iterator rbegin() = 0;
-	virtual iterator rend() = 0;
+	// ========== value access ==========
 
-	virtual const_iterator crbegin() const = 0;
-	virtual const_iterator crend() const = 0;
+	virtual reference operator[](size_t idx) = 0;
 
-	virtual const_iterator begin() const
+	virtual const_reference operator[](size_t idx) const = 0;
+
+	virtual const_pointer c_str() const = 0;
+
+	virtual const_pointer data() const = 0;
+
+	//virtual std::unique_ptr<Self> Copy() const = 0;
+
+	//virtual std::unique_ptr<Self> Slice(size_t begin, size_t end) const = 0;
+
+	// ========== adding/removing values ==========
+
+	virtual void push_back(const_reference ch) = 0;
+
+	virtual void pop_back() = 0;
+
+	virtual void Append(const_iterator begin,
+		const_iterator end) = 0;
+
+	virtual void Append(const Self& other)
 	{
-		return this->cbegin();
+		return this->Append(other.cbegin(), other.cend());
 	}
 
-	virtual const_iterator end() const
+	virtual Self& operator+=(const Self& rhs)
 	{
-		return this->cend();
+		this->Append(rhs);
+		return *this;
 	}
 
-	virtual reference at(size_t idx) = 0;
-
-	virtual const_reference at(size_t idx) const = 0;
-
-	virtual reference operator[](size_t idx)
-	{
-		return this->at(idx);
-	}
-
-	virtual const_reference operator[](size_t idx) const
-	{
-		return this->at(idx);
-	}
+	// ========== item searching ==========
 
 	virtual bool StartsWith(const_iterator begin,
 		const_iterator end) const = 0;
@@ -166,109 +271,47 @@ public:
 		return this->Contains(other.cbegin(), other.end());
 	}
 
-	virtual void push_back(const_reference ch) = 0;
+	// ========== iterators ==========
 
-	virtual void pop_back() = 0;
+	virtual iterator begin() = 0;
+	virtual iterator end() = 0;
 
-	virtual void Append(const_iterator begin,
-		const_iterator end) = 0;
+	virtual const_iterator cbegin() const = 0;
+	virtual const_iterator cend() const = 0;
 
-	virtual void Append(const Self& other)
+	virtual iterator rbegin() = 0;
+	virtual iterator rend() = 0;
+
+	virtual const_iterator crbegin() const = 0;
+	virtual const_iterator crend() const = 0;
+
+	virtual const_iterator begin() const
 	{
-		return this->Append(other.cbegin(), other.cend());
+		return this->cbegin();
 	}
 
-	virtual const_pointer c_str() const = 0;
-
-	virtual void resize(size_t len) = 0;
-
-	virtual void reserve(size_t len) = 0;
-
-	//virtual std::unique_ptr<Self> Copy() const = 0;
-
-	//virtual std::unique_ptr<Self> Slice(size_t begin, size_t end) const = 0;
-
-	virtual bool operator==(const Self& rhs) const = 0;
-
-	virtual bool operator>(const Self& rhs) const = 0;
-
-	virtual bool operator<(const Self& rhs) const = 0;
-
-	virtual bool operator!=(const Self& rhs) const
+	virtual const_iterator end() const
 	{
-		return !(*this == rhs);
+		return this->cend();
 	}
 
-	virtual bool operator<=(const Self& rhs) const
+	// ========== Interface copy/Move ==========
+
+	virtual std::unique_ptr<Self> Copy(const Self* /*unused*/) const = 0;
+
+	virtual std::unique_ptr<Self> Move(const Self* /*unused*/) = 0;
+
+	using Base::Copy;
+	virtual std::unique_ptr<Base> Copy(const Base* /*unused*/) const override
 	{
-		return !(*this > rhs);
+		return Copy(sk_null);
 	}
 
-	virtual bool operator>=(const Self& rhs) const
+	using Base::Move;
+	virtual std::unique_ptr<Base> Move(const Base* /*unused*/) override
 	{
-		return !(*this < rhs);
+		return Move(sk_null);
 	}
-
-	virtual bool operator==(const BaseBase& rhs) const override
-	{
-		const auto rhsCat = rhs.GetCategory();
-		if (rhsCat != ObjCategory::String)
-		{
-			return false;
-		}
-		return *this == rhs.AsString();
-	}
-
-	using BaseBase::operator!=;
-
-	virtual bool operator<(const BaseBase& rhs) const override
-	{
-		const auto rhsCat = rhs.GetCategory();
-		if (rhsCat != ObjCategory::String)
-		{
-			throw UnsupportedOperation("<",
-				this->GetCategoryName(), rhs.GetCategoryName());
-		}
-		return *this < rhs.AsString();
-	}
-
-	virtual bool operator>(const BaseBase& rhs) const override
-	{
-		const auto rhsCat = rhs.GetCategory();
-		if (rhsCat != ObjCategory::String)
-		{
-			throw UnsupportedOperation(">",
-				this->GetCategoryName(), rhs.GetCategoryName());
-		}
-		return *this > rhs.AsString();
-	}
-
-	using BaseBase::operator<=;
-	using BaseBase::operator>=;
-
-	virtual Self& operator+=(const Self& rhs)
-	{
-		this->Append(rhs);
-		return *this;
-	}
-
-	/**
-	 * @brief lexicographical compare this string with the other
-	 *
-	 * @param pos1   the begin position of this string
-	 * @param count1 the length since the begin position to be compared
-	 * @param begin  the begin of the other string
-	 * @param end    the end of the other string
-	 * @return compare result
-	 */
-	virtual bool LessThan(size_t pos1, size_t count1,
-		const_pointer begin, const_pointer end) const = 0;
-
-	virtual bool GreaterThan(size_t pos1, size_t count1,
-		const_pointer begin, const_pointer end) const = 0;
-
-	virtual bool Equal(size_t pos1, size_t count1,
-		const_pointer begin, const_pointer end) const = 0;
 
 }; // class StringBaseObject
 

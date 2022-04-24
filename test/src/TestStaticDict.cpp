@@ -11,6 +11,8 @@
 
 #include <SimpleObjects/DefaultTypes.hpp>
 
+#include "CompareHelpers.hpp"
+
 #ifndef SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE
 using namespace SimpleObjects;
 #else
@@ -558,22 +560,27 @@ GTEST_TEST(TestStaticDict, Compare)
 	EXPECT_FALSE(dict1 != dict2);
 	EXPECT_TRUE( dict1 != dict3);
 	EXPECT_FALSE(dict1 == dict3);
-	EXPECT_FALSE(dict1 !=
-		static_cast<const StaticDictBaseObj&>(dict2));
-	EXPECT_TRUE( dict1 !=
-		static_cast<const StaticDictBaseObj&>(dict3));
-	EXPECT_TRUE( dict1 !=
-		static_cast<const StaticDictBaseObj&>(dict3.get_Key2_3()));
+
+	using DictBaseCmp = CompareTestHelpers<StaticDictBaseObj>;
+
+	EXPECT_FALSE(DictBaseCmp::Neq(dict1, dict2));
+	EXPECT_TRUE(DictBaseCmp::Neq(dict1, dict3));
+	EXPECT_TRUE(DictBaseCmp::Neq(dict1, dict3.get_Key2_3()));
 
 	// == diff obj
-	EXPECT_TRUE(dict1 != static_cast<const BaseObj&>(Null()));
-	EXPECT_TRUE(dict1 != static_cast<const BaseObj&>(String()));
+	using BaseObjCmp = CompareTestHelpers<BaseObj>;
+
+	EXPECT_TRUE(BaseObjCmp::Neq(dict1, Null()));
+	EXPECT_TRUE(BaseObjCmp::Neq(dict1, String()));
 
 	// <
-	EXPECT_THROW((void)(dict1 <  static_cast<const BaseObj&>(Null())), UnsupportedOperation);
-	EXPECT_THROW((void)(dict1 >  static_cast<const BaseObj&>(Null())), UnsupportedOperation);
-	EXPECT_THROW((void)(dict1 <= static_cast<const BaseObj&>(Null())), UnsupportedOperation);
-	EXPECT_THROW((void)(dict1 >= static_cast<const BaseObj&>(Null())), UnsupportedOperation);
+	EXPECT_THROW(BaseObjCmp::Lt(dict1, Null()), UnsupportedOperation);
+	EXPECT_THROW(BaseObjCmp::Lt(dict1, Null()), UnsupportedOperation);
+	EXPECT_THROW(BaseObjCmp::Gt(dict1, Null()), UnsupportedOperation);
+	EXPECT_THROW(BaseObjCmp::Le(dict1, Null()), UnsupportedOperation);
+	EXPECT_THROW(BaseObjCmp::Le(dict1, dict1), UnsupportedOperation);
+	EXPECT_THROW(BaseObjCmp::Ge(dict1, Null()), UnsupportedOperation);
+	EXPECT_THROW(BaseObjCmp::Ge(dict1, dict1), UnsupportedOperation);
 }
 
 GTEST_TEST(TestStaticDict, Len)

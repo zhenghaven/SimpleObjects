@@ -11,6 +11,8 @@
 
 #include <SimpleObjects/SimpleObjects.hpp>
 
+#include "CompareHelpers.hpp"
+
 #ifndef SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE
 using namespace SimpleObjects;
 #else
@@ -209,15 +211,36 @@ GTEST_TEST(TestString, Len)
 
 GTEST_TEST(TestString, At)
 {
-	EXPECT_EQ(String("abcdef")[1], std::string("abcdef")[1]);
-	EXPECT_EQ(String("abcdef")[3], std::string("abcdef")[3]);
-	EXPECT_EQ(String("1234567890")[1], std::string("1234567890")[1]);
-	EXPECT_EQ(String("1234567890")[3], std::string("1234567890")[3]);
+	auto testStr1 = String("abcdef");
+	auto testStr2 = String("1234567890");
 
-	const auto testStr1 = String("abcdef");
-	EXPECT_EQ(&testStr1[1], &testStr1[1]);
-	EXPECT_EQ(&testStr1[2], &testStr1[1] + 1);
-	EXPECT_EQ(testStr1[2], testStr1[1] + 1);
+	// const
+	auto prog = [testStr1, testStr2]()
+	{
+		EXPECT_EQ(&testStr1[0], testStr1.data());
+		EXPECT_EQ(testStr1[1], 'b');
+
+		EXPECT_EQ(&testStr2[0], testStr2.data());
+		EXPECT_EQ(testStr2[1], '2');
+
+		EXPECT_THROW(testStr1[7], IndexError);
+		EXPECT_THROW(testStr2[11], IndexError);
+	};
+	prog();
+
+	// mutables
+	EXPECT_EQ(&testStr1[0], testStr1.data());
+	EXPECT_EQ(testStr1[1], 'b');
+	++testStr1[1];
+	EXPECT_EQ(testStr1[1], 'c');
+
+	EXPECT_EQ(&testStr2[0], testStr2.data());
+	EXPECT_EQ(testStr2[1], '2');
+	++testStr2[1];
+	EXPECT_EQ(testStr2[1], '3');
+
+	EXPECT_THROW(testStr1[7], IndexError);
+	EXPECT_THROW(testStr2[11], IndexError);
 }
 
 GTEST_TEST(TestString, StartsWith)
@@ -325,80 +348,56 @@ GTEST_TEST(TestString, Compare)
 GTEST_TEST(TestString, BaseIsEqual)
 {
 	// Base object
-	auto testBaseObjNE = [](const BaseObj& a, const BaseObj& b) -> bool
-		{
-			return a != b;
-		};
+	using BaseObjCmp = CompareTestHelpers<BaseObj>;
 
-	EXPECT_TRUE(testBaseObjNE(String(), Bool(true)));
-	EXPECT_TRUE(testBaseObjNE(String(), Null()));
+	EXPECT_TRUE(BaseObjCmp::Neq(String(), Bool(true)));
+	EXPECT_TRUE(BaseObjCmp::Neq(String(), Null()));
 
-	EXPECT_TRUE(testBaseObjNE(
+	EXPECT_TRUE(BaseObjCmp::Neq(
 		String("test string1"), String("test string2")));
-	EXPECT_FALSE(testBaseObjNE(
+	EXPECT_FALSE(BaseObjCmp::Neq(
 		String("test string"), String("test string")));
 
 	// String base object
-	auto testStrBaseObjNE =
-		[](const StringBaseObj& a, const StringBaseObj& b) -> bool
-		{
-			return a != b;
-		};
+	using StrBaseCmp = CompareTestHelpers<StringBaseObj>;
 
-	EXPECT_TRUE(testStrBaseObjNE(
+	EXPECT_TRUE(StrBaseCmp::Neq(
 		String("test string1"), String("test string2")));
-	EXPECT_FALSE(testStrBaseObjNE(
+	EXPECT_FALSE(StrBaseCmp::Neq(
 		String("test string"), String("test string")));
 }
 
 GTEST_TEST(TestString, BaseCompare)
 {
 	// Base object
-	auto testBaseObjLE = [](const BaseObj& a, const BaseObj& b) -> bool
-		{
-			return a <= b;
-		};
-	auto testBaseObjGE = [](const BaseObj& a, const BaseObj& b) -> bool
-		{
-			return a >= b;
-		};
+	using BaseObjCmp = CompareTestHelpers<BaseObj>;
 
-	EXPECT_THROW(testBaseObjLE(String(), Null()), UnsupportedOperation);
-	EXPECT_THROW(testBaseObjGE(String(), Null()), UnsupportedOperation);
-	EXPECT_THROW(testBaseObjLE(String(), Int32()), UnsupportedOperation);
-	EXPECT_THROW(testBaseObjGE(String(), Int32()), UnsupportedOperation);
+	EXPECT_THROW(BaseObjCmp::Le(String(), Null()), UnsupportedOperation);
+	EXPECT_THROW(BaseObjCmp::Ge(String(), Null()), UnsupportedOperation);
+	EXPECT_THROW(BaseObjCmp::Le(String(), Int32()), UnsupportedOperation);
+	EXPECT_THROW(BaseObjCmp::Ge(String(), Int32()), UnsupportedOperation);
 
-	EXPECT_FALSE(testBaseObjLE(String("123466"), String("123456")));
-	EXPECT_FALSE(testBaseObjGE(String("123456"), String("123466")));
+	EXPECT_FALSE(BaseObjCmp::Le(String("123466"), String("123456")));
+	EXPECT_FALSE(BaseObjCmp::Ge(String("123456"), String("123466")));
 
 	// String base object
-	auto testStrBaseObjLE =
-		[](const StringBaseObj& a, const StringBaseObj& b) -> bool
-		{
-			return a <= b;
-		};
+	using StrBaseCmp = CompareTestHelpers<StringBaseObj>;
 
 	// less or equal to, true
-	EXPECT_TRUE(testStrBaseObjLE(String("123456"), String("123466")));
-	EXPECT_TRUE(testStrBaseObjLE(String("12345"), String("12345")));
+	EXPECT_TRUE(StrBaseCmp::Le(String("123456"), String("123466")));
+	EXPECT_TRUE(StrBaseCmp::Le(String("12345"), String("12345")));
 
 	// less or equal to, false
-	EXPECT_FALSE(testStrBaseObjLE(String("123466"), String("123456")));
-	EXPECT_FALSE(testStrBaseObjLE(String("123456"), String("12345")));
-
-	auto testStrBaseObjGE =
-		[](const StringBaseObj& a, const StringBaseObj& b) -> bool
-		{
-			return a >= b;
-		};
+	EXPECT_FALSE(StrBaseCmp::Le(String("123466"), String("123456")));
+	EXPECT_FALSE(StrBaseCmp::Le(String("123456"), String("12345")));
 
 	// greater or equal to, true
-	EXPECT_TRUE(testStrBaseObjGE(String("123466"), String("123456")));
-	EXPECT_TRUE(testStrBaseObjGE(String("12345"), String("12345")));
+	EXPECT_TRUE(StrBaseCmp::Ge(String("123466"), String("123456")));
+	EXPECT_TRUE(StrBaseCmp::Ge(String("12345"), String("12345")));
 
 	// greater or equal to, false
-	EXPECT_FALSE(testStrBaseObjGE(String("123456"), String("123466")));
-	EXPECT_FALSE(testStrBaseObjGE(String("12345"), String("123456")));
+	EXPECT_FALSE(StrBaseCmp::Ge(String("123456"), String("123466")));
+	EXPECT_FALSE(StrBaseCmp::Ge(String("12345"), String("123456")));
 }
 
 GTEST_TEST(TestString, ToString)

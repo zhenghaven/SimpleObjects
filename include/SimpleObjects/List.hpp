@@ -104,46 +104,152 @@ public:
 
 	// ========== operators ==========
 
-	using Base::operator==;
-	using Base::operator!=;
+	// ===== This class
 
-	using Base::operator<;
-	using Base::operator>;
-
-	using Base::operator<=;
-	using Base::operator>=;
-
-	virtual bool operator==(const Self& rhs) const
+	bool operator==(const Self& rhs) const
 	{
 		return m_data == rhs.m_data;
 	}
 
-	virtual bool operator!=(const Self& rhs) const
+#ifdef __cpp_lib_three_way_comparison
+	auto operator<=>(const Self& rhs) const
+	{
+		return m_data <=> rhs.m_data;
+	}
+#else
+	bool operator!=(const Self& rhs) const
 	{
 		return m_data != rhs.m_data;
 	}
 
-	virtual bool operator<(const Self& rhs) const
+	bool operator<(const Self& rhs) const
 	{
 		return m_data < rhs.m_data;
 	}
 
-	virtual bool operator>(const Self& rhs) const
+	bool operator>(const Self& rhs) const
 	{
 		return m_data > rhs.m_data;
 	}
 
-	virtual bool operator<=(const Self& rhs) const
+	bool operator<=(const Self& rhs) const
 	{
 		return m_data <= rhs.m_data;
 	}
 
-	virtual bool operator>=(const Self& rhs) const
+	bool operator>=(const Self& rhs) const
 	{
 		return m_data >= rhs.m_data;
 	}
+#endif
+
+	// ===== ListBase class
+
+	virtual bool ListBaseIsEqual(const Base& rhs) const override
+	{
+		if (m_data.size() != rhs.size())
+		{
+			return false;
+		}
+
+		return std::equal(m_data.cbegin(), m_data.cend(),
+			rhs.cbegin(),
+			[](const BaseBase& a, const BaseBase& b) -> bool
+			{ return a == b; }
+		);
+	}
+
+	virtual ObjectOrder ListBaseCompare(const Base& rhs) const override
+	{
+		return Internal::ObjectRangeCompareThreeWay(
+			cbegin(), cend(),
+			rhs.cbegin(), rhs.cend());
+	}
+
+	using Base::operator==;
+#ifdef __cpp_lib_three_way_comparison
+	using Base::operator<=>;
+#else
+	using Base::operator!=;
+	using Base::operator<;
+	using Base::operator>;
+	using Base::operator<=;
+	using Base::operator>=;
+#endif
 
 	// ========== Functions provided by this class ==========
+
+	// ========== value access ==========
+
+	value_type& operator[](size_t idx)
+	{
+		try
+		{
+			return m_data.at(idx);
+		}
+		catch(const std::out_of_range&)
+		{
+			throw IndexError(idx);
+		}
+	}
+
+	const value_type& operator[](size_t idx) const
+	{
+		try
+		{
+			return m_data.at(idx);
+		}
+		catch(const std::out_of_range&)
+		{
+			throw IndexError(idx);
+		}
+	}
+
+	const_pointer data() const
+	{
+		return m_data.data();
+	}
+
+	// ========== adding/removing values ==========
+
+	void push_back(value_type&& ch)
+	{
+		m_data.push_back(std::forward<value_type>(ch));
+	}
+
+	void push_back(const value_type& ch)
+	{
+		m_data.push_back(ch);
+	}
+
+	void Append(const_iterator begin, const_iterator end)
+	{
+		while (begin != end)
+		{
+			push_back(*begin);
+			++begin;
+		}
+	}
+
+	void Append(const Self& other)
+	{
+		Append(other.cbegin(), other.cend());
+	}
+
+	void Insert(size_t idx, const_reference other)
+	{
+		m_data.insert(m_data.begin() + idx, other);
+	}
+
+	// ========== item searching ==========
+
+	bool Contains(const_reference val) const
+	{
+		auto e = cend();
+		return std::find(cbegin(), e, val) != e;
+	}
+
+	// ========== iterators ==========
 
 	iterator begin()
 	{
@@ -195,70 +301,6 @@ public:
 		return ToRdIt<true>(m_data.crend());
 	}
 
-	const_pointer data() const
-	{
-		return m_data.data();
-	}
-
-	value_type& operator[](size_t idx)
-	{
-		try
-		{
-			return m_data.at(idx);
-		}
-		catch(const std::out_of_range&)
-		{
-			throw IndexError(idx);
-		}
-	}
-
-	const value_type& operator[](size_t idx) const
-	{
-		try
-		{
-			return m_data.at(idx);
-		}
-		catch(const std::out_of_range&)
-		{
-			throw IndexError(idx);
-		}
-	}
-
-	bool Contains(const_reference val) const
-	{
-		auto e = cend();
-		return std::find(cbegin(), e, val) != e;
-	}
-
-	void push_back(value_type&& ch)
-	{
-		m_data.push_back(std::forward<value_type>(ch));
-	}
-
-	void push_back(const value_type& ch)
-	{
-		m_data.push_back(ch);
-	}
-
-	void Append(const_iterator begin, const_iterator end)
-	{
-		while (begin != end)
-		{
-			push_back(*begin);
-			++begin;
-		}
-	}
-
-	void Append(const Self& other)
-	{
-		Append(other.cbegin(), other.cend());
-	}
-
-	void Insert(size_t idx, const_reference other)
-	{
-		m_data.insert(m_data.begin() + idx, other);
-	}
-
 	// ========== Overrides BaseObject ==========
 
 	virtual ObjCategory GetCategory() const override
@@ -301,14 +343,11 @@ public:
 
 	// ========== Overrides ListBaseObject ==========
 
+	// ========== capacity ==========
+
 	virtual size_t size() const override
 	{
 		return m_data.size();
-	}
-
-	virtual void pop_back() override
-	{
-		m_data.pop_back();
 	}
 
 	virtual void resize(size_t len) override
@@ -319,6 +358,13 @@ public:
 	virtual void reserve(size_t len) override
 	{
 		m_data.reserve(len);
+	}
+
+	// ========== removing values ==========
+
+	virtual void pop_back() override
+	{
+		m_data.pop_back();
 	}
 
 	virtual void Remove(size_t idx) override
@@ -419,6 +465,8 @@ public:
 
 protected:
 
+	// ========== iterators ==========
+
 	virtual base_iterator ListBaseBegin() override
 	{
 		return ToRdIt<false,
@@ -447,6 +495,8 @@ protected:
 			base_value_type>(m_data.cend());
 	}
 
+	// ========== value access ==========
+
 	virtual base_reference ListBaseAt(size_t idx) override
 	{
 		return Self::operator[](idx);
@@ -456,6 +506,8 @@ protected:
 	{
 		return Self::operator[](idx);
 	}
+
+	// ========== adding/removing values ==========
 
 	virtual void ListBasePushBack(base_value_type&& val) override
 	{

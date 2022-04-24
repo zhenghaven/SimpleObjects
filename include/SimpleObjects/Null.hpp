@@ -113,42 +113,53 @@ public:
 			>::AsChild(*this, "Null", this->GetCategoryName());
 	}
 
-	virtual bool operator==(const Self&) const
-	{
+	// ========== operators ==========
+
+	// ===== This class
+
+	bool operator==(const Self&) const
+	{ // All nulls are the same
 		return true;
 	}
 
-	virtual bool operator!=(const Self&) const
+#ifndef __cpp_lib_three_way_comparison
+	bool operator!=(const Self&) const
 	{
 		return false;
 	}
+#endif
 
 	bool operator<(const Self& rhs) const = delete;
 	bool operator>(const Self& rhs) const = delete;
 	bool operator<=(const Self& rhs) const = delete;
 	bool operator>=(const Self& rhs) const = delete;
 
-	virtual bool operator==(const BaseBase& rhs) const override
+	// ===== BaseObject class
+
+	virtual bool BaseObjectIsEqual(const BaseBase& rhs) const override
 	{
-		return rhs.IsNull();
+		return rhs.GetCategory() == ObjCategory::Null;
 	}
 
-	using BaseBase::operator!=;
-
-	virtual bool operator<(const BaseBase& rhs) const override
+	virtual ObjectOrder BaseObjectCompare(const BaseBase& rhs) const override
 	{
-		throw UnsupportedOperation("<",
-			this->GetCategoryName(), rhs.GetCategoryName());
+		return (rhs.GetCategory() == ObjCategory::Null) ?
+				ObjectOrder::EqualUnordered :
+				ObjectOrder::NotEqualUnordered;
 	}
 
-	virtual bool operator>(const BaseBase& rhs) const override
-	{
-		throw UnsupportedOperation(">",
-			this->GetCategoryName(), rhs.GetCategoryName());
-	}
+	using Base::operator==;
+#ifdef __cpp_lib_three_way_comparison
+	using Base::operator<=>;
+#else
+	using Base::operator!=;
+	using Base::operator<;
+	using Base::operator>;
+	using Base::operator<=;
+	using Base::operator>=;
+#endif
 
-	using BaseBase::operator<=;
-	using BaseBase::operator>=;
+	// ========== Interface copy/Move ==========
 
 	using Base::Copy;
 	virtual std::unique_ptr<Base> Copy(const Base* /*unused*/) const override
@@ -161,6 +172,8 @@ public:
 	{
 		return CopyImpl();
 	}
+
+	// ========== To string ==========
 
 	virtual std::string DebugString() const override
 	{
