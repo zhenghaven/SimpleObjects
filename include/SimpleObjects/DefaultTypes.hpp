@@ -74,7 +74,7 @@ using Double = RealNumT<double  >;
 
 // ========== Convenient types of String ==========
 
-using String = StringCat<std::string, ToStringType>;
+using String = StringImpl<std::string, ToStringType>;
 
 // ========== Convenient types of Object ==========
 
@@ -87,14 +87,14 @@ using HashableObject = HashableObjectImpl<ToStringType>;
 // ========== Convenient types of List ==========
 
 template<typename _ValType>
-using ListT = ListCat<VecType<_ValType>, ToStringType>;
+using ListT = ListImpl<VecType<_ValType>, ToStringType>;
 
 using List = ListT<Object>;
 
 // ========== Convenient types of Dict ==========
 
 template<typename _KeyType, typename _Valtype>
-using DictT = DictCat<MapType<_KeyType, _Valtype>, ToStringType>;
+using DictT = DictImpl<MapType<_KeyType, _Valtype>, ToStringType>;
 
 using Dict = DictT<HashableObject, Object>;
 

@@ -73,7 +73,7 @@ GTEST_TEST(TestIterator, ItTraits)
 
 GTEST_TEST(TestIterator, RdIterator)
 {
-	using _String = StringCat<std::string, std::string>;
+	using _String = StringImpl<std::string, std::string>;
 
 	std::string testCtn = "abcdef";
 	_String testStr = "abcdef";
@@ -278,7 +278,7 @@ GTEST_TEST(TestIterator, OutIterator)
 
 GTEST_TEST(TestIterator, UpConversion)
 {
-	using _String = StringCat<std::string, std::string>;
+	using _String = StringImpl<std::string, std::string>;
 
 	_String testStr = "abcdef";
 
