@@ -406,4 +406,4 @@ struct InferBinOpRetType<double, float> : InferBinOpRetType<float, double> {};
 
 } // namespace Internal
 
-}//namespace SimpleObjects
+} // namespace SimpleObjects

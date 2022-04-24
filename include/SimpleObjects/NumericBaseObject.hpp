@@ -176,4 +176,4 @@ public:
 
 }; // class NumericBaseObject
 
-}//namespace SimpleObjects
+} // namespace SimpleObjects

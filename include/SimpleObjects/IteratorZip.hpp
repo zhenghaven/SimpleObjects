@@ -107,8 +107,7 @@ public:
 
 	virtual pointer GetPtr() const override
 	{
-		const TupleType* ptr = &m_its;
-		return const_cast<pointer>(ptr);
+		return &m_its;
 	}
 
 	virtual bool IsEqual(const BaseInIf& rhs) const override
@@ -130,12 +129,11 @@ private:
 
 	BaseIfPtr CopyImpl() const
 	{
-		// TODO: make_unique
-		return BaseIfPtr(new FwItZipper(*this));
+		return Internal::make_unique<FwItZipper>(*this);
 	}
 
-	TupleType m_its;
+	mutable TupleType m_its;
 
 }; // class FwItZipper
 
-}//namespace SimpleObjects
+} // namespace SimpleObjects

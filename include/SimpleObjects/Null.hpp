@@ -201,10 +201,9 @@ private:
 
 	std::unique_ptr<Self> CopyImpl() const
 	{
-		// TODO: make_unique
-		return std::unique_ptr<Self>(new Self());
+		return Internal::make_unique<Self>();
 	}
 
 }; //class NullImpl
 
-}//namespace SimpleObjects
+} // namespace SimpleObjects

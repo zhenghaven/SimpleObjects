@@ -12,6 +12,7 @@
 #include "IteratorZip.hpp"
 
 #include "Internal/IteratorTransform.hpp"
+#include "Internal/make_unique.hpp"
 
 #ifndef SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE
 namespace SimpleObjects
@@ -658,15 +659,16 @@ inline RdIterator<_ValType, _IsConst> ToRdIt(_OriItType it)
 }
 
 template<bool _IsConst, typename ..._ItTypes>
-inline FrIterator<std::tuple<_ItTypes...>, _IsConst> FwItZip(_ItTypes... its)
+inline FrIterator<std::tuple<_ItTypes...>, _IsConst> FwItZip(_ItTypes&&... its)
 {
-	using ValType = std::tuple<_ItTypes...>;
-	using ItWrap = FwItZipper<_IsConst, _ItTypes...>;
+	using ValType = std::tuple<
+		typename std::remove_reference<_ItTypes>::type ...>;
+	using ItWrap = FwItZipper<_IsConst,
+		typename std::remove_reference<_ItTypes>::type ...>;
 
-	// TODO: make_unique
-	auto ptr = std::unique_ptr<ItWrap>(new ItWrap(its...));
+	auto ptr = Internal::make_unique<ItWrap>(std::forward<_ItTypes>(its)...);
 
 	return FrIterator<ValType, _IsConst>(std::move(ptr));
 }
 
-}//namespace SimpleObjects
+} // namespace SimpleObjects

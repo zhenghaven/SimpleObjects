@@ -285,4 +285,4 @@ protected:
 
 }; // class ListBaseObject
 
-} //namespace SimpleObjects
+} // namespace SimpleObjects

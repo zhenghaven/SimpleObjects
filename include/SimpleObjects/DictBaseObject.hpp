@@ -306,4 +306,4 @@ protected:
 
 }; // class DictBaseObject
 
-} //namespace SimpleObjects
+} // namespace SimpleObjects

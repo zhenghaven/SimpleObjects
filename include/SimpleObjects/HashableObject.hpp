@@ -372,7 +372,7 @@ private:
 
 }; // class HashableObjectImpl
 
-}//namespace SimpleObjects
+} // namespace SimpleObjects
 
 // ========== Hash ==========
 namespace std
@@ -390,4 +390,4 @@ namespace std
 		using _ObjType = SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE::HashableObjectImpl<_ToStringType>;
 #endif
 	}; // struct hash
-}
+} // namespace std

@@ -96,7 +96,7 @@ public:
 
 }; // class HashableReferenceWrapper
 
-}//namespace SimpleObjects
+} // namespace SimpleObjects
 
 // ========== Hash ==========
 namespace std
@@ -153,4 +153,4 @@ namespace std
 			return std::hash<_ObjType>()(obj.get());
 		}
 	}; // struct hash
-}
+} // namespace std

@@ -144,4 +144,4 @@ public:
 
 }; // class IndexError
 
-}//namespace SimpleObjects
+} // namespace SimpleObjects

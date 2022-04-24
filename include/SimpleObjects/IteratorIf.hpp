@@ -229,4 +229,4 @@ public:
 
 }; //class RandomAccessIteratorIf
 
-}//namespace SimpleObjects
+} // namespace SimpleObjects

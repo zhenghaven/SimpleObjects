@@ -365,4 +365,4 @@ private:
 
 }; // class ObjectImpl
 
-} //namespace SimpleObjects
+} // namespace SimpleObjects

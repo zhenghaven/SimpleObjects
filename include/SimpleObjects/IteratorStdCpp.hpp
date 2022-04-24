@@ -8,6 +8,8 @@
 #include <memory>
 #include <type_traits>
 
+#include "Internal/make_unique.hpp"
+
 #include "IteratorIf.hpp"
 #include "Utils.hpp"
 
@@ -40,8 +42,7 @@ public: // Static members:
 
 	static _BaseIfPtr Build(_OriItType oriIt)
 	{
-		// TODO: make_unique
-		return _BaseIfPtr(new CppStdOutIteratorWrap(oriIt));
+		return Internal::make_unique<CppStdOutIteratorWrap>(oriIt);
 	}
 
 	static_assert(
@@ -86,8 +87,7 @@ public:
 
 	virtual _BaseIfPtr Copy(const _BaseIf&) const override
 	{
-		// TODO: make_unique
-		return _BaseIfPtr(new CppStdOutIteratorWrap(*this));
+		return Internal::make_unique<CppStdOutIteratorWrap>(*this);
 	}
 
 public:
@@ -118,8 +118,7 @@ public: // Static members:
 
 	static _BaseIfPtr Build(_OriItType oriIt)
 	{
-		// TODO: make_unique
-		return _BaseIfPtr(new CppStdInIteratorWrap(oriIt));
+		return Internal::make_unique<CppStdInIteratorWrap>(oriIt);
 	}
 
 	static_assert(
@@ -170,8 +169,7 @@ public:
 
 	virtual _BaseIfPtr Copy(const _BaseIf&) const override
 	{
-		// TODO: make_unique
-		return _BaseIfPtr(new CppStdInIteratorWrap(*this));
+		return Internal::make_unique<CppStdInIteratorWrap>(*this);
 	}
 
 public:
@@ -213,8 +211,7 @@ public: // Static members:
 
 	static _BaseIfPtr Build(_OriItType oriIt)
 	{
-		// TODO: make_unique
-		return _BaseIfPtr(new CppStdFwIteratorWrap(oriIt));
+		return Internal::make_unique<CppStdFwIteratorWrap>(oriIt);
 	}
 
 	static_assert(
@@ -263,8 +260,7 @@ private:
 
 	_BaseIfPtr CopyImpl() const
 	{
-		// TODO: make_unique
-		return _BaseIfPtr(new CppStdFwIteratorWrap(*this));
+		return Internal::make_unique<CppStdFwIteratorWrap>(*this);
 	}
 
 }; // class CppStdFwIteratorWrap
@@ -302,8 +298,7 @@ public: // Static members:
 
 	static _BaseIfPtr Build(_OriItType oriIt)
 	{
-		// TODO: make_unique
-		return _BaseIfPtr(new CppStdBiIteratorWrap(oriIt));
+		return Internal::make_unique<CppStdBiIteratorWrap>(oriIt);
 	}
 
 	static_assert(
@@ -353,8 +348,7 @@ private:
 
 	_BaseIfPtr CopyImpl() const
 	{
-		// TODO: make_unique
-		return _BaseIfPtr(new CppStdBiIteratorWrap(*this));
+		return Internal::make_unique<CppStdBiIteratorWrap>(*this);
 	}
 
 }; // class CppStdBiIteratorWrap
@@ -396,8 +390,7 @@ public: // Static members:
 
 	static _BaseIfPtr Build(_OriItType oriIt)
 	{
-		// TODO: make_unique
-		return _BaseIfPtr(new CppStdRdIteratorWrap(oriIt));
+		return Internal::make_unique<CppStdRdIteratorWrap>(oriIt);
 	}
 
 	static_assert(
@@ -464,10 +457,9 @@ public:
 private:
 	_BaseIfPtr CopyImpl() const
 	{
-		// TODO: make_unique
-		return _BaseIfPtr(new CppStdRdIteratorWrap(*this));
+		return Internal::make_unique<CppStdRdIteratorWrap>(*this);
 	}
 
 }; // class CppStdRdIteratorWrap
 
-}//namespace SimpleObjects
+} // namespace SimpleObjects
