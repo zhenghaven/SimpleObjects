@@ -62,6 +62,10 @@ public:
 		m_ptr(other.Move(Base::sk_null))
 	{}
 
+	HashableObjectImpl(BasePtr other) :
+		m_ptr(std::move(other))
+	{}
+
 	virtual ~HashableObjectImpl() = default;
 
 	Self& operator=(const Self& rhs)

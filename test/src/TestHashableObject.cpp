@@ -40,13 +40,20 @@ GTEST_TEST(TestHashableObj, Construction)
 	});
 
 	// Copy/Move
-	HashableObject valCpy1(val1);
+	HashableObject valCpy1(val2);
+	EXPECT_TRUE(valCpy1.BaseObjectIsEqual(String("Test")));
 	HashableObject valMov1(std::move(valCpy1));
+	EXPECT_TRUE(valMov1.BaseObjectIsEqual(String("Test")));
 
 	// Copy/Move internal objects
 	auto tmpStr = String("Test");
 	HashableObject valCpy2(tmpStr);
+	EXPECT_TRUE(valCpy2.BaseObjectIsEqual(String("Test")));
 	HashableObject valMov2(std::move(tmpStr));
+	EXPECT_TRUE(valMov2.BaseObjectIsEqual(String("Test")));
+
+	HashableObject valMov3(String("Test").Move(HashableBaseObj::sk_null));
+	EXPECT_TRUE(valMov3.BaseObjectIsEqual(String("Test")));
 }
 
 GTEST_TEST(TestHashableObj, Assignment)
