@@ -84,6 +84,38 @@ public:
 			other.m_basePtr)
 	{}
 
+	Self& operator=(const Self& rhs)
+	{
+		if (this != &rhs)
+		{
+			m_val = rhs.m_val.get() != nullptr ?
+				Internal::make_unique<_ValType>(*(rhs.m_val)) :
+				nullptr;
+			m_valPtr = m_val.get() != nullptr ?
+				m_val.get() :
+				rhs.m_valPtr;
+			m_basePtr = m_val.get() != nullptr ?
+				m_val.get() :
+				rhs.m_basePtr;
+		}
+		return *this;
+	}
+
+	Self& operator=(Self&& rhs)
+	{
+		if (this != &rhs)
+		{
+			m_val = std::forward<std::unique_ptr<_ValType> >(rhs.m_val);
+			m_valPtr = m_val.get() != nullptr ?
+				m_val.get() :
+				rhs.m_valPtr;
+			m_basePtr = m_val.get() != nullptr ?
+				m_val.get() :
+				rhs.m_basePtr;
+		}
+		return *this;
+	}
+
 	~DictKeyImpl() = default;
 
 	conference GetVal()
