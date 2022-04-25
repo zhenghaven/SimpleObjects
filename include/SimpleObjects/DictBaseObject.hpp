@@ -74,27 +74,7 @@ public:
 
 	// ===== This class
 
-	virtual bool DictBaseIsEqual(const Self& rhs) const
-	{
-		// reference: https://github.com/llvm/llvm-project/blob/main/libcxx/include/unordered_map#L1877
-
-		if (size() != rhs.size())
-		{
-			return false;
-		}
-		auto xi = begin();
-		auto xe = end();
-		auto ye = rhs.ValsCEnd();
-		for (; xi != xe; ++xi)
-		{
-			auto yj = rhs.FindVal((*std::get<0>(*xi)));
-			if (yj == ye || !((*std::get<1>(*xi)) == *yj))
-			{
-				return false;
-			}
-		}
-		return true;
-	}
+	virtual bool DictBaseIsEqual(const Self& rhs) const = 0;
 
 	bool operator==(const Self& rhs) const
 	{

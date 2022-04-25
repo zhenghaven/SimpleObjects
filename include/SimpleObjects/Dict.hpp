@@ -154,6 +154,28 @@ public:
 
 	// ===== DictBase class
 
+	virtual bool DictBaseIsEqual(const Base& rhs) const override
+	{
+		// reference: https://github.com/llvm/llvm-project/blob/main/libcxx/include/unordered_map#L1877
+
+		if (m_data.size() != rhs.size())
+		{
+			return false;
+		}
+		auto xi = m_data.cbegin();
+		auto xe = m_data.cend();
+		auto ye = rhs.ValsCEnd();
+		for (; xi != xe; ++xi)
+		{
+			auto yj = rhs.FindVal(xi->first.GetVal());
+			if (yj == ye || !(xi->second == *yj))
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+
 	using Base::operator==;
 #ifdef __cpp_lib_three_way_comparison
 	using Base::operator<=>;

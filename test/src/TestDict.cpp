@@ -152,10 +152,15 @@ GTEST_TEST(TestDict, Compare)
 		{ Int64(1), String("test val 1") },
 		{ String("2"), String("test val 1") },
 	});
+
+	std::cout << "TEST X 0" << std::endl;
+
 	// ==
 	EXPECT_TRUE(testDc_001122 != testDc_0011);
 	EXPECT_TRUE(testDc_001122 != testDc_001121);
 	EXPECT_FALSE(testDc_001122 != testDc_001122_cp);
+
+	std::cout << "TEST X 1" << std::endl;
 
 	using DictBaseCmp = CompareTestHelpers<DictBaseObj>;
 
@@ -163,11 +168,15 @@ GTEST_TEST(TestDict, Compare)
 	EXPECT_TRUE(DictBaseCmp::Neq(testDc_001122, testDc_001121));
 	EXPECT_FALSE(DictBaseCmp::Neq(testDc_001122, testDc_001122_cp));
 
+	std::cout << "TEST X 2" << std::endl;
+
 	// == diff obj
 	using BaseObjCmp = CompareTestHelpers<BaseObj>;
 
 	EXPECT_TRUE(BaseObjCmp::Neq(Dict(), Null()));
 	EXPECT_TRUE(BaseObjCmp::Neq(Dict(), String()));
+
+	std::cout << "TEST X 3" << std::endl;
 
 	// <
 	EXPECT_THROW(BaseObjCmp::Lt(Dict(), Dict()), UnsupportedOperation);
@@ -175,11 +184,17 @@ GTEST_TEST(TestDict, Compare)
 	EXPECT_THROW(BaseObjCmp::Le(Dict(), Dict()), UnsupportedOperation);
 	EXPECT_THROW(BaseObjCmp::Ge(Dict(), Dict()), UnsupportedOperation);
 
+	std::cout << "TEST X 4" << std::endl;
+
 	// < diff obj
 	EXPECT_THROW(BaseObjCmp::Lt(Dict(), String()), UnsupportedOperation);
 
+	std::cout << "TEST X 5" << std::endl;
+
 	// > diff obj
 	EXPECT_THROW(BaseObjCmp::Lt(Dict(), String()), UnsupportedOperation);
+
+	std::cout << "TEST X 6" << std::endl;
 }
 
 GTEST_TEST(TestDict, Len)
