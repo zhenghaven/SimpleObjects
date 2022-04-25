@@ -112,6 +112,9 @@ public:
 			m_basePtr = m_val.get() != nullptr ?
 				m_val.get() :
 				rhs.m_basePtr;
+
+			rhs.m_valPtr = nullptr;
+			rhs.m_basePtr = nullptr;
 		}
 		return *this;
 	}
