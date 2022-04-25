@@ -40,13 +40,20 @@ GTEST_TEST(TestObject, Construction)
 	});
 
 	// Copy/Move
-	Object valCpy1(val1);
+	Object valCpy1(val2);
+	EXPECT_TRUE(valCpy1.BaseObjectIsEqual(String("Test")));
 	Object valMov1(std::move(valCpy1));
+	EXPECT_TRUE(valMov1.BaseObjectIsEqual(String("Test")));
 
 	// Copy/Move internal objects
 	auto tmpStr = String("Test");
 	Object valCpy2(tmpStr);
+	EXPECT_TRUE(valCpy2.BaseObjectIsEqual(String("Test")));
 	Object valMov2(std::move(tmpStr));
+	EXPECT_TRUE(valMov2.BaseObjectIsEqual(String("Test")));
+
+	Object valMov3(String("Test").Move(Object::sk_null));
+	EXPECT_TRUE(valMov3.BaseObjectIsEqual(String("Test")));
 }
 
 GTEST_TEST(TestObject, Assignment)

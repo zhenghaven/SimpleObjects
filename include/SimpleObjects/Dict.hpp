@@ -9,6 +9,7 @@
 
 #include <memory>
 
+#include "Internal/DictKey.hpp"
 #include "Internal/make_unique.hpp"
 
 #include "ToString.hpp"
@@ -20,7 +21,11 @@ namespace SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE
 #endif
 {
 
-template<typename _CtnType, typename _ToStringType>
+template<
+	typename _KeyType,
+	typename _ValType,
+	template<typename, typename> class _ContainerType,
+	typename _ToStringType>
 class DictImpl :
 	public DictBaseObject<
 		HashableBaseObject<_ToStringType>,
@@ -29,28 +34,28 @@ class DictImpl :
 {
 public: // Static member:
 
-	using ContainerType = _CtnType;
 	using ToStringType = _ToStringType;
-	using Self = DictImpl<_CtnType, _ToStringType>;
+	using Self = DictImpl<_KeyType, _ValType, _ContainerType, _ToStringType>;
 	using Base = DictBaseObject<
 		HashableBaseObject<_ToStringType>,
 		BaseObject<_ToStringType>,
 		_ToStringType>;
 	using BaseBase = typename Base::Base;
 
+	using DictKey = Internal::DictKeyImpl<
+		_KeyType,
+		typename Base::key_type>;
+	using ContainerType = _ContainerType<DictKey, _ValType>;
+
 	static_assert(std::is_same<BaseBase, BaseObject<_ToStringType> >::value,
 		"Expecting Base::Base to be BaseObject class");
 
-	typedef typename ContainerType::key_type             key_type;
-	typedef typename ContainerType::mapped_type          mapped_type;
-	typedef typename ContainerType::value_type           value_type;
-	typedef typename ContainerType::difference_type      difference_type;
-	typedef typename ContainerType::reference            reference;
-	typedef typename ContainerType::const_reference      const_reference;
-	typedef typename ContainerType::pointer              pointer;
-	typedef typename ContainerType::const_pointer        const_pointer;
-	typedef FrIterator<value_type, false>                iterator;
-	typedef FrIterator<value_type, true>                 const_iterator;
+	typedef _KeyType                               key_type;
+	typedef _ValType                               mapped_type;
+	typedef std::pair<key_type, mapped_type>       value_type;
+	typedef typename ContainerType::value_type     wrapped_value_type;
+	typedef FrIterator<wrapped_value_type, false>  iterator;
+	typedef FrIterator<wrapped_value_type, true>   const_iterator;
 
 	typedef typename Base::key_type                  base_key_type;
 	typedef typename Base::mapped_type               base_mapped_type;
@@ -64,7 +69,7 @@ public: // Static member:
 			_CtnConstIterator,
 			base_key_type,
 			true,
-			Internal::ItTransformTupleGet<0> >;
+			Internal::ItTransformDictKey >;
 	using _ValKIteratorWrap = CppStdFwIteratorWrap<
 			_CtnConstIterator,
 			base_mapped_type,
@@ -88,8 +93,13 @@ public:
 	{}
 
 	DictImpl(std::initializer_list<value_type> l) :
-		m_data(l)
-	{}
+		m_data()
+	{
+		for (auto it = l.begin(); it != l.end(); ++it)
+		{
+			m_data.insert(std::make_pair(DictKey::Make(it->first), it->second));
+		}
+	}
 
 	DictImpl(const Self& other) :
 		m_data(other.m_data)
@@ -144,6 +154,28 @@ public:
 
 	// ===== DictBase class
 
+	virtual bool DictBaseIsEqual(const Base& rhs) const override
+	{
+		// reference: https://github.com/llvm/llvm-project/blob/main/libcxx/include/unordered_map#L1877
+
+		if (m_data.size() != rhs.size())
+		{
+			return false;
+		}
+		auto xi = m_data.cbegin();
+		auto xe = m_data.cend();
+		auto ye = rhs.ValsCEnd();
+		for (; xi != xe; ++xi)
+		{
+			auto yj = rhs.FindVal(xi->first.GetVal());
+			if (yj == ye || !(xi->second == *yj))
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+
 	using Base::operator==;
 #ifdef __cpp_lib_three_way_comparison
 	using Base::operator<=>;
@@ -193,14 +225,16 @@ public:
 
 	mapped_type& operator[](const key_type& key)
 	{
-		return m_data[key];
+		auto wrappedKey = DictKey::Borrow(&key);
+		return m_data[wrappedKey];
 	}
 
 	const mapped_type& operator[](const key_type& key) const
 	{
 		try
 		{
-			return m_data.at(key);
+			auto wrappedKey = DictKey::Borrow(&key);
+			return m_data.at(wrappedKey);
 		}
 		catch (const std::out_of_range&)
 		{
@@ -212,17 +246,20 @@ public:
 
 	const_iterator find(const key_type& key) const
 	{
-		return ToFrIt<true>(m_data.find(key));
+		auto wrappedKey = DictKey::Borrow(&key);
+		return ToFrIt<true>(m_data.find(wrappedKey));
 	}
 
 	iterator find(const key_type& key)
 	{
-		return ToFrIt<false>(m_data.find(key));
+		auto wrappedKey = DictKey::Borrow(&key);
+		return ToFrIt<false>(m_data.find(wrappedKey));
 	}
 
 	bool HasKey(const key_type& key) const
 	{
-		return m_data.find(key) != m_data.cend();
+		auto wrappedKey = DictKey::Borrow(&key);
+		return m_data.find(wrappedKey) != m_data.cend();
 	}
 
 	// ========== adding/removing values ==========
@@ -230,11 +267,12 @@ public:
 	std::pair<iterator, bool> InsertOnly(
 		const key_type& key, const mapped_type& other)
 	{
-		auto it = m_data.find(key);
+		auto wrappedKey = DictKey::Borrow(&key);
+		auto it = m_data.find(wrappedKey);
 		if (it == m_data.end())
 		{
 			// insert
-			it = m_data.emplace(key, other).first;
+			it = m_data.emplace(DictKey::Make(key), other).first;
 			return {ToFrIt<false>(it), true};
 		}
 		return {ToFrIt<false>(it), false};
@@ -243,12 +281,13 @@ public:
 	std::pair<iterator, bool> InsertOnly(
 		key_type&& key, mapped_type&& other)
 	{
-		auto it = m_data.find(key);
+		auto wrappedKey = DictKey::Borrow(&key);
+		auto it = m_data.find(wrappedKey);
 		if (it == m_data.end())
 		{
 			// insert
 			it = m_data.emplace(
-				std::forward<key_type>(key),
+				DictKey::Make(std::forward<key_type>(key)),
 				std::forward<mapped_type>(other)).first;
 			return {ToFrIt<false>(it), true};
 		}
@@ -258,11 +297,12 @@ public:
 	std::pair<iterator, bool> InsertOrAssign(
 		const key_type& key, const mapped_type& other)
 	{
-		auto it = m_data.find(key);
+		auto wrappedKey = DictKey::Borrow(&key);
+		auto it = m_data.find(wrappedKey);
 		if (it == m_data.end())
 		{
 			// insert
-			it = m_data.emplace(key, other).first;
+			it = m_data.emplace(DictKey::Make(key), other).first;
 			return {ToFrIt<false>(it), true};
 		}
 		else
@@ -276,12 +316,13 @@ public:
 	std::pair<iterator, bool> InsertOrAssign(
 		key_type&& key, mapped_type&& other)
 	{
-		auto it = m_data.find(key);
+		auto wrappedKey = DictKey::Borrow(&key);
+		auto it = m_data.find(wrappedKey);
 		if (it == m_data.end())
 		{
 			// insert
 			it = m_data.emplace(
-				std::forward<key_type>(key),
+				DictKey::Make(std::forward<key_type>(key)),
 				std::forward<mapped_type>(other)).first;
 			return {ToFrIt<false>(it), true};
 		}
@@ -295,7 +336,8 @@ public:
 
 	void Remove(const key_type& key)
 	{
-		m_data.erase(key);
+		auto wrappedKey = DictKey::Borrow(&key);
+		m_data.erase(wrappedKey);
 	}
 
 	// ========== Overrides BaseObject ==========
@@ -405,7 +447,7 @@ public:
 		size_t i = 0;
 		for (const auto& item : m_data)
 		{
-			res += item.first.DebugString();
+			res += item.first.GetVal().DebugString();
 			res += " : ";
 			res += item.second.DebugString();
 			if (i < m_data.size() - 1)
@@ -427,7 +469,7 @@ public:
 		size_t i = 0;
 		for (const auto& item : m_data)
 		{
-			res += item.first.ShortDebugString();
+			res += item.first.GetVal().ShortDebugString();
 			res += ":";
 			res += item.second.ShortDebugString();
 			if (i < m_data.size() - 1)
@@ -446,7 +488,7 @@ public:
 		size_t i = 0;
 		for (const auto& item : m_data)
 		{
-			res += item.first.ToString();
+			res += item.first.GetVal().ToString();
 			res += Internal::ToString<ToStringType>(" : ");
 			res += item.second.ToString();
 			if (i < m_data.size() - 1)
@@ -466,7 +508,7 @@ public:
 		size_t i = 0;
 		for (const auto& item : m_data)
 		{
-			item.first.DumpString(outIt);
+			item.first.GetVal().DumpString(outIt);
 			*outIt++ = ' ';
 			*outIt++ = ':';
 			*outIt++ = ' ';
@@ -489,23 +531,26 @@ protected:
 	virtual base_const_mapped_iterator DictBaseFindVal(
 		const base_key_type& key) const override
 	{
+		auto wrappedKey = DictKey::Borrow(&key);
 		return base_const_mapped_iterator(
-			_ValKIteratorWrap::Build(m_data.find(DynCastKey(key))));
+			_ValKIteratorWrap::Build(m_data.find(wrappedKey)));
 	}
 
 	virtual base_mapped_iterator DictBaseFindVal(
 		const base_key_type& key) override
 	{
+		auto wrappedKey = DictKey::Borrow(&key);
 		return base_mapped_iterator(
-			_ValIteratorWrap::Build(m_data.find(DynCastKey(key))));
+			_ValIteratorWrap::Build(m_data.find(wrappedKey)));
 	}
 
 	virtual base_mapped_iterator DictBaseFindValOrAddDefault(
 		const base_key_type& key) override
 	{
-		m_data[DynCastKey(key)];
+		auto wrappedKey = DictKey::Borrow(&key);
+		m_data[wrappedKey];
 		return base_mapped_iterator(
-			_ValIteratorWrap::Build(m_data.find(DynCastKey(key))));
+			_ValIteratorWrap::Build(m_data.find(wrappedKey)));
 	}
 
 	virtual bool DictBaseInsertOnly(
@@ -538,7 +583,8 @@ protected:
 
 	virtual void DictBaseRemove(const base_key_type& key) override
 	{
-		return Remove(DynCastKey(key));
+		auto wrappedKey = DictKey::Borrow(&key);
+		m_data.erase(wrappedKey);
 	}
 
 private:

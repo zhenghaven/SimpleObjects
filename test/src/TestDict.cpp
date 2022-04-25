@@ -152,6 +152,7 @@ GTEST_TEST(TestDict, Compare)
 		{ Int64(1), String("test val 1") },
 		{ String("2"), String("test val 1") },
 	});
+
 	// ==
 	EXPECT_TRUE(testDc_001122 != testDc_0011);
 	EXPECT_TRUE(testDc_001122 != testDc_001121);
@@ -214,9 +215,9 @@ GTEST_TEST(TestDict, Iterator)
 	// const it
 	for(auto it = cpDc.cbegin(); it != cpDc.cend(); it++)
 	{
-		EXPECT_TRUE((testDc.find(it->first) != testDc.end()) &&
-			(testDc.find(it->first)->second == it->second));
-		++testCount[it->first];
+		EXPECT_TRUE((testDc.find(it->first.GetVal()) != testDc.end()) &&
+			(testDc.find(it->first.GetVal())->second == it->second));
+		++testCount[it->first.GetVal()];
 	}
 	for(auto& count: testCount)
 	{
@@ -227,9 +228,9 @@ GTEST_TEST(TestDict, Iterator)
 	// const obj begin & end
 	for(auto it = kCpDc.begin(); it != kCpDc.end(); ++it)
 	{
-		EXPECT_TRUE((testDc.find(it->first) != testDc.end()) &&
-			(testDc.find(it->first)->second == it->second));
-		++testCount[it->first];
+		EXPECT_TRUE((testDc.find(it->first.GetVal()) != testDc.end()) &&
+			(testDc.find(it->first.GetVal())->second == it->second));
+		++testCount[it->first.GetVal()];
 	}
 	for(auto& count: testCount)
 	{
@@ -240,9 +241,9 @@ GTEST_TEST(TestDict, Iterator)
 	// it
 	for(auto it = cpDc.begin(); it != cpDc.end(); it++)
 	{
-		EXPECT_TRUE((testDc.find(it->first) != testDc.end()) &&
-			(testDc.find(it->first)->second == it->second));
-		++testCount[it->first];
+		EXPECT_TRUE((testDc.find(it->first.GetVal()) != testDc.end()) &&
+			(testDc.find(it->first.GetVal())->second == it->second));
+		++testCount[it->first.GetVal()];
 	}
 	for(auto& count: testCount)
 	{
@@ -307,7 +308,7 @@ GTEST_TEST(TestDict, Insert)
 	auto subTest1 = [&]()
 	{
 		auto res = testDc.InsertOnly(Int64(1), String("test val 1"));
-		EXPECT_TRUE(res.first->first.AsRealNum() == Int64(1));
+		EXPECT_TRUE(res.first->first.GetVal().AsRealNum() == Int64(1));
 		EXPECT_TRUE(res.first->second.AsString() == String("test val 1"));
 		EXPECT_TRUE(&*res.first == &*testDc.find(Int64(1)));
 		EXPECT_TRUE(res.second == true);
@@ -321,7 +322,7 @@ GTEST_TEST(TestDict, Insert)
 		const auto tmpKey = HashableObject(Int64(2));
 		const auto tmpVal = Object(String("test val 2"));
 		auto res = testDc.InsertOnly(tmpKey, tmpVal);
-		EXPECT_TRUE(res.first->first.AsRealNum() == Int64(2));
+		EXPECT_TRUE(res.first->first.GetVal().AsRealNum() == Int64(2));
 		EXPECT_TRUE(res.first->second.AsString() == String("test val 2"));
 		EXPECT_TRUE(&*res.first == &*testDc.find(Int64(2)));
 		EXPECT_TRUE(res.second == true);
@@ -334,7 +335,7 @@ GTEST_TEST(TestDict, Insert)
 	auto subTest3 = [&]()
 	{
 		auto res = testDc.InsertOnly(Int64(1), String("test val 1_1"));
-		EXPECT_TRUE(res.first->first.AsRealNum() == Int64(1));
+		EXPECT_TRUE(res.first->first.GetVal().AsRealNum() == Int64(1));
 		EXPECT_TRUE(res.first->second.AsString() == String("test val 1"));
 		EXPECT_TRUE(&*res.first == &*testDc.find(Int64(1)));
 		EXPECT_TRUE(res.second == false);
@@ -347,7 +348,7 @@ GTEST_TEST(TestDict, Insert)
 		const auto tmpKey = HashableObject(Int64(2));
 		const auto tmpVal = Object(String("test val 2_2"));
 		auto res = testDc.InsertOnly(tmpKey, tmpVal);
-		EXPECT_TRUE(res.first->first.AsRealNum() == Int64(2));
+		EXPECT_TRUE(res.first->first.GetVal().AsRealNum() == Int64(2));
 		EXPECT_TRUE(res.first->second.AsString() == String("test val 2"));
 		EXPECT_TRUE(&*res.first == &*testDc.find(Int64(2)));
 		EXPECT_TRUE(res.second == false);

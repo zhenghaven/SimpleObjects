@@ -58,6 +58,10 @@ public:
 		m_ptr(other.Move(Base::sk_null))
 	{}
 
+	ObjectImpl(BasePtr other) :
+		m_ptr(std::move(other))
+	{}
+
 	virtual ~ObjectImpl() = default;
 
 	Self& operator=(const Self& rhs)

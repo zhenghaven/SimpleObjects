@@ -94,7 +94,7 @@ using List = ListT<Object>;
 // ========== Convenient types of Dict ==========
 
 template<typename _KeyType, typename _Valtype>
-using DictT = DictImpl<MapType<_KeyType, _Valtype>, ToStringType>;
+using DictT = DictImpl<_KeyType, _Valtype, MapType, ToStringType>;
 
 using Dict = DictT<HashableObject, Object>;
 
