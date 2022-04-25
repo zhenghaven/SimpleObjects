@@ -143,14 +143,14 @@ public:
 
 	bool operator==(const DictKeyImpl& rhs) const
 	{
-		return (m_valPtr != nullptr) ?
+		return (m_valPtr != nullptr && rhs.m_valPtr != nullptr) ?
 				(*m_valPtr == *(rhs.m_valPtr)) :
 				(*m_basePtr == *(rhs.m_basePtr));
 	}
 
 	bool operator<(const DictKeyImpl& rhs) const
 	{
-		return (m_valPtr != nullptr) ?
+		return (m_valPtr != nullptr && rhs.m_valPtr != nullptr) ?
 				(*m_valPtr < *(rhs.m_valPtr)) :
 				(*m_basePtr < *(rhs.m_basePtr));
 	}
