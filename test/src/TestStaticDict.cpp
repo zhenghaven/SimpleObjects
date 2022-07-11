@@ -273,16 +273,16 @@ public:
 
 	using Base::Base;
 
-	typename Base::GetRef<StrKey<SIMOBJ_KSTR("Key1_1")> >
+	typename Base::template GetRef<StrKey<SIMOBJ_KSTR("Key1_1")> >
 	get_Key1_1()
 	{
-		return Base::get<StrKey<SIMOBJ_KSTR("Key1_1")> >();
+		return Base::template get<StrKey<SIMOBJ_KSTR("Key1_1")> >();
 	}
 
-	typename Base::GetConstRef<StrKey<SIMOBJ_KSTR("Key1_1")> >
+	typename Base::template GetConstRef<StrKey<SIMOBJ_KSTR("Key1_1")> >
 	get_Key1_1() const
 	{
-		return Base::get<StrKey<SIMOBJ_KSTR("Key1_1")> >();
+		return Base::template get<StrKey<SIMOBJ_KSTR("Key1_1")> >();
 	}
 
 }; // class TestStaticDict1
@@ -300,40 +300,40 @@ public:
 
 	using Base::Base;
 
-	typename Base::GetRef<StrKey<SIMOBJ_KSTR("Key2_1")> >
+	typename Base::template GetRef<StrKey<SIMOBJ_KSTR("Key2_1")> >
 	get_Key2_1()
 	{
-		return Base::get<StrKey<SIMOBJ_KSTR("Key2_1")> >();
+		return Base::template get<StrKey<SIMOBJ_KSTR("Key2_1")> >();
 	}
 
-	typename Base::GetConstRef<StrKey<SIMOBJ_KSTR("Key2_1")> >
+	typename Base::template GetConstRef<StrKey<SIMOBJ_KSTR("Key2_1")> >
 	get_Key2_1() const
 	{
-		return Base::get<StrKey<SIMOBJ_KSTR("Key2_1")> >();
+		return Base::template get<StrKey<SIMOBJ_KSTR("Key2_1")> >();
 	}
 
-	typename Base::GetRef<StrKey<SIMOBJ_KSTR("Key2_2")> >
+	typename Base::template GetRef<StrKey<SIMOBJ_KSTR("Key2_2")> >
 	get_Key2_2()
 	{
-		return Base::get<StrKey<SIMOBJ_KSTR("Key2_2")> >();
+		return Base::template get<StrKey<SIMOBJ_KSTR("Key2_2")> >();
 	}
 
-	typename Base::GetConstRef<StrKey<SIMOBJ_KSTR("Key2_2")> >
+	typename Base::template GetConstRef<StrKey<SIMOBJ_KSTR("Key2_2")> >
 	get_Key2_2() const
 	{
-		return Base::get<StrKey<SIMOBJ_KSTR("Key2_2")> >();
+		return Base::template get<StrKey<SIMOBJ_KSTR("Key2_2")> >();
 	}
 
-	typename Base::GetRef<StrKey<SIMOBJ_KSTR("Key2_3")> >
+	typename Base::template GetRef<StrKey<SIMOBJ_KSTR("Key2_3")> >
 	get_Key2_3()
 	{
-		return Base::get<StrKey<SIMOBJ_KSTR("Key2_3")> >();
+		return Base::template get<StrKey<SIMOBJ_KSTR("Key2_3")> >();
 	}
 
-	typename Base::GetConstRef<StrKey<SIMOBJ_KSTR("Key2_3")> >
+	typename Base::template GetConstRef<StrKey<SIMOBJ_KSTR("Key2_3")> >
 	get_Key2_3() const
 	{
-		return Base::get<StrKey<SIMOBJ_KSTR("Key2_3")> >();
+		return Base::template get<StrKey<SIMOBJ_KSTR("Key2_3")> >();
 	}
 
 }; // class TestStaticDict2
