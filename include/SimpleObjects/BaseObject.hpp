@@ -84,25 +84,27 @@ public: // Static members:
 	using ToStringType = _ToStringType;
 
 
-	using NullBase    = NullImpl<ToStringType>;
+	using NullBase      = NullImpl<ToStringType>;
 
-	using RealNumBase = RealNumBaseObject<ToStringType>;
+	using RealNumBase   = RealNumBaseObject<ToStringType>;
 
-	using StringBase  = StringBaseObject<char, ToStringType>;
+	using StringBase    = StringBaseObject<char, ToStringType>;
 
-	using ListBase    = ListBaseObject<BaseObject<ToStringType>, ToStringType>;
+	using ListBase      = ListBaseObject<BaseObject<ToStringType>, ToStringType>;
 
-	using DictBase    = DictBaseObject<HashableBaseObject<ToStringType>,
-		                               BaseObject<ToStringType>,
-		                               ToStringType>;
+	using HashableBase  = HashableBaseObject<ToStringType>;
 
-	using BytesBase   = BytesBaseObject<uint8_t, ToStringType>;
+	using DictBase      = DictBaseObject<HashableBaseObject<ToStringType>,
+										BaseObject<ToStringType>,
+										ToStringType>;
 
-	using StatDictBase = StaticDictBaseObject<HashableBaseObject<ToStringType>,
-		                                      BaseObject<ToStringType>,
-		                                      HashableReferenceWrapper,
-		                                      std::reference_wrapper,
-		                                      ToStringType>;
+	using BytesBase     = BytesBaseObject<uint8_t, ToStringType>;
+
+	using StatDictBase  = StaticDictBaseObject<HashableBaseObject<ToStringType>,
+											BaseObject<ToStringType>,
+											HashableReferenceWrapper,
+											std::reference_wrapper,
+											ToStringType>;
 
 	static constexpr Self* sk_null = nullptr;
 
@@ -389,6 +391,16 @@ public:
 	virtual const BytesBase& AsBytes() const
 	{
 		throw TypeError("Bytes", this->GetCategoryName());
+	}
+
+	virtual HashableBase& AsHashable()
+	{
+		throw TypeError("Hashable", this->GetCategoryName());
+	}
+
+	virtual const HashableBase& AsHashable() const
+	{
+		throw TypeError("Hashable", this->GetCategoryName());
 	}
 
 	virtual std::unique_ptr<Self> Copy(const Self* /*unused*/) const = 0;

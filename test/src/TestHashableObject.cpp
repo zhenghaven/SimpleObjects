@@ -94,53 +94,65 @@ GTEST_TEST(TestHashableObj, Cast)
 {
 	HashableObject obj;
 	EXPECT_NO_THROW(obj.AsNull());
-	EXPECT_THROW(obj.AsRealNum(), TypeError);
-	EXPECT_THROW(obj.AsString(), TypeError);
-	EXPECT_THROW(obj.AsList(), TypeError);
-	EXPECT_THROW(obj.AsDict(), TypeError);
+	EXPECT_THROW(obj.AsRealNum(),    TypeError);
+	EXPECT_THROW(obj.AsString(),     TypeError);
+	EXPECT_THROW(obj.AsList(),       TypeError);
+	EXPECT_THROW(obj.AsDict(),       TypeError);
 	EXPECT_THROW(obj.AsStaticDict(), TypeError);
+	EXPECT_THROW(obj.AsBytes(),      TypeError);
+	EXPECT_NO_THROW(obj.AsHashable());
 	// test const version
 	[obj](){
 		EXPECT_NO_THROW(obj.AsNull());
-		EXPECT_THROW(obj.AsRealNum(), TypeError);
-		EXPECT_THROW(obj.AsString(), TypeError);
-		EXPECT_THROW(obj.AsList(), TypeError);
-		EXPECT_THROW(obj.AsDict(), TypeError);
+		EXPECT_THROW(obj.AsRealNum(),    TypeError);
+		EXPECT_THROW(obj.AsString(),     TypeError);
+		EXPECT_THROW(obj.AsList(),       TypeError);
+		EXPECT_THROW(obj.AsDict(),       TypeError);
 		EXPECT_THROW(obj.AsStaticDict(), TypeError);
+		EXPECT_THROW(obj.AsBytes(),      TypeError);
+		EXPECT_NO_THROW(obj.AsHashable());
 	}();
 
 	obj = Bool(true);
-	EXPECT_THROW(obj.AsNull(), TypeError);
+	EXPECT_THROW(obj.AsNull(),       TypeError);
 	EXPECT_NO_THROW(obj.AsRealNum());
-	EXPECT_THROW(obj.AsString(), TypeError);
-	EXPECT_THROW(obj.AsList(), TypeError);
-	EXPECT_THROW(obj.AsDict(), TypeError);
+	EXPECT_THROW(obj.AsString(),     TypeError);
+	EXPECT_THROW(obj.AsList(),       TypeError);
+	EXPECT_THROW(obj.AsDict(),       TypeError);
 	EXPECT_THROW(obj.AsStaticDict(), TypeError);
+	EXPECT_THROW(obj.AsBytes(),      TypeError);
+	EXPECT_NO_THROW(obj.AsHashable());
 	// test const version
 	[obj](){
-		EXPECT_THROW(obj.AsNull(), TypeError);
+		EXPECT_THROW(obj.AsNull(),       TypeError);
 		EXPECT_NO_THROW(obj.AsRealNum());
-		EXPECT_THROW(obj.AsString(), TypeError);
-		EXPECT_THROW(obj.AsList(), TypeError);
-		EXPECT_THROW(obj.AsDict(), TypeError);
+		EXPECT_THROW(obj.AsString(),     TypeError);
+		EXPECT_THROW(obj.AsList(),       TypeError);
+		EXPECT_THROW(obj.AsDict(),       TypeError);
 		EXPECT_THROW(obj.AsStaticDict(), TypeError);
+		EXPECT_THROW(obj.AsBytes(),      TypeError);
+		EXPECT_NO_THROW(obj.AsHashable());
 	}();
 
 	obj = String("Test");
-	EXPECT_THROW(obj.AsNull(), TypeError);
-	EXPECT_THROW(obj.AsRealNum(), TypeError);
+	EXPECT_THROW(obj.AsNull(),       TypeError);
+	EXPECT_THROW(obj.AsRealNum(),    TypeError);
 	EXPECT_NO_THROW(obj.AsString());
-	EXPECT_THROW(obj.AsList(), TypeError);
-	EXPECT_THROW(obj.AsDict(), TypeError);
+	EXPECT_THROW(obj.AsList(),       TypeError);
+	EXPECT_THROW(obj.AsDict(),       TypeError);
 	EXPECT_THROW(obj.AsStaticDict(), TypeError);
+	EXPECT_THROW(obj.AsBytes(),      TypeError);
+	EXPECT_NO_THROW(obj.AsHashable());
 	// test const version
 	[obj](){
-		EXPECT_THROW(obj.AsNull(), TypeError);
-		EXPECT_THROW(obj.AsRealNum(), TypeError);
+		EXPECT_THROW(obj.AsNull(),       TypeError);
+		EXPECT_THROW(obj.AsRealNum(),    TypeError);
 		EXPECT_NO_THROW(obj.AsString());
-		EXPECT_THROW(obj.AsList(), TypeError);
-		EXPECT_THROW(obj.AsDict(), TypeError);
+		EXPECT_THROW(obj.AsList(),       TypeError);
+		EXPECT_THROW(obj.AsDict(),       TypeError);
 		EXPECT_THROW(obj.AsStaticDict(), TypeError);
+		EXPECT_THROW(obj.AsBytes(),      TypeError);
+		EXPECT_NO_THROW(obj.AsHashable());
 	}();
 
 	obj = Bytes({ 0x12U });
@@ -151,6 +163,7 @@ GTEST_TEST(TestHashableObj, Cast)
 	EXPECT_THROW(obj.AsDict(),       TypeError);
 	EXPECT_THROW(obj.AsStaticDict(), TypeError);
 	EXPECT_NO_THROW(obj.AsBytes());
+	EXPECT_NO_THROW(obj.AsHashable());
 	// test const version
 	[obj](){
 		EXPECT_THROW(obj.AsNull(),       TypeError);
@@ -160,6 +173,7 @@ GTEST_TEST(TestHashableObj, Cast)
 		EXPECT_THROW(obj.AsDict(),       TypeError);
 		EXPECT_THROW(obj.AsStaticDict(), TypeError);
 		EXPECT_NO_THROW(obj.AsBytes());
+		EXPECT_NO_THROW(obj.AsHashable());
 	}();
 }
 

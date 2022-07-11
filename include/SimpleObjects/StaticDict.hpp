@@ -11,6 +11,7 @@
 
 #include "ConstSequence.hpp"
 #include "StaticDictBaseObject.hpp"
+#include "ToString.hpp"
 #include "Utils.hpp"
 
 #ifndef SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE

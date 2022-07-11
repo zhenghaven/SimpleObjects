@@ -273,16 +273,16 @@ public:
 
 	using Base::Base;
 
-	typename Base::GetRef<StrKey<SIMOBJ_KSTR("Key1_1")> >
+	typename Base::template GetRef<StrKey<SIMOBJ_KSTR("Key1_1")> >
 	get_Key1_1()
 	{
-		return Base::get<StrKey<SIMOBJ_KSTR("Key1_1")> >();
+		return Base::template get<StrKey<SIMOBJ_KSTR("Key1_1")> >();
 	}
 
-	typename Base::GetConstRef<StrKey<SIMOBJ_KSTR("Key1_1")> >
+	typename Base::template GetConstRef<StrKey<SIMOBJ_KSTR("Key1_1")> >
 	get_Key1_1() const
 	{
-		return Base::get<StrKey<SIMOBJ_KSTR("Key1_1")> >();
+		return Base::template get<StrKey<SIMOBJ_KSTR("Key1_1")> >();
 	}
 
 }; // class TestStaticDict1
@@ -300,40 +300,40 @@ public:
 
 	using Base::Base;
 
-	typename Base::GetRef<StrKey<SIMOBJ_KSTR("Key2_1")> >
+	typename Base::template GetRef<StrKey<SIMOBJ_KSTR("Key2_1")> >
 	get_Key2_1()
 	{
-		return Base::get<StrKey<SIMOBJ_KSTR("Key2_1")> >();
+		return Base::template get<StrKey<SIMOBJ_KSTR("Key2_1")> >();
 	}
 
-	typename Base::GetConstRef<StrKey<SIMOBJ_KSTR("Key2_1")> >
+	typename Base::template GetConstRef<StrKey<SIMOBJ_KSTR("Key2_1")> >
 	get_Key2_1() const
 	{
-		return Base::get<StrKey<SIMOBJ_KSTR("Key2_1")> >();
+		return Base::template get<StrKey<SIMOBJ_KSTR("Key2_1")> >();
 	}
 
-	typename Base::GetRef<StrKey<SIMOBJ_KSTR("Key2_2")> >
+	typename Base::template GetRef<StrKey<SIMOBJ_KSTR("Key2_2")> >
 	get_Key2_2()
 	{
-		return Base::get<StrKey<SIMOBJ_KSTR("Key2_2")> >();
+		return Base::template get<StrKey<SIMOBJ_KSTR("Key2_2")> >();
 	}
 
-	typename Base::GetConstRef<StrKey<SIMOBJ_KSTR("Key2_2")> >
+	typename Base::template GetConstRef<StrKey<SIMOBJ_KSTR("Key2_2")> >
 	get_Key2_2() const
 	{
-		return Base::get<StrKey<SIMOBJ_KSTR("Key2_2")> >();
+		return Base::template get<StrKey<SIMOBJ_KSTR("Key2_2")> >();
 	}
 
-	typename Base::GetRef<StrKey<SIMOBJ_KSTR("Key2_3")> >
+	typename Base::template GetRef<StrKey<SIMOBJ_KSTR("Key2_3")> >
 	get_Key2_3()
 	{
-		return Base::get<StrKey<SIMOBJ_KSTR("Key2_3")> >();
+		return Base::template get<StrKey<SIMOBJ_KSTR("Key2_3")> >();
 	}
 
-	typename Base::GetConstRef<StrKey<SIMOBJ_KSTR("Key2_3")> >
+	typename Base::template GetConstRef<StrKey<SIMOBJ_KSTR("Key2_3")> >
 	get_Key2_3() const
 	{
-		return Base::get<StrKey<SIMOBJ_KSTR("Key2_3")> >();
+		return Base::template get<StrKey<SIMOBJ_KSTR("Key2_3")> >();
 	}
 
 }; // class TestStaticDict2
@@ -689,21 +689,23 @@ GTEST_TEST(TestStaticDict, Miscs)
 
 	// Cast
 	EXPECT_NO_THROW(dict1.AsStaticDict());
-	EXPECT_THROW(dict1.AsDict(),    TypeError);
-	EXPECT_THROW(dict1.AsNull(),    TypeError);
-	EXPECT_THROW(dict1.AsRealNum(), TypeError);
-	EXPECT_THROW(dict1.AsString(),  TypeError);
-	EXPECT_THROW(dict1.AsList(),    TypeError);
-	EXPECT_THROW(dict1.AsBytes(),   TypeError);
+	EXPECT_THROW(dict1.AsDict(),     TypeError);
+	EXPECT_THROW(dict1.AsNull(),     TypeError);
+	EXPECT_THROW(dict1.AsRealNum(),  TypeError);
+	EXPECT_THROW(dict1.AsString(),   TypeError);
+	EXPECT_THROW(dict1.AsList(),     TypeError);
+	EXPECT_THROW(dict1.AsBytes(),    TypeError);
+	EXPECT_THROW(dict1.AsHashable(), TypeError);
 
 	const auto& kDict1 = dict1;
 	EXPECT_NO_THROW(kDict1.AsStaticDict());
-	EXPECT_THROW(kDict1.AsDict(),    TypeError);
-	EXPECT_THROW(kDict1.AsNull(),    TypeError);
-	EXPECT_THROW(kDict1.AsRealNum(), TypeError);
-	EXPECT_THROW(kDict1.AsString(),  TypeError);
-	EXPECT_THROW(kDict1.AsList(),    TypeError);
-	EXPECT_THROW(kDict1.AsBytes(),   TypeError);
+	EXPECT_THROW(kDict1.AsDict(),     TypeError);
+	EXPECT_THROW(kDict1.AsNull(),     TypeError);
+	EXPECT_THROW(kDict1.AsRealNum(),  TypeError);
+	EXPECT_THROW(kDict1.AsString(),   TypeError);
+	EXPECT_THROW(kDict1.AsList(),     TypeError);
+	EXPECT_THROW(kDict1.AsBytes(),    TypeError);
+	EXPECT_THROW(kDict1.AsHashable(), TypeError);
 
 	// Copy
 	static_assert(std::is_same<
