@@ -27,13 +27,14 @@ public: // Static members
 	using Self = ObjectImpl<_ToStringType>;
 	using Base = BaseObject<_ToStringType>;
 
-	using NullBase     = typename Base::NullBase;
-	using RealNumBase  = typename Base::RealNumBase;
-	using StringBase   = typename Base::StringBase;
-	using ListBase     = typename Base::ListBase;
-	using DictBase     = typename Base::DictBase;
-	using StatDictBase = typename Base::StatDictBase;
-	using BytesBase    = typename Base::BytesBase;
+	using NullBase      = typename Base::NullBase;
+	using RealNumBase   = typename Base::RealNumBase;
+	using StringBase    = typename Base::StringBase;
+	using ListBase      = typename Base::ListBase;
+	using DictBase      = typename Base::DictBase;
+	using StatDictBase  = typename Base::StatDictBase;
+	using BytesBase     = typename Base::BytesBase;
+	using HashableBase  = typename Base::HashableBase;
 
 	using BasePtr = std::unique_ptr<Base>;
 
@@ -327,6 +328,16 @@ public:
 	virtual const BytesBase& AsBytes() const override
 	{
 		return m_ptr->AsBytes();
+	}
+
+	virtual HashableBase& AsHashable() override
+	{
+		return m_ptr->AsHashable();
+	}
+
+	virtual const HashableBase& AsHashable() const override
+	{
+		return m_ptr->AsHashable();
 	}
 
 	// ========== Interface copy/Move ==========

@@ -27,11 +27,12 @@ public: // Static Member
 	using Base = BaseObject<_ToStringType>;
 	using ToStringType = _ToStringType;
 
-	using NullBase    = typename Base::NullBase;
-	using RealNumBase = typename Base::RealNumBase;
-	using StringBase  = typename Base::StringBase;
-	using ListBase    = typename Base::ListBase;
-	using DictBase    = typename Base::DictBase;
+	using NullBase      = typename Base::NullBase;
+	using RealNumBase   = typename Base::RealNumBase;
+	using StringBase    = typename Base::StringBase;
+	using ListBase      = typename Base::ListBase;
+	using DictBase      = typename Base::DictBase;
+	using HashableBase  = typename Base::HashableBase;
 
 	static constexpr Self* sk_null = nullptr;
 
@@ -45,6 +46,20 @@ public:
 	 */
 	virtual ~HashableBaseObject() = default;
 	// LCOV_EXCL_STOP
+
+	virtual HashableBase& AsHashable() override
+	{
+		return Internal::AsChildType<
+				std::is_same<Self, HashableBase>::value, Self, HashableBase
+			>::AsChild(*this, "Hashable", this->GetCategoryName());
+	}
+
+	virtual const HashableBase& AsHashable() const override
+	{
+		return Internal::AsChildType<
+				std::is_same<Self, HashableBase>::value, Self, HashableBase
+			>::AsChild(*this, "Hashable", this->GetCategoryName());
+	}
 
 	virtual std::size_t Hash() const = 0;
 

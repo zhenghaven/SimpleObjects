@@ -33,13 +33,14 @@ public: // Static members
 
 	using BasePtr = std::unique_ptr<Base>;
 
-	using NullBase     = typename Base::NullBase;
-	using RealNumBase  = typename Base::RealNumBase;
-	using StringBase   = typename Base::StringBase;
-	using ListBase     = typename Base::ListBase;
-	using DictBase     = typename Base::DictBase;
-	using StatDictBase = typename Base::StatDictBase;
-	using BytesBase    = typename Base::BytesBase;
+	using NullBase      = typename Base::NullBase;
+	using RealNumBase   = typename Base::RealNumBase;
+	using StringBase    = typename Base::StringBase;
+	using ListBase      = typename Base::ListBase;
+	using DictBase      = typename Base::DictBase;
+	using StatDictBase  = typename Base::StatDictBase;
+	using BytesBase     = typename Base::BytesBase;
+	using HashableBase  = typename Base::HashableBase;
 
 public:
 	HashableObjectImpl() :
@@ -304,6 +305,16 @@ public:
 	virtual const BytesBase& AsBytes() const override
 	{
 		return m_ptr->AsBytes();
+	}
+
+	virtual HashableBase& AsHashable() override
+	{
+		return m_ptr->AsHashable();
+	}
+
+	virtual const HashableBase& AsHashable() const override
+	{
+		return m_ptr->AsHashable();
 	}
 
 	virtual bool BaseObjectIsEqual(const BaseBase& rhs) const override

@@ -1284,6 +1284,7 @@ GTEST_TEST(TestRealNum, Miscs)
 	EXPECT_THROW(kNum.AsDict(),       TypeError);
 	EXPECT_THROW(kNum.AsStaticDict(), TypeError);
 	EXPECT_THROW(kNum.AsBytes(),      TypeError);
+	EXPECT_NO_THROW(kNum.AsHashable());
 
 	EXPECT_NO_THROW(Int16().AsRealNum());
 	EXPECT_THROW(Int32().AsNull(),       TypeError);
@@ -1292,6 +1293,7 @@ GTEST_TEST(TestRealNum, Miscs)
 	EXPECT_THROW(Int64().AsDict(),       TypeError);
 	EXPECT_THROW(Int64().AsStaticDict(), TypeError);
 	EXPECT_THROW(Int64().AsBytes(),      TypeError);
+	EXPECT_NO_THROW(Int16().AsHashable());
 
 	// Copy
 	static_assert(std::is_same<

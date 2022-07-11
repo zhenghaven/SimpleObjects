@@ -73,6 +73,7 @@ GTEST_TEST(TestNull, Miscs)
 	EXPECT_THROW(kNull.AsDict(),       TypeError);
 	EXPECT_THROW(kNull.AsStaticDict(), TypeError);
 	EXPECT_THROW(kNull.AsBytes(),      TypeError);
+	EXPECT_NO_THROW(kNull.AsHashable());
 
 	EXPECT_NO_THROW(Null().AsNull());
 	EXPECT_THROW(Null().AsRealNum(),    TypeError);
@@ -81,6 +82,7 @@ GTEST_TEST(TestNull, Miscs)
 	EXPECT_THROW(Null().AsDict(),       TypeError);
 	EXPECT_THROW(Null().AsStaticDict(), TypeError);
 	EXPECT_THROW(Null().AsBytes(),      TypeError);
+	EXPECT_NO_THROW(Null().AsHashable());
 
 	// Copy
 	static_assert(std::is_same<
