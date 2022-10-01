@@ -14,7 +14,7 @@
 #include <iterator>
 #include <type_traits>
 
-#include "CompareRealNum.hpp"
+#include "RealNumCompare.hpp"
 
 #ifndef SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE
 namespace SimpleObjects

@@ -8,9 +8,11 @@
 #include <functional>
 #include <string>
 
+#include "BasicDefs.hpp"
 #include "Compare.hpp"
 #include "Exception.hpp"
 #include "Iterator.hpp"
+
 
 #ifndef SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE
 namespace SimpleObjects
@@ -18,37 +20,6 @@ namespace SimpleObjects
 namespace SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE
 #endif
 {
-
-enum class ObjCategory
-{
-	Null,
-	Bool,
-	Integer,
-	Real,
-	String,
-	List,
-	Dict,
-	StaticDict,
-	Bytes,
-};
-
-enum class RealNumType
-{
-	Bool,
-	Int8,
-	Int16,
-	Int32,
-	Int64,
-	UInt8,
-	UInt16,
-	UInt32,
-	UInt64,
-	Float,
-	Double,
-	// All enum type above are RESERVED for RealNumImpl<> class ONLY
-
-	Other,  // for future extensions, use this
-};
 
 // Forward declarations
 template<typename _ToStringType>
