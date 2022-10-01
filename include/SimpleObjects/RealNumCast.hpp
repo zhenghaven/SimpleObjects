@@ -21,23 +21,23 @@ namespace SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE
 {
 
 template<typename _DstValType, typename _SrcValType>
-struct RealNumCast;
+struct RealNumCastImpl;
 
 
 template<typename _ValType>
-struct RealNumCast<_ValType, _ValType>
+struct RealNumCastImpl<_ValType, _ValType>
 {
-	static void Set(_ValType& dst, const _ValType& src)
+	static void Cast(_ValType& dst, const _ValType& src)
 	{
 		dst = src;
 	}
-}; // struct RealNumCast<_ValType, _ValType>
+}; // struct RealNumCastImpl<_ValType, _ValType>
 
 
 template<typename _DstValType, typename _SrcValType>
-struct RealNumCast
+struct RealNumCastImpl
 {
-	static void Set(_DstValType& dst, const _SrcValType& src)
+	static void Cast(_DstValType& dst, const _SrcValType& src)
 	{
 		using namespace Internal;
 
@@ -79,6 +79,22 @@ struct RealNumCast
 		// value range should have passed the check at this point
 		dst = static_cast<_DstValType>(src);
 	}
-}; // struct RealNumCast
+}; // struct RealNumCastImpl
+
+
+template<typename _DstValType, typename _SrcValType>
+void RealNumCast(_DstValType& dst, const _SrcValType& src)
+{
+	RealNumCastImpl<_DstValType, _SrcValType>::Cast(dst, src);
+}
+
+
+template<typename _DstValType, typename _SrcValType>
+_DstValType RealNumCast(const _SrcValType& src)
+{
+	_DstValType res;
+	RealNumCast<_DstValType, _SrcValType>(res, src);
+	return res;
+}
 
 } // namespace SimpleObjects

@@ -429,42 +429,42 @@ public:
 
 	virtual void Set(bool val) override
 	{
-		RealNumCast<InternalType, bool>::Set(m_data, val);
+		RealNumCast<InternalType>(m_data, val);
 	}
 
 	virtual void Set(uint8_t val) override
 	{
-		RealNumCast<InternalType, uint8_t>::Set(m_data, val);
+		RealNumCast<InternalType>(m_data, val);
 	}
 
 	virtual void Set(int8_t val) override
 	{
-		RealNumCast<InternalType, int8_t>::Set(m_data, val);
+		RealNumCast<InternalType>(m_data, val);
 	}
 
 	virtual void Set(uint32_t val) override
 	{
-		RealNumCast<InternalType, uint32_t>::Set(m_data, val);
+		RealNumCast<InternalType>(m_data, val);
 	}
 
 	virtual void Set(int32_t val) override
 	{
-		RealNumCast<InternalType, int32_t>::Set(m_data, val);
+		RealNumCast<InternalType>(m_data, val);
 	}
 
 	virtual void Set(uint64_t val) override
 	{
-		RealNumCast<InternalType, uint64_t>::Set(m_data, val);
+		RealNumCast<InternalType>(m_data, val);
 	}
 
 	virtual void Set(int64_t val) override
 	{
-		RealNumCast<InternalType, int64_t>::Set(m_data, val);
+		RealNumCast<InternalType>(m_data, val);
 	}
 
 	virtual void Set(double val) override
 	{
-		RealNumCast<InternalType, double>::Set(m_data, val);
+		RealNumCast<InternalType>(m_data, val);
 	}
 
 	virtual bool IsTrue() const override
@@ -474,51 +474,37 @@ public:
 
 	virtual uint8_t AsCppUInt8() const override
 	{
-		uint8_t tmp;
-		RealNumCast<uint8_t, InternalType>::Set(tmp, m_data);
-		return tmp;
+		return RealNumCast<uint8_t>(m_data);
 	}
 
 	virtual int8_t AsCppInt8() const override
 	{
-		int8_t tmp;
-		RealNumCast<int8_t, InternalType>::Set(tmp, m_data);
-		return tmp;
+		return RealNumCast<int8_t>(m_data);
 	}
 
 	virtual uint32_t AsCppUInt32() const override
 	{
-		uint32_t tmp;
-		RealNumCast<uint32_t, InternalType>::Set(tmp, m_data);
-		return tmp;
+		return RealNumCast<uint32_t>(m_data);
 	}
 
 	virtual int32_t AsCppInt32() const override
 	{
-		int32_t tmp;
-		RealNumCast<int32_t, InternalType>::Set(tmp, m_data);
-		return tmp;
+		return RealNumCast<int32_t>(m_data);
 	}
 
 	virtual uint64_t AsCppUInt64() const override
 	{
-		uint64_t tmp;
-		RealNumCast<uint64_t, InternalType>::Set(tmp, m_data);
-		return tmp;
+		return RealNumCast<uint64_t>(m_data);
 	}
 
 	virtual int64_t AsCppInt64() const override
 	{
-		int64_t tmp;
-		RealNumCast<int64_t, InternalType>::Set(tmp, m_data);
-		return tmp;
+		return RealNumCast<int64_t>(m_data);
 	}
 
 	virtual double AsCppDouble() const override
 	{
-		double tmp;
-		RealNumCast<double, InternalType>::Set(tmp, m_data);
-		return tmp;
+		return RealNumCast<double>(m_data);
 	}
 
 	virtual ObjCategory GetCategory() const override
