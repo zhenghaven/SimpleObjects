@@ -141,6 +141,8 @@ template<>
 struct RealNumTraits<bool> :
 	public Internal::CategoryTraits<ObjCategory::Bool>
 {
+	static constexpr bool sk_isRealNumUnderlyingType = true;
+
 	static constexpr RealNumType sk_numType()
 	{ return RealNumType::Bool;  }
 
@@ -155,6 +157,8 @@ template<>
 struct RealNumTraits<uint8_t> :
 	public Internal::CategoryTraits<ObjCategory::Integer>
 {
+	static constexpr bool sk_isRealNumUnderlyingType = true;
+
 	static constexpr RealNumType sk_numType()
 	{ return RealNumType::UInt8;  }
 
@@ -169,6 +173,8 @@ template<>
 struct RealNumTraits<int8_t> :
 	public Internal::CategoryTraits<ObjCategory::Integer>
 {
+	static constexpr bool sk_isRealNumUnderlyingType = true;
+
 	static constexpr RealNumType sk_numType()
 	{ return RealNumType::Int8;  }
 
@@ -183,6 +189,8 @@ template<>
 struct RealNumTraits<uint16_t> :
 	public Internal::CategoryTraits<ObjCategory::Integer>
 {
+	static constexpr bool sk_isRealNumUnderlyingType = true;
+
 	static constexpr RealNumType sk_numType()
 	{ return RealNumType::UInt16;  }
 
@@ -197,6 +205,8 @@ template<>
 struct RealNumTraits<int16_t> :
 	public Internal::CategoryTraits<ObjCategory::Integer>
 {
+	static constexpr bool sk_isRealNumUnderlyingType = true;
+
 	static constexpr RealNumType sk_numType()
 	{ return RealNumType::Int16;  }
 
@@ -211,6 +221,8 @@ template<>
 struct RealNumTraits<uint32_t> :
 	public Internal::CategoryTraits<ObjCategory::Integer>
 {
+	static constexpr bool sk_isRealNumUnderlyingType = true;
+
 	static constexpr RealNumType sk_numType()
 	{ return RealNumType::UInt32;  }
 
@@ -225,6 +237,8 @@ template<>
 struct RealNumTraits<int32_t> :
 	public Internal::CategoryTraits<ObjCategory::Integer>
 {
+	static constexpr bool sk_isRealNumUnderlyingType = true;
+
 	static constexpr RealNumType sk_numType()
 	{ return RealNumType::Int32;  }
 
@@ -239,6 +253,8 @@ template<>
 struct RealNumTraits<uint64_t> :
 	public Internal::CategoryTraits<ObjCategory::Integer>
 {
+	static constexpr bool sk_isRealNumUnderlyingType = true;
+
 	static constexpr RealNumType sk_numType()
 	{ return RealNumType::UInt64;  }
 
@@ -253,6 +269,8 @@ template<>
 struct RealNumTraits<int64_t> :
 	public Internal::CategoryTraits<ObjCategory::Integer>
 {
+	static constexpr bool sk_isRealNumUnderlyingType = true;
+
 	static constexpr RealNumType sk_numType()
 	{ return RealNumType::Int64;  }
 
@@ -267,6 +285,8 @@ template<>
 struct RealNumTraits<float> :
 	public Internal::CategoryTraits<ObjCategory::Real>
 {
+	static constexpr bool sk_isRealNumUnderlyingType = true;
+
 	static constexpr RealNumType sk_numType()
 	{ return RealNumType::Float;  }
 
@@ -281,6 +301,8 @@ template<>
 struct RealNumTraits<double> :
 	public Internal::CategoryTraits<ObjCategory::Real>
 {
+	static constexpr bool sk_isRealNumUnderlyingType = true;
+
 	static constexpr RealNumType sk_numType()
 	{ return RealNumType::Double;  }
 
@@ -294,6 +316,11 @@ struct RealNumTraits<double> :
 template<typename _T>
 struct RealNumTraits
 {
+	static constexpr bool sk_isRealNumUnderlyingType = false;
+
+	static constexpr const char* sk_numTypeName()
+	{ return sk_primitiveName();  }
+
 	static constexpr const char* sk_primitiveName()
 	{ return PrimitiveTypeName<_T>::sk_name();  }
 }; // struct RealNumTraits

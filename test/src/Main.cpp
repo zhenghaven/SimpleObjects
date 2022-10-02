@@ -17,9 +17,18 @@ static void PrintIntType(const std::string& typeName)
 {
 	using namespace SimpleObjects;
 
+	static constexpr const char* const sk_isUnderlying =
+		RealNumTraits<_T>::sk_isRealNumUnderlyingType ?
+		"RealNumT" :
+		"!RealNumT";
+
 	auto f = std::cout.flags();
-	std::cout	<< std::setw(9)  << std::left  << typeName
-				<< std::setw(0)  << "-"
+	std::cout	<< std::setw(10)  << std::left  << typeName
+				<< std::setw(0)  << " - "
+				<< std::setw(10) << std::right << sk_isUnderlying
+				<< std::setw(0)  << " - "
+				<< std::setw(15) << std::left << RealNumTraits<_T>::sk_numTypeName()
+				<< std::setw(0)  << " - "
 				<< std::setw(20) << std::right << RealNumTraits<_T>::sk_primitiveName()
 				<< std::setw(0)  << std::endl;
 	std::cout.flags(f);
