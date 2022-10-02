@@ -19,108 +19,283 @@ namespace SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE
 {
 
 
+template<typename _T>
+struct PrimitiveTypeName;
+
+template<>
+struct PrimitiveTypeName<bool>
+{
+	static constexpr const char* sk_name() { return "bool"; }
+}; // struct PrimitiveTypeName<bool>
+
+template<>
+struct PrimitiveTypeName<char>
+{
+	static constexpr const char* sk_name() { return "char"; }
+}; // struct PrimitiveTypeName<char>
+
+template<>
+struct PrimitiveTypeName<signed char>
+{
+	static constexpr const char* sk_name() { return "signed char"; }
+}; // struct PrimitiveTypeName<signed char>
+
+template<>
+struct PrimitiveTypeName<unsigned char>
+{
+	static constexpr const char* sk_name() { return "unsigned char"; }
+}; // struct PrimitiveTypeName<unsigned char>
+
+template<>
+struct PrimitiveTypeName<wchar_t>
+{
+	static constexpr const char* sk_name() { return "wchar_t"; }
+}; // struct PrimitiveTypeName<wchar_t>
+
+template<>
+struct PrimitiveTypeName<char16_t>
+{
+	static constexpr const char* sk_name() { return "char16_t"; }
+}; // struct PrimitiveTypeName<char16_t>
+
+template<>
+struct PrimitiveTypeName<char32_t>
+{
+	static constexpr const char* sk_name() { return "char32_t"; }
+}; // struct PrimitiveTypeName<char32_t>
+
+template<>
+struct PrimitiveTypeName<short>
+{
+	static constexpr const char* sk_name() { return "short"; }
+}; // struct PrimitiveTypeName<short>
+
+template<>
+struct PrimitiveTypeName<unsigned short>
+{
+	static constexpr const char* sk_name() { return "unsigned short"; }
+}; // struct PrimitiveTypeName<unsigned short>
+
+template<>
+struct PrimitiveTypeName<int>
+{
+	static constexpr const char* sk_name() { return "int"; }
+}; // struct PrimitiveTypeName<int>
+
+template<>
+struct PrimitiveTypeName<unsigned int>
+{
+	static constexpr const char* sk_name() { return "unsigned int"; }
+}; // struct PrimitiveTypeName<unsigned int>
+
+template<>
+struct PrimitiveTypeName<long>
+{
+	static constexpr const char* sk_name() { return "long"; }
+}; // struct PrimitiveTypeName<long>
+
+template<>
+struct PrimitiveTypeName<unsigned long>
+{
+	static constexpr const char* sk_name() { return "unsigned long"; }
+}; // struct PrimitiveTypeName<unsigned long>
+
+template<>
+struct PrimitiveTypeName<long long>
+{
+	static constexpr const char* sk_name() { return "long long"; }
+}; // struct PrimitiveTypeName<long long>
+
+template<>
+struct PrimitiveTypeName<unsigned long long>
+{
+	static constexpr const char* sk_name() { return "unsigned long long"; }
+}; // struct PrimitiveTypeName<unsigned long long>
+
+template<>
+struct PrimitiveTypeName<float>
+{
+	static constexpr const char* sk_name() { return "float"; }
+}; // struct PrimitiveTypeName<float>
+
+template<>
+struct PrimitiveTypeName<double>
+{
+	static constexpr const char* sk_name() { return "double"; }
+}; // struct PrimitiveTypeName<double>
+
+template<>
+struct PrimitiveTypeName<long double>
+{
+	static constexpr const char* sk_name() { return "long double"; }
+}; // struct PrimitiveTypeName<long double>
+
+
+
+
+
 template<typename _ValType>
+struct RealNumTraits; // struct RealNumTraits
+
+template<>
+struct RealNumTraits<bool> :
+	public Internal::CategoryTraits<ObjCategory::Bool>
+{
+	static constexpr RealNumType sk_numType()
+	{ return RealNumType::Bool;  }
+
+	static constexpr const char* sk_numTypeName()
+	{ return "Bool";  }
+
+	static constexpr const char* sk_primitiveName()
+	{ return PrimitiveTypeName<bool>::sk_name();  }
+}; // struct RealNumTraits<bool>
+
+template<>
+struct RealNumTraits<uint8_t> :
+	public Internal::CategoryTraits<ObjCategory::Integer>
+{
+	static constexpr RealNumType sk_numType()
+	{ return RealNumType::UInt8;  }
+
+	static constexpr const char* sk_numTypeName()
+	{ return "UInt8";  }
+
+	static constexpr const char* sk_primitiveName()
+	{ return PrimitiveTypeName<uint8_t>::sk_name();  }
+}; // struct RealNumTraits<uint8_t>
+
+template<>
+struct RealNumTraits<int8_t> :
+	public Internal::CategoryTraits<ObjCategory::Integer>
+{
+	static constexpr RealNumType sk_numType()
+	{ return RealNumType::Int8;  }
+
+	static constexpr const char* sk_numTypeName()
+	{ return "Int8";  }
+
+	static constexpr const char* sk_primitiveName()
+	{ return PrimitiveTypeName<int8_t>::sk_name();  }
+}; // struct RealNumTraits<int8_t>
+
+template<>
+struct RealNumTraits<uint16_t> :
+	public Internal::CategoryTraits<ObjCategory::Integer>
+{
+	static constexpr RealNumType sk_numType()
+	{ return RealNumType::UInt16;  }
+
+	static constexpr const char* sk_numTypeName()
+	{ return "UInt16";  }
+
+	static constexpr const char* sk_primitiveName()
+	{ return PrimitiveTypeName<uint16_t>::sk_name();  }
+}; // struct RealNumTraits<uint16_t>
+
+template<>
+struct RealNumTraits<int16_t> :
+	public Internal::CategoryTraits<ObjCategory::Integer>
+{
+	static constexpr RealNumType sk_numType()
+	{ return RealNumType::Int16;  }
+
+	static constexpr const char* sk_numTypeName()
+	{ return "Int16";  }
+
+	static constexpr const char* sk_primitiveName()
+	{ return PrimitiveTypeName<int16_t>::sk_name();  }
+}; // struct RealNumTraits<int16_t>
+
+template<>
+struct RealNumTraits<uint32_t> :
+	public Internal::CategoryTraits<ObjCategory::Integer>
+{
+	static constexpr RealNumType sk_numType()
+	{ return RealNumType::UInt32;  }
+
+	static constexpr const char* sk_numTypeName()
+	{ return "UInt32";  }
+
+	static constexpr const char* sk_primitiveName()
+	{ return PrimitiveTypeName<uint32_t>::sk_name();  }
+}; // struct RealNumTraits<uint32_t>
+
+template<>
+struct RealNumTraits<int32_t> :
+	public Internal::CategoryTraits<ObjCategory::Integer>
+{
+	static constexpr RealNumType sk_numType()
+	{ return RealNumType::Int32;  }
+
+	static constexpr const char* sk_numTypeName()
+	{ return "Int32";  }
+
+	static constexpr const char* sk_primitiveName()
+	{ return PrimitiveTypeName<int32_t>::sk_name();  }
+}; // struct RealNumTraits<int32_t>
+
+template<>
+struct RealNumTraits<uint64_t> :
+	public Internal::CategoryTraits<ObjCategory::Integer>
+{
+	static constexpr RealNumType sk_numType()
+	{ return RealNumType::UInt64;  }
+
+	static constexpr const char* sk_numTypeName()
+	{ return "UInt64";  }
+
+	static constexpr const char* sk_primitiveName()
+	{ return PrimitiveTypeName<uint64_t>::sk_name();  }
+}; // struct RealNumTraits<uint64_t>
+
+template<>
+struct RealNumTraits<int64_t> :
+	public Internal::CategoryTraits<ObjCategory::Integer>
+{
+	static constexpr RealNumType sk_numType()
+	{ return RealNumType::Int64;  }
+
+	static constexpr const char* sk_numTypeName()
+	{ return "Int64";  }
+
+	static constexpr const char* sk_primitiveName()
+	{ return PrimitiveTypeName<int64_t>::sk_name();  }
+}; // struct RealNumTraits<int64_t>
+
+template<>
+struct RealNumTraits<float> :
+	public Internal::CategoryTraits<ObjCategory::Real>
+{
+	static constexpr RealNumType sk_numType()
+	{ return RealNumType::Float;  }
+
+	static constexpr const char* sk_numTypeName()
+	{ return "Float";  }
+
+	static constexpr const char* sk_primitiveName()
+	{ return PrimitiveTypeName<float>::sk_name();  }
+}; // struct RealNumTraits<float>
+
+template<>
+struct RealNumTraits<double> :
+	public Internal::CategoryTraits<ObjCategory::Real>
+{
+	static constexpr RealNumType sk_numType()
+	{ return RealNumType::Double;  }
+
+	static constexpr const char* sk_numTypeName()
+	{ return "Double";  }
+
+	static constexpr const char* sk_primitiveName()
+	{ return PrimitiveTypeName<double>::sk_name();  }
+}; // struct RealNumTraits<double>
+
+template<typename _T>
 struct RealNumTraits
 {
-	static constexpr ObjCategory sk_cat();
-	static constexpr const char* sk_catName();
-
-	static constexpr RealNumType sk_numType();
-	static constexpr const char* sk_numTypeName();
-
+	static constexpr const char* sk_primitiveName()
+	{ return PrimitiveTypeName<_T>::sk_name();  }
 }; // struct RealNumTraits
-
-
-template<>
-inline constexpr ObjCategory RealNumTraits<bool    >::sk_cat() { return ObjCategory::Bool; }
-template<>
-inline constexpr ObjCategory RealNumTraits<int8_t  >::sk_cat() { return ObjCategory::Integer; }
-template<>
-inline constexpr ObjCategory RealNumTraits<int16_t >::sk_cat() { return ObjCategory::Integer; }
-template<>
-inline constexpr ObjCategory RealNumTraits<int32_t >::sk_cat() { return ObjCategory::Integer; }
-template<>
-inline constexpr ObjCategory RealNumTraits<int64_t >::sk_cat() { return ObjCategory::Integer; }
-template<>
-inline constexpr ObjCategory RealNumTraits<uint8_t >::sk_cat() { return ObjCategory::Integer; }
-template<>
-inline constexpr ObjCategory RealNumTraits<uint16_t>::sk_cat() { return ObjCategory::Integer; }
-template<>
-inline constexpr ObjCategory RealNumTraits<uint32_t>::sk_cat() { return ObjCategory::Integer; }
-template<>
-inline constexpr ObjCategory RealNumTraits<uint64_t>::sk_cat() { return ObjCategory::Integer; }
-template<>
-inline constexpr ObjCategory RealNumTraits<float   >::sk_cat() { return ObjCategory::Real; }
-template<>
-inline constexpr ObjCategory RealNumTraits<double  >::sk_cat() { return ObjCategory::Real; }
-
-template<>
-inline constexpr const char* RealNumTraits<bool    >::sk_catName() { return "Bool";  }
-template<>
-inline constexpr const char* RealNumTraits<int8_t  >::sk_catName() { return "Integer";  }
-template<>
-inline constexpr const char* RealNumTraits<int16_t >::sk_catName() { return "Integer"; }
-template<>
-inline constexpr const char* RealNumTraits<int32_t >::sk_catName() { return "Integer"; }
-template<>
-inline constexpr const char* RealNumTraits<int64_t >::sk_catName() { return "Integer"; }
-template<>
-inline constexpr const char* RealNumTraits<uint8_t >::sk_catName() { return "Integer";  }
-template<>
-inline constexpr const char* RealNumTraits<uint16_t>::sk_catName() { return "Integer"; }
-template<>
-inline constexpr const char* RealNumTraits<uint32_t>::sk_catName() { return "Integer"; }
-template<>
-inline constexpr const char* RealNumTraits<uint64_t>::sk_catName() { return "Integer"; }
-template<>
-inline constexpr const char* RealNumTraits<float   >::sk_catName() { return "Real";  }
-template<>
-inline constexpr const char* RealNumTraits<double  >::sk_catName() { return "Real"; }
-
-template<>
-inline constexpr RealNumType RealNumTraits<bool    >::sk_numType() { return RealNumType::Bool;  }
-template<>
-inline constexpr RealNumType RealNumTraits<int8_t  >::sk_numType() { return RealNumType::Int8;  }
-template<>
-inline constexpr RealNumType RealNumTraits<int16_t >::sk_numType() { return RealNumType::Int16; }
-template<>
-inline constexpr RealNumType RealNumTraits<int32_t >::sk_numType() { return RealNumType::Int32; }
-template<>
-inline constexpr RealNumType RealNumTraits<int64_t >::sk_numType() { return RealNumType::Int64; }
-template<>
-inline constexpr RealNumType RealNumTraits<uint8_t >::sk_numType() { return RealNumType::UInt8;  }
-template<>
-inline constexpr RealNumType RealNumTraits<uint16_t>::sk_numType() { return RealNumType::UInt16; }
-template<>
-inline constexpr RealNumType RealNumTraits<uint32_t>::sk_numType() { return RealNumType::UInt32; }
-template<>
-inline constexpr RealNumType RealNumTraits<uint64_t>::sk_numType() { return RealNumType::UInt64; }
-template<>
-inline constexpr RealNumType RealNumTraits<float   >::sk_numType() { return RealNumType::Float;  }
-template<>
-inline constexpr RealNumType RealNumTraits<double  >::sk_numType() { return RealNumType::Double; }
-
-template<>
-inline constexpr const char* RealNumTraits<bool    >::sk_numTypeName() { return "Bool";  }
-template<>
-inline constexpr const char* RealNumTraits<int8_t  >::sk_numTypeName() { return "Int8";  }
-template<>
-inline constexpr const char* RealNumTraits<int16_t >::sk_numTypeName() { return "Int16"; }
-template<>
-inline constexpr const char* RealNumTraits<int32_t >::sk_numTypeName() { return "Int32"; }
-template<>
-inline constexpr const char* RealNumTraits<int64_t >::sk_numTypeName() { return "Int64"; }
-template<>
-inline constexpr const char* RealNumTraits<uint8_t >::sk_numTypeName() { return "UInt8";  }
-template<>
-inline constexpr const char* RealNumTraits<uint16_t>::sk_numTypeName() { return "UInt16"; }
-template<>
-inline constexpr const char* RealNumTraits<uint32_t>::sk_numTypeName() { return "UInt32"; }
-template<>
-inline constexpr const char* RealNumTraits<uint64_t>::sk_numTypeName() { return "UInt64"; }
-template<>
-inline constexpr const char* RealNumTraits<float   >::sk_numTypeName() { return "Float";  }
-template<>
-inline constexpr const char* RealNumTraits<double  >::sk_numTypeName() { return "Double"; }
 
 } // namespace SimpleObjects
