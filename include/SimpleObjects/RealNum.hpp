@@ -7,15 +7,18 @@
 
 #include "RealNumBaseObject.hpp"
 
+#include <limits>
 #include <tuple>
 #include <type_traits>
-#include <limits>
 
-#include "CompareRealNum.hpp"
 #include "Exception.hpp"
+#include "RealNumCast.hpp"
+#include "RealNumCompare.hpp"
+#include "RealNumTraits.hpp"
 #include "RealNumTypeInfer.hpp"
 #include "ToString.hpp"
 #include "Utils.hpp"
+
 
 #ifndef SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE
 namespace SimpleObjects
@@ -23,17 +26,6 @@ namespace SimpleObjects
 namespace SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE
 #endif
 {
-
-template<typename _ValType>
-struct RealNumTraits
-{
-	static constexpr ObjCategory sk_cat();
-	static constexpr const char* sk_catName();
-
-	static constexpr RealNumType sk_numType();
-	static constexpr const char* sk_numTypeName();
-
-}; // struct RealNumTraits
 
 namespace Internal
 {
@@ -55,65 +47,6 @@ struct NumCompareCmp
 		return lhs.RealNumCmp(rhs);
 	}
 }; // struct NumCompareCmp
-
-template<typename _DstValType, typename _SrcValType>
-struct RealNumBinOp;
-
-template<typename _ValType>
-struct RealNumBinOp<_ValType, _ValType>
-{
-	static void Set(_ValType& dst, const _ValType& src)
-	{
-		dst = src;
-	}
-}; // struct RealNumBinOp
-
-template<typename _DstValType, typename _SrcValType>
-struct RealNumBinOp
-{
-	static void Set(_DstValType& dst, const _SrcValType& src)
-	{
-		using namespace Internal;
-
-		// // Check if a "check" is needed
-		// if (DstType.Lowest <= SrcType.Lowest) and (SrcType.Max <= DstType.Max)
-		//    Src's possible range is within Dst's range => no need to check
-		// else
-		//    Src's value might fall outside of Dst's range => need to check
-		static constexpr bool isCheckNeed = (
-			!(
-				RealNumCompare<_DstValType, _SrcValType>::LessEqual(
-					std::numeric_limits<_DstValType>::lowest(),
-					std::numeric_limits<_SrcValType>::lowest()) &&
-				RealNumCompare<_SrcValType, _DstValType>::LessEqual(
-					std::numeric_limits<_SrcValType>::max(),
-					std::numeric_limits<_DstValType>::max())
-			));
-
-		if (isCheckNeed)
-		{
-			// // ==> to check `src`:
-			// if (src < DstType.Lowest) or (DstType.Max < src)
-			//    throw
-			const bool isOutRange = (
-					(RealNumCompare<_SrcValType, _DstValType>::Less(
-						src,
-						std::numeric_limits<_DstValType>::lowest())) ||
-					(RealNumCompare<_DstValType, _SrcValType>::Less(
-						std::numeric_limits<_DstValType>::max(),
-						src))
-				);
-			if (isOutRange)
-			{
-				throw TypeError(RealNumTraits<_DstValType>::sk_numTypeName(),
-					RealNumTraits<_SrcValType>::sk_numTypeName());
-			}
-		}
-
-		// value range should have passed the check at this point
-		dst = static_cast<_DstValType>(src);
-	}
-}; // struct RealNumBinOp
 
 } // namespace Internal
 
@@ -496,42 +429,42 @@ public:
 
 	virtual void Set(bool val) override
 	{
-		Internal::RealNumBinOp<InternalType, bool>::Set(m_data, val);
+		RealNumCast<InternalType>(m_data, val);
 	}
 
 	virtual void Set(uint8_t val) override
 	{
-		Internal::RealNumBinOp<InternalType, uint8_t>::Set(m_data, val);
+		RealNumCast<InternalType>(m_data, val);
 	}
 
 	virtual void Set(int8_t val) override
 	{
-		Internal::RealNumBinOp<InternalType, int8_t>::Set(m_data, val);
+		RealNumCast<InternalType>(m_data, val);
 	}
 
 	virtual void Set(uint32_t val) override
 	{
-		Internal::RealNumBinOp<InternalType, uint32_t>::Set(m_data, val);
+		RealNumCast<InternalType>(m_data, val);
 	}
 
 	virtual void Set(int32_t val) override
 	{
-		Internal::RealNumBinOp<InternalType, int32_t>::Set(m_data, val);
+		RealNumCast<InternalType>(m_data, val);
 	}
 
 	virtual void Set(uint64_t val) override
 	{
-		Internal::RealNumBinOp<InternalType, uint64_t>::Set(m_data, val);
+		RealNumCast<InternalType>(m_data, val);
 	}
 
 	virtual void Set(int64_t val) override
 	{
-		Internal::RealNumBinOp<InternalType, int64_t>::Set(m_data, val);
+		RealNumCast<InternalType>(m_data, val);
 	}
 
 	virtual void Set(double val) override
 	{
-		Internal::RealNumBinOp<InternalType, double>::Set(m_data, val);
+		RealNumCast<InternalType>(m_data, val);
 	}
 
 	virtual bool IsTrue() const override
@@ -541,51 +474,37 @@ public:
 
 	virtual uint8_t AsCppUInt8() const override
 	{
-		uint8_t tmp;
-		Internal::RealNumBinOp<uint8_t, InternalType>::Set(tmp, m_data);
-		return tmp;
+		return RealNumCast<uint8_t>(m_data);
 	}
 
 	virtual int8_t AsCppInt8() const override
 	{
-		int8_t tmp;
-		Internal::RealNumBinOp<int8_t, InternalType>::Set(tmp, m_data);
-		return tmp;
+		return RealNumCast<int8_t>(m_data);
 	}
 
 	virtual uint32_t AsCppUInt32() const override
 	{
-		uint32_t tmp;
-		Internal::RealNumBinOp<uint32_t, InternalType>::Set(tmp, m_data);
-		return tmp;
+		return RealNumCast<uint32_t>(m_data);
 	}
 
 	virtual int32_t AsCppInt32() const override
 	{
-		int32_t tmp;
-		Internal::RealNumBinOp<int32_t, InternalType>::Set(tmp, m_data);
-		return tmp;
+		return RealNumCast<int32_t>(m_data);
 	}
 
 	virtual uint64_t AsCppUInt64() const override
 	{
-		uint64_t tmp;
-		Internal::RealNumBinOp<uint64_t, InternalType>::Set(tmp, m_data);
-		return tmp;
+		return RealNumCast<uint64_t>(m_data);
 	}
 
 	virtual int64_t AsCppInt64() const override
 	{
-		int64_t tmp;
-		Internal::RealNumBinOp<int64_t, InternalType>::Set(tmp, m_data);
-		return tmp;
+		return RealNumCast<int64_t>(m_data);
 	}
 
 	virtual double AsCppDouble() const override
 	{
-		double tmp;
-		Internal::RealNumBinOp<double, InternalType>::Set(tmp, m_data);
-		return tmp;
+		return RealNumCast<double>(m_data);
 	}
 
 	virtual ObjCategory GetCategory() const override
@@ -672,100 +591,6 @@ private:
 
 	InternalType m_data;
 }; // class RealNumImpl
-
-// ========== Category specialization ==========
-
-template<>
-inline constexpr ObjCategory RealNumTraits<bool    >::sk_cat() { return ObjCategory::Bool; }
-template<>
-inline constexpr ObjCategory RealNumTraits<int8_t  >::sk_cat() { return ObjCategory::Integer; }
-template<>
-inline constexpr ObjCategory RealNumTraits<int16_t >::sk_cat() { return ObjCategory::Integer; }
-template<>
-inline constexpr ObjCategory RealNumTraits<int32_t >::sk_cat() { return ObjCategory::Integer; }
-template<>
-inline constexpr ObjCategory RealNumTraits<int64_t >::sk_cat() { return ObjCategory::Integer; }
-template<>
-inline constexpr ObjCategory RealNumTraits<uint8_t >::sk_cat() { return ObjCategory::Integer; }
-template<>
-inline constexpr ObjCategory RealNumTraits<uint16_t>::sk_cat() { return ObjCategory::Integer; }
-template<>
-inline constexpr ObjCategory RealNumTraits<uint32_t>::sk_cat() { return ObjCategory::Integer; }
-template<>
-inline constexpr ObjCategory RealNumTraits<uint64_t>::sk_cat() { return ObjCategory::Integer; }
-template<>
-inline constexpr ObjCategory RealNumTraits<float   >::sk_cat() { return ObjCategory::Real; }
-template<>
-inline constexpr ObjCategory RealNumTraits<double  >::sk_cat() { return ObjCategory::Real; }
-
-template<>
-inline constexpr const char* RealNumTraits<bool    >::sk_catName() { return "Bool";  }
-template<>
-inline constexpr const char* RealNumTraits<int8_t  >::sk_catName() { return "Integer";  }
-template<>
-inline constexpr const char* RealNumTraits<int16_t >::sk_catName() { return "Integer"; }
-template<>
-inline constexpr const char* RealNumTraits<int32_t >::sk_catName() { return "Integer"; }
-template<>
-inline constexpr const char* RealNumTraits<int64_t >::sk_catName() { return "Integer"; }
-template<>
-inline constexpr const char* RealNumTraits<uint8_t >::sk_catName() { return "Integer";  }
-template<>
-inline constexpr const char* RealNumTraits<uint16_t>::sk_catName() { return "Integer"; }
-template<>
-inline constexpr const char* RealNumTraits<uint32_t>::sk_catName() { return "Integer"; }
-template<>
-inline constexpr const char* RealNumTraits<uint64_t>::sk_catName() { return "Integer"; }
-template<>
-inline constexpr const char* RealNumTraits<float   >::sk_catName() { return "Real";  }
-template<>
-inline constexpr const char* RealNumTraits<double  >::sk_catName() { return "Real"; }
-
-template<>
-inline constexpr RealNumType RealNumTraits<bool    >::sk_numType() { return RealNumType::Bool;  }
-template<>
-inline constexpr RealNumType RealNumTraits<int8_t  >::sk_numType() { return RealNumType::Int8;  }
-template<>
-inline constexpr RealNumType RealNumTraits<int16_t >::sk_numType() { return RealNumType::Int16; }
-template<>
-inline constexpr RealNumType RealNumTraits<int32_t >::sk_numType() { return RealNumType::Int32; }
-template<>
-inline constexpr RealNumType RealNumTraits<int64_t >::sk_numType() { return RealNumType::Int64; }
-template<>
-inline constexpr RealNumType RealNumTraits<uint8_t >::sk_numType() { return RealNumType::UInt8;  }
-template<>
-inline constexpr RealNumType RealNumTraits<uint16_t>::sk_numType() { return RealNumType::UInt16; }
-template<>
-inline constexpr RealNumType RealNumTraits<uint32_t>::sk_numType() { return RealNumType::UInt32; }
-template<>
-inline constexpr RealNumType RealNumTraits<uint64_t>::sk_numType() { return RealNumType::UInt64; }
-template<>
-inline constexpr RealNumType RealNumTraits<float   >::sk_numType() { return RealNumType::Float;  }
-template<>
-inline constexpr RealNumType RealNumTraits<double  >::sk_numType() { return RealNumType::Double; }
-
-template<>
-inline constexpr const char* RealNumTraits<bool    >::sk_numTypeName() { return "Bool";  }
-template<>
-inline constexpr const char* RealNumTraits<int8_t  >::sk_numTypeName() { return "Int8";  }
-template<>
-inline constexpr const char* RealNumTraits<int16_t >::sk_numTypeName() { return "Int16"; }
-template<>
-inline constexpr const char* RealNumTraits<int32_t >::sk_numTypeName() { return "Int32"; }
-template<>
-inline constexpr const char* RealNumTraits<int64_t >::sk_numTypeName() { return "Int64"; }
-template<>
-inline constexpr const char* RealNumTraits<uint8_t >::sk_numTypeName() { return "UInt8";  }
-template<>
-inline constexpr const char* RealNumTraits<uint16_t>::sk_numTypeName() { return "UInt16"; }
-template<>
-inline constexpr const char* RealNumTraits<uint32_t>::sk_numTypeName() { return "UInt32"; }
-template<>
-inline constexpr const char* RealNumTraits<uint64_t>::sk_numTypeName() { return "UInt64"; }
-template<>
-inline constexpr const char* RealNumTraits<float   >::sk_numTypeName() { return "Float";  }
-template<>
-inline constexpr const char* RealNumTraits<double  >::sk_numTypeName() { return "Double"; }
 
 // ========== binary operators for RealNumImpl ==========
 
