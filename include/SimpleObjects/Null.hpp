@@ -41,6 +41,10 @@ public:
 
 	NullImpl() = default;
 
+	NullImpl(const NullImpl&) = default;
+
+	NullImpl(NullImpl&&) = default;
+
 	virtual ~NullImpl() = default;
 
 	virtual ObjCategory GetCategory() const override
@@ -137,6 +141,12 @@ public:
 	Self& operator=(const Self&)
 	{
 		// nothing to copy from
+		return *this;
+	}
+
+	Self& operator=(Self&&)
+	{
+		// nothing to move from
 		return *this;
 	}
 
