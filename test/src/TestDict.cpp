@@ -277,6 +277,50 @@ GTEST_TEST(TestDict, At)
 	EXPECT_TRUE(cpDc[String("3")].IsNull());
 }
 
+GTEST_TEST(TestDict, SubscriptAssign)
+{
+	// Dict
+	{
+		auto dict = Dict();
+		dict[String("test")] = String("test val");
+
+		auto it = dict.cbegin();
+		ASSERT_NE(
+			&(it->first.GetVal()),
+			nullptr
+		);
+		EXPECT_EQ(
+			it->first.GetVal(),
+			String("test")
+		);
+		EXPECT_EQ(
+			it->second,
+			String("test val")
+		);
+	}
+
+	// DictBase
+	{
+		auto dictObj = Dict();
+		DictBaseObj& dict = dictObj;
+		dict[String("test")]; // TODO: assign value when this is supported = String("test val");
+
+		auto it = dict.cbegin();
+		ASSERT_NE(
+			&(*std::get<0>(*it)),
+			nullptr
+		);
+		EXPECT_EQ(
+			*std::get<0>(*it),
+			String("test")
+		);
+		EXPECT_EQ(
+			*std::get<1>(*it),
+			Null()
+		);
+	}
+}
+
 GTEST_TEST(TestDict, FindKey)
 {
 	Dict cpDc = {

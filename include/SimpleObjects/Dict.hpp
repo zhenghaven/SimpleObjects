@@ -226,7 +226,17 @@ public:
 	mapped_type& operator[](const key_type& key)
 	{
 		auto wrappedKey = DictKey::Borrow(&key);
-		return m_data[wrappedKey];
+		auto it = m_data.find(wrappedKey);
+		if (it == m_data.end())
+		{
+			// Key is not present, we need to copy the key
+			return m_data[DictKey::Make(key)];
+		}
+		else
+		{
+			// key is present, we can just utilize the existing pair
+			return it->second;
+		}
 	}
 
 	const mapped_type& operator[](const key_type& key) const
@@ -548,9 +558,24 @@ protected:
 		const base_key_type& key) override
 	{
 		auto wrappedKey = DictKey::Borrow(&key);
-		m_data[wrappedKey];
-		return base_mapped_iterator(
-			_ValIteratorWrap::Build(m_data.find(wrappedKey)));
+		auto it = m_data.find(wrappedKey);
+		if (it == m_data.end())
+		{
+			// Key is not present, we need to copy the key
+			return base_mapped_iterator(
+				_ValIteratorWrap::Build(
+					m_data.emplace(
+						DictKey::Make(key),
+						mapped_type()
+					).first
+				)
+			);
+		}
+		else
+		{
+			// key is present, we can just utilize the existing pair
+			return base_mapped_iterator(_ValIteratorWrap::Build(it));
+		}
 	}
 
 	virtual bool DictBaseInsertOnly(
