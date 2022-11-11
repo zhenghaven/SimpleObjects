@@ -290,12 +290,12 @@ GTEST_TEST(TestDict, SubscriptAssign)
 			nullptr
 		);
 		EXPECT_EQ(
-			it->first.GetVal(),
-			String("test")
+			it->first.GetVal().AsString(),
+			String("test").AsString()
 		);
 		EXPECT_EQ(
-			it->second,
-			String("test val")
+			it->second.AsString(),
+			String("test val").AsString()
 		);
 	}
 
