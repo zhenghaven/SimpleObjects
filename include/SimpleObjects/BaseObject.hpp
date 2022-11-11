@@ -184,6 +184,7 @@ public:
 
 	// TODO:
 	// =
+	Self& operator=(const Self& rhs) = delete;
 	// +=
 	// +
 	// slice

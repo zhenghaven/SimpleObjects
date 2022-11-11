@@ -403,7 +403,10 @@ private:
 
 		for (const auto& b : m_data)
 		{
-			Internal::ByteToString<_CharType>(outit, static_cast<uint8_t>(b));
+			Internal::ByteToHEX<true, _CharType>(
+				outit,
+				static_cast<uint8_t>(b)
+			);
 		}
 
 		*outit++ = '\"';

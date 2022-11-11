@@ -134,6 +134,12 @@ public:
 	bool operator<=(const Self& rhs) const = delete;
 	bool operator>=(const Self& rhs) const = delete;
 
+	Self& operator=(const Self&)
+	{
+		// nothing to copy from
+		return *this;
+	}
+
 	// ===== BaseObject class
 
 	virtual bool BaseObjectIsEqual(const BaseBase& rhs) const override
