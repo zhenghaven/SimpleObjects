@@ -52,8 +52,8 @@ struct RealNumCastImpl
 					std::numeric_limits<_DstValType>::lowest(),
 					std::numeric_limits<_SrcValType>::lowest()) &&
 				RealNumCompare<_SrcValType, _DstValType>::LessEqual(
-					std::numeric_limits<_SrcValType>::max(),
-					std::numeric_limits<_DstValType>::max())
+					(std::numeric_limits<_SrcValType>::max)(),
+					(std::numeric_limits<_DstValType>::max)())
 			));
 
 		if (isCheckNeed)
@@ -66,7 +66,7 @@ struct RealNumCastImpl
 						src,
 						std::numeric_limits<_DstValType>::lowest())) ||
 					(RealNumCompare<_DstValType, _SrcValType>::Less(
-						std::numeric_limits<_DstValType>::max(),
+						(std::numeric_limits<_DstValType>::max)(),
 						src))
 				);
 			if (isOutRange)

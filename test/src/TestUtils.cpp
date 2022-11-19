@@ -7,6 +7,9 @@
 
 #include <memory>
 
+#ifdef _MSC_VER
+#include <windows.h>
+#endif // _MSC_VER
 #include <SimpleObjects/Utils.hpp>
 #include <SimpleObjects/ToString.hpp>
 
@@ -112,6 +115,57 @@ GTEST_TEST(TestUtils, BytesToHEX)
 			testIn.end()
 		);
 
+		EXPECT_EQ(testOut, expOut);
+	}
+}
+
+GTEST_TEST(TestUtils, PrimitiveToHEX)
+{
+	{
+		uint8_t testIn = 0x7FU;
+		std::string expOut = "0x7F";
+		std::string testOut;
+
+		Internal::PrimitiveToHEX<true, char>(
+			std::back_inserter(testOut),
+			testIn
+		);
+		EXPECT_EQ(testOut, expOut);
+	}
+
+	{
+		uint16_t testIn = 0x3E4BU;
+		std::string expOut = "0x3E4B";
+		std::string testOut;
+
+		Internal::PrimitiveToHEX<true, char>(
+			std::back_inserter(testOut),
+			testIn
+		);
+		EXPECT_EQ(testOut, expOut);
+	}
+
+	{
+		int32_t testIn = 0x3E4B239AU;
+		std::string expOut = "0x3E4B239A";
+		std::string testOut;
+
+		Internal::PrimitiveToHEX<true, char>(
+			std::back_inserter(testOut),
+			testIn
+		);
+		EXPECT_EQ(testOut, expOut);
+	}
+
+	{
+		uint64_t testIn = 0x3E4B239A3F5C2D79ULL;
+		std::string expOut = "0x3E4B239A3F5C2D79";
+		std::string testOut;
+
+		Internal::PrimitiveToHEX<true, char>(
+			std::back_inserter(testOut),
+			testIn
+		);
 		EXPECT_EQ(testOut, expOut);
 	}
 }

@@ -7,6 +7,9 @@
 
 #include <memory>
 
+#ifdef _MSC_VER
+#include <windows.h>
+#endif // _MSC_VER
 #include <SimpleObjects/SimpleObjects.hpp>
 
 #ifndef SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE
@@ -304,22 +307,22 @@ GTEST_TEST(TestHashableObj, Setters)
 	HashableObject u64 = UInt64();
 	HashableObject d   = Double();
 
-	EXPECT_NO_THROW(b.Set(std::numeric_limits<bool>::max()));
-	EXPECT_TRUE(b == HashableObject(Bool(std::numeric_limits<bool>::max())));
+	EXPECT_NO_THROW(b.Set((std::numeric_limits<bool>::max)()));
+	EXPECT_TRUE(b == HashableObject(Bool((std::numeric_limits<bool>::max)())));
 	EXPECT_NO_THROW(i8.Set(std::numeric_limits<int8_t>::lowest()));
 	EXPECT_TRUE(i8 == HashableObject(Int8(std::numeric_limits<int8_t>::lowest())));
 	EXPECT_NO_THROW(i32.Set(std::numeric_limits<int32_t>::lowest()));
 	EXPECT_TRUE(i32 == HashableObject(Int32(std::numeric_limits<int32_t>::lowest())));
 	EXPECT_NO_THROW(i64.Set(std::numeric_limits<int64_t>::lowest()));
 	EXPECT_TRUE(i64 == HashableObject(Int64(std::numeric_limits<int64_t>::lowest())));
-	EXPECT_NO_THROW(u8.Set(std::numeric_limits<uint8_t>::max()));
-	EXPECT_TRUE(u8 == HashableObject(UInt8(std::numeric_limits<uint8_t>::max())));
-	EXPECT_NO_THROW(u32.Set(std::numeric_limits<uint32_t>::max()));
-	EXPECT_TRUE(u32 == HashableObject(UInt32(std::numeric_limits<uint32_t>::max())));
-	EXPECT_NO_THROW(u64.Set(std::numeric_limits<uint64_t>::max()));
-	EXPECT_TRUE(u64 == HashableObject(UInt64(std::numeric_limits<uint64_t>::max())));
-	EXPECT_NO_THROW(d.Set(std::numeric_limits<double>::max()));
-	EXPECT_TRUE(d == HashableObject(Double(std::numeric_limits<double>::max())));
+	EXPECT_NO_THROW(u8.Set((std::numeric_limits<uint8_t>::max)()));
+	EXPECT_TRUE(u8 == HashableObject(UInt8((std::numeric_limits<uint8_t>::max)())));
+	EXPECT_NO_THROW(u32.Set((std::numeric_limits<uint32_t>::max)()));
+	EXPECT_TRUE(u32 == HashableObject(UInt32((std::numeric_limits<uint32_t>::max)())));
+	EXPECT_NO_THROW(u64.Set((std::numeric_limits<uint64_t>::max)()));
+	EXPECT_TRUE(u64 == HashableObject(UInt64((std::numeric_limits<uint64_t>::max)())));
+	EXPECT_NO_THROW(d.Set((std::numeric_limits<double>::max)()));
+	EXPECT_TRUE(d == HashableObject(Double((std::numeric_limits<double>::max)())));
 }
 
 GTEST_TEST(TestHashableObj, Getters)
@@ -333,12 +336,12 @@ GTEST_TEST(TestHashableObj, Getters)
 	EXPECT_TRUE(i32.AsCppInt32() == std::numeric_limits<int32_t>::lowest());
 	HashableObject i64 = Int64(std::numeric_limits<int64_t>::lowest());
 	EXPECT_TRUE(i64.AsCppInt64() == std::numeric_limits<int64_t>::lowest());
-	HashableObject u8  = UInt8(std::numeric_limits<uint8_t>::max());
-	EXPECT_TRUE(u8.AsCppUInt8() == std::numeric_limits<uint8_t>::max());
-	HashableObject u32 = UInt32(std::numeric_limits<uint32_t>::max());
-	EXPECT_TRUE(u32.AsCppUInt32() == std::numeric_limits<uint32_t>::max());
-	HashableObject u64 = UInt64(std::numeric_limits<uint64_t>::max());
-	EXPECT_TRUE(u64.AsCppUInt64() == std::numeric_limits<uint64_t>::max());
-	HashableObject d   = Double(std::numeric_limits<double>::max());
-	EXPECT_TRUE(d.AsCppDouble() == std::numeric_limits<double>::max());
+	HashableObject u8  = UInt8((std::numeric_limits<uint8_t>::max)());
+	EXPECT_TRUE(u8.AsCppUInt8() == (std::numeric_limits<uint8_t>::max)());
+	HashableObject u32 = UInt32((std::numeric_limits<uint32_t>::max)());
+	EXPECT_TRUE(u32.AsCppUInt32() == (std::numeric_limits<uint32_t>::max)());
+	HashableObject u64 = UInt64((std::numeric_limits<uint64_t>::max)());
+	EXPECT_TRUE(u64.AsCppUInt64() == (std::numeric_limits<uint64_t>::max)());
+	HashableObject d   = Double((std::numeric_limits<double>::max)());
+	EXPECT_TRUE(d.AsCppDouble() == (std::numeric_limits<double>::max)());
 }

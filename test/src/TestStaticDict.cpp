@@ -9,6 +9,9 @@
 
 #include <algorithm>
 
+#ifdef _MSC_VER
+#include <windows.h>
+#endif // _MSC_VER
 #include <SimpleObjects/DefaultTypes.hpp>
 
 #include "CompareHelpers.hpp"
