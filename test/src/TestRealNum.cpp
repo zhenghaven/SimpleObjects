@@ -172,34 +172,34 @@ GTEST_TEST(TestRealNum, Setter)
 	//    uint8_t -> bool
 	EXPECT_NO_THROW(b = Bool(); b.Set(uint8_t(1)););
 	EXPECT_TRUE(b.GetVal() == true);
-	EXPECT_THROW(b.Set(std::numeric_limits<uint8_t>::max());, TypeError);
+	EXPECT_THROW(b.Set((std::numeric_limits<uint8_t>::max)());, TypeError);
 	//    uint32_t -> bool
 	EXPECT_NO_THROW(b = Bool(); b.Set(uint32_t(1)););
 	EXPECT_TRUE(b.GetVal() == true);
-	EXPECT_THROW(b.Set(std::numeric_limits<uint32_t>::max());, TypeError);
+	EXPECT_THROW(b.Set((std::numeric_limits<uint32_t>::max)());, TypeError);
 	//    uint64_t -> bool
 	EXPECT_NO_THROW(b = Bool(); b.Set(uint64_t(1)););
 	EXPECT_TRUE(b.GetVal() == true);
-	EXPECT_THROW(b.Set(std::numeric_limits<uint64_t>::max());, TypeError);
+	EXPECT_THROW(b.Set((std::numeric_limits<uint64_t>::max)());, TypeError);
 	//    int8_t -> bool
 	EXPECT_NO_THROW(b = Bool(); b.Set(int8_t(1)););
 	EXPECT_TRUE(b.GetVal() == true);
-	EXPECT_THROW(b.Set(std::numeric_limits<int8_t>::max());, TypeError);
+	EXPECT_THROW(b.Set((std::numeric_limits<int8_t>::max)());, TypeError);
 	EXPECT_THROW(b.Set(std::numeric_limits<int8_t>::lowest());, TypeError);
 	//    int32_t -> bool
 	EXPECT_NO_THROW(b = Bool(); b.Set(int32_t(1)););
 	EXPECT_TRUE(b.GetVal() == true);
-	EXPECT_THROW(b.Set(std::numeric_limits<int32_t>::max());, TypeError);
+	EXPECT_THROW(b.Set((std::numeric_limits<int32_t>::max)());, TypeError);
 	EXPECT_THROW(b.Set(std::numeric_limits<int32_t>::lowest());, TypeError);
 	//    int64_t -> bool
 	EXPECT_NO_THROW(b = Bool(); b.Set(int64_t(1)););
 	EXPECT_TRUE(b.GetVal() == true);
-	EXPECT_THROW(b.Set(std::numeric_limits<int64_t>::max());, TypeError);
+	EXPECT_THROW(b.Set((std::numeric_limits<int64_t>::max)());, TypeError);
 	EXPECT_THROW(b.Set(std::numeric_limits<int64_t>::lowest());, TypeError);
 	//    double -> bool
 	EXPECT_NO_THROW(b = Bool(); b.Set(double(1)););
 	EXPECT_TRUE(b.GetVal() == true);
-	EXPECT_THROW(b.Set(std::numeric_limits<double>::max());, TypeError);
+	EXPECT_THROW(b.Set((std::numeric_limits<double>::max)());, TypeError);
 	EXPECT_THROW(b.Set(std::numeric_limits<double>::lowest());, TypeError);
 
 	// int8_t
@@ -215,32 +215,32 @@ GTEST_TEST(TestRealNum, Setter)
 	//    uint8_t ->
 	EXPECT_NO_THROW(i8 = Int8(); i8.Set(uint8_t(12)););
 	EXPECT_TRUE(i8.GetVal() == 12);
-	EXPECT_THROW(i8.Set(std::numeric_limits<uint8_t>::max());, TypeError);
+	EXPECT_THROW(i8.Set((std::numeric_limits<uint8_t>::max)());, TypeError);
 	//    uint32_t ->
 	EXPECT_NO_THROW(i8 = Int8(); i8.Set(uint32_t(12)););
 	EXPECT_TRUE(i8.GetVal() == 12);
-	EXPECT_THROW(i8.Set(std::numeric_limits<uint32_t>::max());, TypeError);
+	EXPECT_THROW(i8.Set((std::numeric_limits<uint32_t>::max)());, TypeError);
 	//    uint64_t ->
 	EXPECT_NO_THROW(i8 = Int8(); i8.Set(uint64_t(12)););
 	EXPECT_TRUE(i8.GetVal() == 12);
-	EXPECT_THROW(i8.Set(std::numeric_limits<uint64_t>::max());, TypeError);
+	EXPECT_THROW(i8.Set((std::numeric_limits<uint64_t>::max)());, TypeError);
 	//    int8_t ->
 	EXPECT_NO_THROW(i8 = Int8(); i8.Set(int8_t(12)););
 	EXPECT_TRUE(i8.GetVal() == 12);
 	//    int32_t ->
 	EXPECT_NO_THROW(i8 = Int8(); i8.Set(int32_t(12)););
 	EXPECT_TRUE(i8.GetVal() == 12);
-	EXPECT_THROW(i8.Set(std::numeric_limits<int32_t>::max());, TypeError);
+	EXPECT_THROW(i8.Set((std::numeric_limits<int32_t>::max)());, TypeError);
 	EXPECT_THROW(i8.Set(std::numeric_limits<int32_t>::lowest());, TypeError);
 	//    int64_t ->
 	EXPECT_NO_THROW(i8 = Int8(); i8.Set(int64_t(12)););
 	EXPECT_TRUE(i8.GetVal() == 12);
-	EXPECT_THROW(i8.Set(std::numeric_limits<int64_t>::max());, TypeError);
+	EXPECT_THROW(i8.Set((std::numeric_limits<int64_t>::max)());, TypeError);
 	EXPECT_THROW(i8.Set(std::numeric_limits<int64_t>::lowest());, TypeError);
 	//    double ->
 	EXPECT_NO_THROW(i8 = Int8(); i8.Set(double(12)););
 	EXPECT_TRUE(i8.GetVal() == 12);
-	EXPECT_THROW(i8.Set(std::numeric_limits<double>::max());, TypeError);
+	EXPECT_THROW(i8.Set((std::numeric_limits<double>::max)());, TypeError);
 	EXPECT_THROW(i8.Set(std::numeric_limits<double>::lowest());, TypeError);
 
 	// int16_t
@@ -259,28 +259,28 @@ GTEST_TEST(TestRealNum, Setter)
 	//    uint32_t ->
 	EXPECT_NO_THROW(i16 = Int16(); i16.Set(uint32_t(12)););
 	EXPECT_TRUE(i16.GetVal() == 12);
-	EXPECT_THROW(i16.Set(std::numeric_limits<uint32_t>::max());, TypeError);
+	EXPECT_THROW(i16.Set((std::numeric_limits<uint32_t>::max)());, TypeError);
 	//    uint64_t ->
 	EXPECT_NO_THROW(i16 = Int16(); i16.Set(uint64_t(12)););
 	EXPECT_TRUE(i16.GetVal() == 12);
-	EXPECT_THROW(i16.Set(std::numeric_limits<uint64_t>::max());, TypeError);
+	EXPECT_THROW(i16.Set((std::numeric_limits<uint64_t>::max)());, TypeError);
 	//    int8_t ->
 	EXPECT_NO_THROW(i16 = Int16(); i16.Set(int8_t(12)););
 	EXPECT_TRUE(i16.GetVal() == 12);
 	//    int32_t ->
 	EXPECT_NO_THROW(i16 = Int16(); i16.Set(int32_t(12)););
 	EXPECT_TRUE(i16.GetVal() == 12);
-	EXPECT_THROW(i16.Set(std::numeric_limits<int32_t>::max());, TypeError);
+	EXPECT_THROW(i16.Set((std::numeric_limits<int32_t>::max)());, TypeError);
 	EXPECT_THROW(i16.Set(std::numeric_limits<int32_t>::lowest());, TypeError);
 	//    int64_t ->
 	EXPECT_NO_THROW(i16 = Int16(); i16.Set(int64_t(12)););
 	EXPECT_TRUE(i16.GetVal() == 12);
-	EXPECT_THROW(i16.Set(std::numeric_limits<int64_t>::max());, TypeError);
+	EXPECT_THROW(i16.Set((std::numeric_limits<int64_t>::max)());, TypeError);
 	EXPECT_THROW(i16.Set(std::numeric_limits<int64_t>::lowest());, TypeError);
 	//    double ->
 	EXPECT_NO_THROW(i16 = Int16(); i16.Set(double(12)););
 	EXPECT_TRUE(i16.GetVal() == 12);
-	EXPECT_THROW(i16.Set(std::numeric_limits<double>::max());, TypeError);
+	EXPECT_THROW(i16.Set((std::numeric_limits<double>::max)());, TypeError);
 	EXPECT_THROW(i16.Set(std::numeric_limits<double>::lowest());, TypeError);
 
 	// int32_t
@@ -299,11 +299,11 @@ GTEST_TEST(TestRealNum, Setter)
 	//    uint32_t ->
 	EXPECT_NO_THROW(i32 = Int32(); i32.Set(uint32_t(12)););
 	EXPECT_TRUE(i32.GetVal() == 12);
-	EXPECT_THROW(i32.Set(std::numeric_limits<uint32_t>::max());, TypeError);
+	EXPECT_THROW(i32.Set((std::numeric_limits<uint32_t>::max)());, TypeError);
 	//    uint64_t ->
 	EXPECT_NO_THROW(i32 = Int32(); i32.Set(uint64_t(12)););
 	EXPECT_TRUE(i32.GetVal() == 12);
-	EXPECT_THROW(i32.Set(std::numeric_limits<uint64_t>::max());, TypeError);
+	EXPECT_THROW(i32.Set((std::numeric_limits<uint64_t>::max)());, TypeError);
 	//    int8_t ->
 	EXPECT_NO_THROW(i32 = Int32(); i32.Set(int8_t(12)););
 	EXPECT_TRUE(i32.GetVal() == 12);
@@ -313,12 +313,12 @@ GTEST_TEST(TestRealNum, Setter)
 	//    int64_t ->
 	EXPECT_NO_THROW(i32 = Int32(); i32.Set(int64_t(12)););
 	EXPECT_TRUE(i32.GetVal() == 12);
-	EXPECT_THROW(i32.Set(std::numeric_limits<int64_t>::max());, TypeError);
+	EXPECT_THROW(i32.Set((std::numeric_limits<int64_t>::max)());, TypeError);
 	EXPECT_THROW(i32.Set(std::numeric_limits<int64_t>::lowest());, TypeError);
 	//    double ->
 	EXPECT_NO_THROW(i32 = Int32(); i32.Set(double(12)););
 	EXPECT_TRUE(i32.GetVal() == 12);
-	EXPECT_THROW(i32.Set(std::numeric_limits<double>::max());, TypeError);
+	EXPECT_THROW(i32.Set((std::numeric_limits<double>::max)());, TypeError);
 	EXPECT_THROW(i32.Set(std::numeric_limits<double>::lowest());, TypeError);
 
 	// int64_t
@@ -340,7 +340,7 @@ GTEST_TEST(TestRealNum, Setter)
 	//    uint64_t ->
 	EXPECT_NO_THROW(i64 = Int64(); i64.Set(uint64_t(12)););
 	EXPECT_TRUE(i64.GetVal() == 12);
-	EXPECT_THROW(i64.Set(std::numeric_limits<uint64_t>::max());, TypeError);
+	EXPECT_THROW(i64.Set((std::numeric_limits<uint64_t>::max)());, TypeError);
 	//    int8_t ->
 	EXPECT_NO_THROW(i64 = Int64(); i64.Set(int8_t(12)););
 	EXPECT_TRUE(i64.GetVal() == 12);
@@ -353,7 +353,7 @@ GTEST_TEST(TestRealNum, Setter)
 	//    double ->
 	EXPECT_NO_THROW(i64 = Int64(); i64.Set(double(12)););
 	EXPECT_TRUE(i64.GetVal() == 12);
-	EXPECT_THROW(i64.Set(std::numeric_limits<double>::max());, TypeError);
+	EXPECT_THROW(i64.Set((std::numeric_limits<double>::max)());, TypeError);
 	EXPECT_THROW(i64.Set(std::numeric_limits<double>::lowest());, TypeError);
 
 	// uint8_t
@@ -372,11 +372,11 @@ GTEST_TEST(TestRealNum, Setter)
 	//    uint32_t ->
 	EXPECT_NO_THROW(u8 = UInt8(); u8.Set(uint32_t(12)););
 	EXPECT_TRUE(u8.GetVal() == 12);
-	EXPECT_THROW(u8.Set(std::numeric_limits<uint32_t>::max());, TypeError);
+	EXPECT_THROW(u8.Set((std::numeric_limits<uint32_t>::max)());, TypeError);
 	//    uint64_t ->
 	EXPECT_NO_THROW(u8 = UInt8(); u8.Set(uint64_t(12)););
 	EXPECT_TRUE(u8.GetVal() == 12);
-	EXPECT_THROW(u8.Set(std::numeric_limits<uint64_t>::max());, TypeError);
+	EXPECT_THROW(u8.Set((std::numeric_limits<uint64_t>::max)());, TypeError);
 	//    int8_t ->
 	EXPECT_NO_THROW(u8 = UInt8(); u8.Set(int8_t(12)););
 	EXPECT_TRUE(u8.GetVal() == 12);
@@ -384,17 +384,17 @@ GTEST_TEST(TestRealNum, Setter)
 	//    int32_t ->
 	EXPECT_NO_THROW(u8 = UInt8(); u8.Set(int32_t(12)););
 	EXPECT_TRUE(u8.GetVal() == 12);
-	EXPECT_THROW(u8.Set(std::numeric_limits<int32_t>::max());, TypeError);
+	EXPECT_THROW(u8.Set((std::numeric_limits<int32_t>::max)());, TypeError);
 	EXPECT_THROW(u8.Set(std::numeric_limits<int32_t>::lowest());, TypeError);
 	//    int64_t ->
 	EXPECT_NO_THROW(u8 = UInt8(); u8.Set(int64_t(12)););
 	EXPECT_TRUE(u8.GetVal() == 12);
-	EXPECT_THROW(u8.Set(std::numeric_limits<int64_t>::max());, TypeError);
+	EXPECT_THROW(u8.Set((std::numeric_limits<int64_t>::max)());, TypeError);
 	EXPECT_THROW(u8.Set(std::numeric_limits<int64_t>::lowest());, TypeError);
 	//    double ->
 	EXPECT_NO_THROW(u8 = UInt8(); u8.Set(double(12)););
 	EXPECT_TRUE(u8.GetVal() == 12);
-	EXPECT_THROW(u8.Set(std::numeric_limits<double>::max());, TypeError);
+	EXPECT_THROW(u8.Set((std::numeric_limits<double>::max)());, TypeError);
 	EXPECT_THROW(u8.Set(std::numeric_limits<double>::lowest());, TypeError);
 
 	// uint16_t
@@ -413,11 +413,11 @@ GTEST_TEST(TestRealNum, Setter)
 	//    uint32_t ->
 	EXPECT_NO_THROW(u16 = UInt16(); u16.Set(uint32_t(12)););
 	EXPECT_TRUE(u16.GetVal() == 12);
-	EXPECT_THROW(u16.Set(std::numeric_limits<uint32_t>::max());, TypeError);
+	EXPECT_THROW(u16.Set((std::numeric_limits<uint32_t>::max)());, TypeError);
 	//    uint64_t ->
 	EXPECT_NO_THROW(u16 = UInt16(); u16.Set(uint64_t(12)););
 	EXPECT_TRUE(u16.GetVal() == 12);
-	EXPECT_THROW(u16.Set(std::numeric_limits<uint64_t>::max());, TypeError);
+	EXPECT_THROW(u16.Set((std::numeric_limits<uint64_t>::max)());, TypeError);
 	//    int8_t ->
 	EXPECT_NO_THROW(u16 = UInt16(); u16.Set(int8_t(12)););
 	EXPECT_TRUE(u16.GetVal() == 12);
@@ -425,17 +425,17 @@ GTEST_TEST(TestRealNum, Setter)
 	//    int32_t ->
 	EXPECT_NO_THROW(u16 = UInt16(); u16.Set(int32_t(12)););
 	EXPECT_TRUE(u16.GetVal() == 12);
-	EXPECT_THROW(u16.Set(std::numeric_limits<int32_t>::max());, TypeError);
+	EXPECT_THROW(u16.Set((std::numeric_limits<int32_t>::max)());, TypeError);
 	EXPECT_THROW(u16.Set(std::numeric_limits<int32_t>::lowest());, TypeError);
 	//    int64_t ->
 	EXPECT_NO_THROW(u16 = UInt16(); u16.Set(int64_t(12)););
 	EXPECT_TRUE(u16.GetVal() == 12);
-	EXPECT_THROW(u16.Set(std::numeric_limits<int64_t>::max());, TypeError);
+	EXPECT_THROW(u16.Set((std::numeric_limits<int64_t>::max)());, TypeError);
 	EXPECT_THROW(u16.Set(std::numeric_limits<int64_t>::lowest());, TypeError);
 	//    double ->
 	EXPECT_NO_THROW(u16 = UInt16(); u16.Set(double(12)););
 	EXPECT_TRUE(u16.GetVal() == 12);
-	EXPECT_THROW(u16.Set(std::numeric_limits<double>::max());, TypeError);
+	EXPECT_THROW(u16.Set((std::numeric_limits<double>::max)());, TypeError);
 	EXPECT_THROW(u16.Set(std::numeric_limits<double>::lowest());, TypeError);
 
 	// uint32_t
@@ -457,7 +457,7 @@ GTEST_TEST(TestRealNum, Setter)
 	//    uint64_t ->
 	EXPECT_NO_THROW(u32 = UInt32(); u32.Set(uint64_t(12)););
 	EXPECT_TRUE(u32.GetVal() == 12);
-	EXPECT_THROW(u32.Set(std::numeric_limits<uint64_t>::max());, TypeError);
+	EXPECT_THROW(u32.Set((std::numeric_limits<uint64_t>::max)());, TypeError);
 	//    int8_t ->
 	EXPECT_NO_THROW(u32 = UInt32(); u32.Set(int8_t(12)););
 	EXPECT_TRUE(u32.GetVal() == 12);
@@ -469,12 +469,12 @@ GTEST_TEST(TestRealNum, Setter)
 	//    int64_t ->
 	EXPECT_NO_THROW(u32 = UInt32(); u32.Set(int64_t(12)););
 	EXPECT_TRUE(u32.GetVal() == 12);
-	EXPECT_THROW(u32.Set(std::numeric_limits<int64_t>::max());, TypeError);
+	EXPECT_THROW(u32.Set((std::numeric_limits<int64_t>::max)());, TypeError);
 	EXPECT_THROW(u32.Set(std::numeric_limits<int64_t>::lowest());, TypeError);
 	//    double ->
 	EXPECT_NO_THROW(u32 = UInt32(); u32.Set(double(12)););
 	EXPECT_TRUE(u32.GetVal() == 12);
-	EXPECT_THROW(u32.Set(std::numeric_limits<double>::max());, TypeError);
+	EXPECT_THROW(u32.Set((std::numeric_limits<double>::max)());, TypeError);
 	EXPECT_THROW(u32.Set(std::numeric_limits<double>::lowest());, TypeError);
 
 	// uint64_t
@@ -511,7 +511,7 @@ GTEST_TEST(TestRealNum, Setter)
 	//    double ->
 	EXPECT_NO_THROW(u64 = UInt64(); u64.Set(double(12)););
 	EXPECT_TRUE(u64.GetVal() == 12);
-	EXPECT_THROW(u64.Set(std::numeric_limits<double>::max());, TypeError);
+	EXPECT_THROW(u64.Set((std::numeric_limits<double>::max)());, TypeError);
 	EXPECT_THROW(u64.Set(std::numeric_limits<double>::lowest());, TypeError);
 
 	// float
@@ -545,7 +545,7 @@ GTEST_TEST(TestRealNum, Setter)
 	//    double ->
 	EXPECT_NO_THROW(f = Float(); f.Set(double(12)););
 	EXPECT_TRUE(f.GetVal() == 12);
-	EXPECT_THROW(f.Set(std::numeric_limits<double>::max());, TypeError);
+	EXPECT_THROW(f.Set((std::numeric_limits<double>::max)());, TypeError);
 	EXPECT_THROW(f.Set(std::numeric_limits<double>::lowest());, TypeError);
 
 	// double
@@ -625,7 +625,7 @@ GTEST_TEST(TestRealNum, Getter)
 	// int16_t
 	//      -> int8_t
 	EXPECT_THROW(
-		Int16(std::numeric_limits<int16_t>::max()).AsCppInt8(), TypeError);
+		Int16((std::numeric_limits<int16_t>::max)()).AsCppInt8(), TypeError);
 	EXPECT_TRUE(Int16(12).AsCppInt8()   == static_cast<int8_t  >(12));
 	//      -> int32_t
 	EXPECT_TRUE(Int16(12).AsCppInt32()  == static_cast<int32_t >(12));
@@ -649,7 +649,7 @@ GTEST_TEST(TestRealNum, Getter)
 	// int32_t
 	//      -> int8_t
 	EXPECT_THROW(
-		Int32(std::numeric_limits<int32_t>::max()).AsCppInt8(), TypeError);
+		Int32((std::numeric_limits<int32_t>::max)()).AsCppInt8(), TypeError);
 	EXPECT_TRUE(Int32(12).AsCppInt8()   == static_cast<int8_t  >(12));
 	//      -> int32_t
 	EXPECT_TRUE(Int32(12).AsCppInt32()  == static_cast<int32_t >(12));
@@ -672,11 +672,11 @@ GTEST_TEST(TestRealNum, Getter)
 
 	// int64_t
 	EXPECT_THROW(
-		Int64(std::numeric_limits<int64_t>::max()).AsCppInt8(), TypeError);
+		Int64((std::numeric_limits<int64_t>::max)()).AsCppInt8(), TypeError);
 	EXPECT_TRUE(Int64(12).AsCppInt8()   == static_cast<int8_t  >(12));
 	//      -> int32_t
 	EXPECT_THROW(
-		Int64(std::numeric_limits<int64_t>::max()).AsCppInt32(), TypeError);
+		Int64((std::numeric_limits<int64_t>::max)()).AsCppInt32(), TypeError);
 	EXPECT_TRUE(Int64(12).AsCppInt32()  == static_cast<int32_t >(12));
 	//      -> int64_t
 	EXPECT_TRUE(Int64(12).AsCppInt64()  == static_cast<int64_t >(12));
@@ -697,7 +697,7 @@ GTEST_TEST(TestRealNum, Getter)
 
 	// uint8_t
 	EXPECT_THROW(
-		UInt8(std::numeric_limits<uint8_t>::max()).AsCppInt8(), TypeError);
+		UInt8((std::numeric_limits<uint8_t>::max)()).AsCppInt8(), TypeError);
 	EXPECT_TRUE(UInt8(12).AsCppInt8()   == static_cast<int8_t  >(12));
 	//      -> int32_t
 	EXPECT_TRUE(UInt8(12).AsCppInt32()  == static_cast<int32_t >(12));
@@ -714,7 +714,7 @@ GTEST_TEST(TestRealNum, Getter)
 
 	// uint16_t
 	EXPECT_THROW(
-		UInt16(std::numeric_limits<uint16_t>::max()).AsCppInt8(), TypeError);
+		UInt16((std::numeric_limits<uint16_t>::max)()).AsCppInt8(), TypeError);
 	EXPECT_TRUE(UInt16(12).AsCppInt8()   == static_cast<int8_t  >(12));
 	//      -> int32_t
 	EXPECT_TRUE(UInt16(12).AsCppInt32()  == static_cast<int32_t >(12));
@@ -722,7 +722,7 @@ GTEST_TEST(TestRealNum, Getter)
 	EXPECT_TRUE(UInt16(12).AsCppInt64()  == static_cast<int64_t >(12));
 	//      -> uint8_t
 	EXPECT_THROW(
-		UInt16(std::numeric_limits<uint16_t>::max()).AsCppUInt8(), TypeError);
+		UInt16((std::numeric_limits<uint16_t>::max)()).AsCppUInt8(), TypeError);
 	EXPECT_TRUE(UInt16(12).AsCppUInt8()  == static_cast<uint8_t >(12));
 	//      -> uint32_t
 	EXPECT_TRUE(UInt16(12).AsCppUInt32() == static_cast<uint32_t>(12));
@@ -733,17 +733,17 @@ GTEST_TEST(TestRealNum, Getter)
 
 	// uint32_t
 	EXPECT_THROW(
-		UInt32(std::numeric_limits<uint32_t>::max()).AsCppInt8(), TypeError);
+		UInt32((std::numeric_limits<uint32_t>::max)()).AsCppInt8(), TypeError);
 	EXPECT_TRUE(UInt32(12).AsCppInt8()   == static_cast<int8_t  >(12));
 	//      -> int32_t
 	EXPECT_THROW(
-		UInt32(std::numeric_limits<uint32_t>::max()).AsCppInt32(), TypeError);
+		UInt32((std::numeric_limits<uint32_t>::max)()).AsCppInt32(), TypeError);
 	EXPECT_TRUE(UInt32(12).AsCppInt32()  == static_cast<int32_t >(12));
 	//      -> int64_t
 	EXPECT_TRUE(UInt32(12).AsCppInt64()  == static_cast<int64_t >(12));
 	//      -> uint8_t
 	EXPECT_THROW(
-		UInt32(std::numeric_limits<uint32_t>::max()).AsCppUInt8(), TypeError);
+		UInt32((std::numeric_limits<uint32_t>::max)()).AsCppUInt8(), TypeError);
 	EXPECT_TRUE(UInt32(12).AsCppUInt8()  == static_cast<uint8_t >(12));
 	//      -> uint32_t
 	EXPECT_TRUE(UInt32(12).AsCppUInt32() == static_cast<uint32_t>(12));
@@ -754,23 +754,23 @@ GTEST_TEST(TestRealNum, Getter)
 
 	// uint64_t
 	EXPECT_THROW(
-		UInt64(std::numeric_limits<uint64_t>::max()).AsCppInt8(), TypeError);
+		UInt64((std::numeric_limits<uint64_t>::max)()).AsCppInt8(), TypeError);
 	EXPECT_TRUE(UInt64(12).AsCppInt8()   == static_cast<int8_t  >(12));
 	//      -> int32_t
 	EXPECT_THROW(
-		UInt64(std::numeric_limits<uint64_t>::max()).AsCppInt32(), TypeError);
+		UInt64((std::numeric_limits<uint64_t>::max)()).AsCppInt32(), TypeError);
 	EXPECT_TRUE(UInt64(12).AsCppInt32()  == static_cast<int32_t >(12));
 	//      -> int64_t
 	EXPECT_THROW(
-		UInt64(std::numeric_limits<uint64_t>::max()).AsCppInt64(), TypeError);
+		UInt64((std::numeric_limits<uint64_t>::max)()).AsCppInt64(), TypeError);
 	EXPECT_TRUE(UInt64(12).AsCppInt64()  == static_cast<int64_t >(12));
 	//      -> uint8_t
 	EXPECT_THROW(
-		UInt64(std::numeric_limits<uint64_t>::max()).AsCppUInt8(), TypeError);
+		UInt64((std::numeric_limits<uint64_t>::max)()).AsCppUInt8(), TypeError);
 	EXPECT_TRUE(UInt64(12).AsCppUInt8()  == static_cast<uint8_t >(12));
 	//      -> uint32_t
 	EXPECT_THROW(
-		UInt64(std::numeric_limits<uint64_t>::max()).AsCppUInt32(), TypeError);
+		UInt64((std::numeric_limits<uint64_t>::max)()).AsCppUInt32(), TypeError);
 	EXPECT_TRUE(UInt64(12).AsCppUInt32() == static_cast<uint32_t>(12));
 	//      -> uint64_t
 	EXPECT_TRUE(UInt64(12).AsCppUInt64() == static_cast<uint64_t>(12));
@@ -779,38 +779,38 @@ GTEST_TEST(TestRealNum, Getter)
 
 	// float
 	EXPECT_THROW(
-		Float(std::numeric_limits<float>::max()).AsCppInt8(), TypeError);
+		Float((std::numeric_limits<float>::max)()).AsCppInt8(), TypeError);
 	EXPECT_THROW(
 		Float(std::numeric_limits<float>::lowest()).AsCppInt8(), TypeError);
 	EXPECT_TRUE(Float(12).AsCppInt8()   == static_cast<int8_t  >(12));
 	//      -> int32_t
 	EXPECT_THROW(
-		Float(std::numeric_limits<float>::max()).AsCppInt32(), TypeError);
+		Float((std::numeric_limits<float>::max)()).AsCppInt32(), TypeError);
 	EXPECT_THROW(
 		Float(std::numeric_limits<float>::lowest()).AsCppInt32(), TypeError);
 	EXPECT_TRUE(Float(12).AsCppInt32()  == static_cast<int32_t >(12));
 	//      -> int64_t
 	EXPECT_THROW(
-		Float(std::numeric_limits<float>::max()).AsCppInt64(), TypeError);
+		Float((std::numeric_limits<float>::max)()).AsCppInt64(), TypeError);
 	EXPECT_THROW(
 		Float(std::numeric_limits<float>::lowest()).AsCppInt64(), TypeError);
 	EXPECT_TRUE(Float(12).AsCppInt64()  == static_cast<int64_t >(12));
 	//      -> uint8_t
 	//      -> int64_t
 	EXPECT_THROW(
-		Float(std::numeric_limits<float>::max()).AsCppUInt8(), TypeError);
+		Float((std::numeric_limits<float>::max)()).AsCppUInt8(), TypeError);
 	EXPECT_THROW(
 		Float(std::numeric_limits<float>::lowest()).AsCppUInt8(), TypeError);
 	EXPECT_TRUE(Float(12).AsCppUInt8()  == static_cast<uint8_t >(12));
 	//      -> uint32_t
 	EXPECT_THROW(
-		Float(std::numeric_limits<float>::max()).AsCppUInt32(), TypeError);
+		Float((std::numeric_limits<float>::max)()).AsCppUInt32(), TypeError);
 	EXPECT_THROW(
 		Float(std::numeric_limits<float>::lowest()).AsCppUInt32(), TypeError);
 	EXPECT_TRUE(Float(12).AsCppUInt32() == static_cast<uint32_t>(12));
 	//      -> uint64_t
 	EXPECT_THROW(
-		Float(std::numeric_limits<float>::max()).AsCppUInt64(), TypeError);
+		Float((std::numeric_limits<float>::max)()).AsCppUInt64(), TypeError);
 	EXPECT_THROW(
 		Float(std::numeric_limits<float>::lowest()).AsCppUInt64(), TypeError);
 	EXPECT_TRUE(Float(12).AsCppUInt64() == static_cast<uint64_t>(12));
@@ -819,38 +819,38 @@ GTEST_TEST(TestRealNum, Getter)
 
 	// double
 	EXPECT_THROW(
-		Double(std::numeric_limits<double>::max()).AsCppInt8(), TypeError);
+		Double((std::numeric_limits<double>::max)()).AsCppInt8(), TypeError);
 	EXPECT_THROW(
 		Double(std::numeric_limits<double>::lowest()).AsCppInt8(), TypeError);
 	EXPECT_TRUE(Double(12).AsCppInt8()   == static_cast<int8_t  >(12));
 	//      -> int32_t
 	EXPECT_THROW(
-		Double(std::numeric_limits<double>::max()).AsCppInt32(), TypeError);
+		Double((std::numeric_limits<double>::max)()).AsCppInt32(), TypeError);
 	EXPECT_THROW(
 		Double(std::numeric_limits<double>::lowest()).AsCppInt32(), TypeError);
 	EXPECT_TRUE(Double(12).AsCppInt32()  == static_cast<int32_t >(12));
 	//      -> int64_t
 	EXPECT_THROW(
-		Double(std::numeric_limits<double>::max()).AsCppInt64(), TypeError);
+		Double((std::numeric_limits<double>::max)()).AsCppInt64(), TypeError);
 	EXPECT_THROW(
 		Double(std::numeric_limits<double>::lowest()).AsCppInt64(), TypeError);
 	EXPECT_TRUE(Double(12).AsCppInt64()  == static_cast<int64_t >(12));
 	//      -> uint8_t
 	//      -> int64_t
 	EXPECT_THROW(
-		Double(std::numeric_limits<double>::max()).AsCppUInt8(), TypeError);
+		Double((std::numeric_limits<double>::max)()).AsCppUInt8(), TypeError);
 	EXPECT_THROW(
 		Double(std::numeric_limits<double>::lowest()).AsCppUInt8(), TypeError);
 	EXPECT_TRUE(Double(12).AsCppUInt8()  == static_cast<uint8_t >(12));
 	//      -> uint32_t
 	EXPECT_THROW(
-		Double(std::numeric_limits<double>::max()).AsCppUInt32(), TypeError);
+		Double((std::numeric_limits<double>::max)()).AsCppUInt32(), TypeError);
 	EXPECT_THROW(
 		Double(std::numeric_limits<double>::lowest()).AsCppUInt32(), TypeError);
 	EXPECT_TRUE(Double(12).AsCppUInt32() == static_cast<uint32_t>(12));
 	//      -> uint64_t
 	EXPECT_THROW(
-		Double(std::numeric_limits<double>::max()).AsCppUInt64(), TypeError);
+		Double((std::numeric_limits<double>::max)()).AsCppUInt64(), TypeError);
 	EXPECT_THROW(
 		Double(std::numeric_limits<double>::lowest()).AsCppUInt64(), TypeError);
 	EXPECT_TRUE(Double(12).AsCppUInt64() == static_cast<uint64_t>(12));
