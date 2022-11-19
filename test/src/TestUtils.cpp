@@ -7,6 +7,9 @@
 
 #include <memory>
 
+#ifdef _MSC_VER
+#include <windows.h>
+#endif // _MSC_VER
 #include <SimpleObjects/Utils.hpp>
 #include <SimpleObjects/ToString.hpp>
 

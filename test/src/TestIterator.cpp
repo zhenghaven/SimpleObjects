@@ -7,6 +7,9 @@
 
 #include <string>
 
+#ifdef _MSC_VER
+#include <windows.h>
+#endif // _MSC_VER
 #include <SimpleObjects/String.hpp>
 
 #ifndef SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE
