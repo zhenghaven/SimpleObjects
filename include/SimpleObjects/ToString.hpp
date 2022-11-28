@@ -5,6 +5,10 @@
 
 #pragma once
 
+
+#include <cstddef>
+
+
 #ifndef SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE
 namespace SimpleObjects
 #else
@@ -38,8 +42,8 @@ inline _OutputType ToString(_ItType begin, _ItType end)
 	return _OutputType(begin, end);
 }
 
-template<bool _Prefix, typename _CharType, typename _OutIt>
-inline void ByteToHEX(_OutIt destIt, uint8_t b)
+template<bool _Prefix, typename _CharType, typename _OutIt, typename _ByteType>
+inline void ByteToHEX(_OutIt destIt, const _ByteType& b)
 {
 	static constexpr char alphabet[] = "0123456789ABCDEF";
 
