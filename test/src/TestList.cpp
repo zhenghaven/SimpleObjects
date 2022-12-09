@@ -635,3 +635,21 @@ GTEST_TEST(TestList, BaseListPushBackAppend)
 				Bool(true), Double(0.0), }));
 	}
 }
+
+GTEST_TEST(TestList, BaseListClear)
+{
+	{
+		auto testLs = List({ Null(), Int64(123), String("test"), });
+
+		// Initial values
+		EXPECT_EQ(testLs.size(), 3);
+		EXPECT_NE(testLs.begin(), testLs.end());
+
+		// Clear
+		testLs.clear();
+
+		// After clear
+		EXPECT_EQ(testLs.size(), 0);
+		EXPECT_EQ(testLs.begin(), testLs.end());
+	}
+}

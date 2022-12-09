@@ -169,6 +169,8 @@ public:
 
 	virtual void Remove(size_t idx) = 0;
 
+	virtual void clear() = 0;
+
 	// ========== Functions that involves value_type in prototype ==========
 
 	// ========== value access ==========
