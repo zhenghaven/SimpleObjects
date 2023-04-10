@@ -83,8 +83,8 @@ struct HexToBytesImpl<_HexValueLut, 1>
 	{
 		// skip leading zeros if needed
 		std::tie(destIt, begin) =
-			HexDecodeSkipZeroBytesImpl<_KeepLeadingZeroBytes>::template
-				Decode<Self, _DestValType>(destIt, begin, end, outDecodedSize);
+			HexDecodeCheckKeepLeadingZeroBytesImpl<_KeepLeadingZeroBytes>::template
+				SkipZeros<Self, _DestValType>(destIt, begin, end, outDecodedSize);
 
 		while (begin != end)
 		{

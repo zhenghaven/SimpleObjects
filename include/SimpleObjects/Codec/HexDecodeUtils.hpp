@@ -90,10 +90,10 @@ inline constexpr bool HexDecodeCanPadInPlace()
 
 
 template<bool _KeepLeadingZeroBytes>
-struct HexDecodeSkipZeroBytesImpl;
+struct HexDecodeCheckKeepLeadingZeroBytesImpl;
 
 template<>
-struct HexDecodeSkipZeroBytesImpl<false>
+struct HexDecodeCheckKeepLeadingZeroBytesImpl<false>
 {
 	template<
 		typename _Decoder,
@@ -101,7 +101,7 @@ struct HexDecodeSkipZeroBytesImpl<false>
 		typename _OutIt,
 		typename _InIt
 	>
-	static std::pair<_OutIt, _InIt> Decode(
+	static std::pair<_OutIt, _InIt> SkipZeros(
 		_OutIt  destIt,
 		_InIt   begin,
 		_InIt   end,
@@ -139,10 +139,36 @@ struct HexDecodeSkipZeroBytesImpl<false>
 
 		return std::make_pair(destIt, begin);
 	}
-}; // struct HexDecodeSkipZeroBytesImpl<false>
+
+
+	template<
+		typename _Decoder,
+		typename _DestValType,
+		typename _InputCharType,
+		typename _OutIt,
+		typename _NibbleType
+	>
+	static _OutIt DecodeZeros(
+		_OutIt        destIt,
+		_NibbleType   nibbleCh2
+	)
+	{
+		if(
+			(nibbleCh2 != '0') // the first byte is not zero
+		)
+		{
+			*destIt++ = _Decoder::template
+				DecodeSingle<_DestValType, _InputCharType>(
+					_InputCharType('0'),
+					nibbleCh2
+				);
+		}
+		return destIt;
+	}
+}; // struct HexDecodeCheckKeepLeadingZeroBytesImpl<false>
 
 template<>
-struct HexDecodeSkipZeroBytesImpl<true>
+struct HexDecodeCheckKeepLeadingZeroBytesImpl<true>
 {
 	template<
 		typename _Decoder,
@@ -150,7 +176,7 @@ struct HexDecodeSkipZeroBytesImpl<true>
 		typename _OutIt,
 		typename _InIt
 	>
-	static std::pair<_OutIt, _InIt> Decode(
+	static std::pair<_OutIt, _InIt> SkipZeros(
 		_OutIt  destIt,
 		_InIt   begin,
 		_InIt   /* end */,
@@ -159,7 +185,29 @@ struct HexDecodeSkipZeroBytesImpl<true>
 	{
 		return std::make_pair(destIt, begin);
 	}
-}; // struct HexDecodeSkipZeroBytesImpl<true>
+
+
+	template<
+		typename _Decoder,
+		typename _DestValType,
+		typename _InputCharType,
+		typename _OutIt,
+		typename _NibbleType
+	>
+	static _OutIt DecodeZeros(
+		_OutIt        destIt,
+		_NibbleType   nibbleCh2
+	)
+	{
+		// we want to keep leading zero bytes
+		*destIt++ = _Decoder::template
+			DecodeSingle<_DestValType, _InputCharType>(
+				_InputCharType('0'),
+				nibbleCh2
+			);
+		return destIt;
+	}
+}; // struct HexDecodeCheckKeepLeadingZeroBytesImpl<true>
 
 
 template<HexPad   _PadOpt>
@@ -188,17 +236,11 @@ struct HexDecodeRandItPadImpl<HexPad::Front>
 		using _InputCharType =
 			typename std::remove_reference<decltype(nibbleCh2)>::type;
 
-		if(
-			(_KeepLeadingZeroBytes) || // we want to keep leading zero bytes
-			(nibbleCh2 != '0') // OR, the first byte is not zero
-		)
-		{
-			*destIt++ = _Decoder::template
-				DecodeSingle<_DestValType, _InputCharType>(
-					_InputCharType('0'),
-					nibbleCh2
-				);
-		}
+		destIt = HexDecodeCheckKeepLeadingZeroBytesImpl<_KeepLeadingZeroBytes>::
+			template DecodeZeros<_Decoder, _DestValType, _InputCharType>(
+				destIt,
+				nibbleCh2
+			);
 
 		return std::make_pair(destIt, begin);
 	}
