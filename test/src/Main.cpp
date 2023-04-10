@@ -50,7 +50,7 @@ static void PrintIntTypes()
 
 int main(int argc, char** argv)
 {
-	constexpr size_t EXPECTED_NUM_OF_TEST_FILE = 16;
+	constexpr size_t EXPECTED_NUM_OF_TEST_FILE = 17;
 
 	std::cout << "===== SimpleObjects test program =====" << std::endl;
 	std::cout << std::endl;
