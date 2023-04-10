@@ -604,6 +604,45 @@ static bool CanPadInPlace(_InIt)
 	return canPadInPlace;
 }
 
+template<bool _canPadInPlace>
+struct Test_HexToBytesImpl_ThrowIfPadDisabled;
+
+template<>
+struct Test_HexToBytesImpl_ThrowIfPadDisabled<true>
+{
+	template<typename _Decoder, bool _KeepLeadingZeroBytes, typename _Container>
+	static void Test(const _Container& input)
+	{
+		if (input.size() % 2 != 0)
+		{
+			// decoder can pad in place, and input is odd
+			// we want to test throwing behavior when padding is disabled
+
+			size_t decodedSize = 0;
+			std::vector<uint8_t> actual;
+			auto prog = [&](){
+				_Decoder::template
+					Decode<_KeepLeadingZeroBytes, HexPad::Disabled, uint8_t>(
+						std::back_inserter(actual),
+						input.cbegin(),
+						input.cend(),
+						decodedSize
+					);
+			};
+			EXPECT_THROW(prog(), std::invalid_argument);
+		}
+	}
+}; // struct Test_HexToBytesImpl_ThrowIfPadDisabled<true>
+
+template<>
+struct Test_HexToBytesImpl_ThrowIfPadDisabled<false>
+{
+	template<typename _Decoder, bool _KeepLeadingZeroBytes, typename _Container>
+	static void Test(const _Container& /* input */)
+	{}
+}; // struct Test_HexToBytesImpl_ThrowIfPadDisabled<false>
+
+
 template<typename _InputType>
 static void Test_HexToBytesImpl_Decode_InputIt(
 	const std::vector<
@@ -636,21 +675,8 @@ static void Test_HexToBytesImpl_Decode_InputIt(
 			const auto& expected = std::get<1>(testCase);
 			const auto& expectedSize = std::get<2>(testCase);
 
-			if (sk_canPad && input.size() % 2 != 0)
-			{
-				// decoder can pad in place, and input is odd
-				// we want to test throwing behavior when padding is disabled
-
-				auto prog = [&](){
-					_Decoder::Decode<true, HexPad::Disabled, uint8_t>(
-						std::back_inserter(actual),
-						input.cbegin(),
-						input.cend(),
-						decodedSize
-					);
-				};
-				EXPECT_THROW(prog(), std::invalid_argument);
-			}
+			Test_HexToBytesImpl_ThrowIfPadDisabled<sk_canPad>::
+				template Test<_Decoder, true>(input);
 
 			decodedSize = 0;
 			actual.clear();
@@ -679,21 +705,8 @@ static void Test_HexToBytesImpl_Decode_InputIt(
 			const auto& expected = std::get<3>(testCase);
 			const auto& expectedSize = std::get<4>(testCase);
 
-			if (sk_canPad && input.size() % 2 != 0)
-			{
-				// decoder can pad in place, and input is odd
-				// we want to test throwing behavior when padding is disabled
-
-				auto prog = [&](){
-					_Decoder::Decode<false, HexPad::Disabled, uint8_t>(
-						std::back_inserter(actual),
-						input.cbegin(),
-						input.cend(),
-						decodedSize
-					);
-				};
-				EXPECT_THROW(prog(), std::invalid_argument);
-			}
+			Test_HexToBytesImpl_ThrowIfPadDisabled<sk_canPad>::
+				template Test<_Decoder, false>(input);
 
 			decodedSize = 0;
 			actual.clear();
