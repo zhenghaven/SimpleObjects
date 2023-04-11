@@ -26,5 +26,13 @@ enum class HexPad : uint8_t
 }; // enum class HexPad
 
 
+enum class HexZero : uint8_t
+{
+	Keep,
+	AtLeastOne,
+	SkipAll,
+}; // enum class HexZero
+
+
 } // namespace Codec
 } // namespace SimpleObjects

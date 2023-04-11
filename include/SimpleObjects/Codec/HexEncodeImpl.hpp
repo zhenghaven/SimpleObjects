@@ -127,6 +127,44 @@ struct BytesToHexImpl<_Alphabet, 1>
 }; // struct BytesToHexImpl<_Alphabet, 1>
 
 
+template<typename _Alphabet>
+struct IntegerToHexImpl
+{
+	using Alphabet = _Alphabet;
+	using AlphabetValType = typename Alphabet::value_type;
+
+	template<
+		HexZero  _HexZeroOpt,
+		bool     _IgnoreSign,
+		typename _OutIt,
+		typename _IntegerType,
+		typename _PrefixType
+	>
+	static _OutIt Encode(
+		_OutIt destIt,
+		const _IntegerType& val,
+		const _PrefixType& prefix
+	)
+	{
+		static constexpr bool sk_isSigned =
+			std::is_signed<_IntegerType>::value;
+
+		destIt =
+			IntegerToHexEncodeSignChImpl<_Alphabet, _IgnoreSign, sk_isSigned>::
+				Encode(destIt, val);
+
+		// Add prefix
+		destIt = std::copy(std::begin(prefix), std::end(prefix), destIt);
+
+		return IntegerToHexEncodeSignedImpl<
+				_Alphabet,
+				_HexZeroOpt,
+				sk_isSigned
+			>::Encode(destIt, val);
+	}
+}; // struct IntegerToHexImpl
+
+
 } // namespace Internal
 
 

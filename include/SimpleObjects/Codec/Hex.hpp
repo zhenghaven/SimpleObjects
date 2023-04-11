@@ -46,7 +46,7 @@ struct Hex
 
 
 	//==========
-	// Encoding functions
+	// Encoding bytes functions
 	//==========
 
 
@@ -200,7 +200,106 @@ struct Hex
 
 
 	//==========
-	// Decoding functions
+	// Encoding Integer functions
+	//==========
+
+
+	template<
+		typename _OutContainer,
+		HexZero  _ZeroOpt,
+		bool     _IgnoreSign,
+		typename _IntegerType,
+		typename std::enable_if<
+			std::is_integral<_IntegerType>::value,
+			int
+		>::type = 0
+	>
+	static _OutContainer Encode(
+		const _IntegerType& src,
+		const PrefixType& prefix = "0x"
+	)
+	{
+		static constexpr size_t sk_intTypeSize =
+			sizeof(_IntegerType);
+
+		_OutContainer dest;
+		dest.reserve(sk_intTypeSize * 2 + prefix.size());
+
+		IntegerToHexImpl<Alphabet>::
+			template Encode<_ZeroOpt, _IgnoreSign>(
+				std::back_inserter(dest),
+				src,
+				prefix
+			);
+
+		return dest;
+	}
+
+
+	template<
+		typename _OutContainer,
+		typename _IntegerType,
+		typename std::enable_if<
+			std::is_integral<_IntegerType>::value,
+			int
+		>::type = 0
+	>
+	static _OutContainer Encode(
+		const _IntegerType& src,
+		const PrefixType& prefix = "0x"
+	)
+	{
+		return Encode<_OutContainer, HexZero::AtLeastOne, false>(src, prefix);
+	}
+
+
+	template<
+		HexZero  _ZeroOpt,
+		bool     _IgnoreSign,
+		typename _OutIt,
+		typename _IntegerType,
+		typename std::enable_if<
+			std::is_integral<_IntegerType>::value,
+			int
+		>::type = 0
+	>
+	static _OutIt Encode(
+		_OutIt destIt,
+		const _IntegerType& src,
+		const PrefixType& prefix = "0x"
+	)
+	{
+		destIt = IntegerToHexImpl<Alphabet>::
+			template Encode<_ZeroOpt, _IgnoreSign>(
+				destIt,
+				src,
+				prefix
+			);
+
+		return destIt;
+	}
+
+
+	template<
+		typename _OutIt,
+		typename _IntegerType,
+		typename std::enable_if<
+			std::is_integral<_IntegerType>::value,
+			int
+		>::type = 0
+	>
+	static _OutIt Encode(
+		_OutIt destIt,
+		const _IntegerType& src,
+		const PrefixType& prefix = "0x"
+	)
+	{
+		return Encode<HexZero::AtLeastOne, false>(destIt, src, prefix);
+	}
+
+
+	//==========
+	// Decoding Bytes functions
 	//==========
 
 
@@ -370,6 +469,12 @@ struct Hex
 		// default to keep leading zeros
 		return Decode<true, HexPad::Disabled>(dest, begin, end);
 	}
+
+
+	//==========
+	// Decoding Integer functions
+	//==========
+
 
 }; // struct Hex
 

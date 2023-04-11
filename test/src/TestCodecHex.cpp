@@ -35,6 +35,13 @@ GTEST_TEST(TestCodecHex, CountTestFile)
 }
 
 
+//==============================================================================
+//
+// BytesToHexImpl
+//
+//==============================================================================
+
+
 namespace{
 
 template<typename _ByteValType, typename _Encoder>
@@ -335,6 +342,302 @@ GTEST_TEST(TestCodecHex, Internal_BytesToHexImpl_LowerCase_String)
 }
 
 
+//==============================================================================
+//
+// IntegerToHexImpl
+//
+//==============================================================================
+
+
+namespace{
+
+template<
+	typename _Encoder,
+	HexZero  _HexZeroOpt,
+	typename _IntegerType
+>
+static void Test_IntegerToHexImpl_OneTestCase(
+	const _IntegerType& input,
+	const std::string& expected,
+	const std::string& prefix
+)
+{
+	std::string actual;
+	auto endIt = actual.end();
+
+	actual.clear();
+	_Encoder::template Encode<_HexZeroOpt, true>(
+		std::back_inserter(actual),
+		input,
+		prefix
+	);
+	ASSERT_EQ(actual, prefix + expected);
+
+	endIt = _Encoder::template Encode<_HexZeroOpt, true>(
+		actual.begin(),
+		input,
+		prefix
+	);
+	EXPECT_EQ(actual, prefix + expected);
+	EXPECT_EQ(endIt, actual.end());
+
+
+	const auto signedPrefix = input >= 0 ? prefix : "-" + prefix;
+
+	actual.clear();
+	_Encoder::template Encode<_HexZeroOpt, false>(
+		std::back_inserter(actual),
+		input,
+		prefix
+	);
+	ASSERT_EQ(actual, signedPrefix + expected);
+
+	endIt = _Encoder::template Encode<_HexZeroOpt, false>(
+		actual.begin(),
+		input,
+		prefix
+	);
+	EXPECT_EQ(actual, signedPrefix + expected);
+	EXPECT_EQ(endIt, actual.end());
+}
+
+template<typename _Alphabet, typename _IntegerType>
+static void Test_IntegerToHexImpl(
+	const std::vector<
+		std::tuple<
+			_IntegerType,
+			std::string
+		>
+	>& testCases
+)
+{
+	using _Encoder = Internal::IntegerToHexImpl<_Alphabet>;
+
+	for(const auto& testCase : testCases)
+	{
+		const _IntegerType& input = std::get<0>(testCase);
+		const std::string& expectedZeros = std::get<1>(testCase);
+		const auto nonZeroPos = expectedZeros.find_first_not_of('0');
+		const std::string expectedNoLZero =
+			nonZeroPos == std::string::npos ?
+				std::string() :
+				expectedZeros.substr(nonZeroPos);
+		const std::string expectedOneLZero =
+			nonZeroPos == std::string::npos ?
+				std::string("0") :
+				expectedZeros.substr(nonZeroPos);
+
+		Test_IntegerToHexImpl_OneTestCase<_Encoder, HexZero::Keep>(
+			input,
+			expectedZeros,
+			""
+		);
+		Test_IntegerToHexImpl_OneTestCase<_Encoder, HexZero::Keep>(
+			input,
+			expectedZeros,
+			"0x"
+		);
+
+		Test_IntegerToHexImpl_OneTestCase<_Encoder, HexZero::AtLeastOne>(
+			input,
+			expectedOneLZero,
+			""
+		);
+		Test_IntegerToHexImpl_OneTestCase<_Encoder, HexZero::AtLeastOne>(
+			input,
+			expectedOneLZero,
+			"0x"
+		);
+
+		Test_IntegerToHexImpl_OneTestCase<_Encoder, HexZero::SkipAll>(
+			input,
+			expectedNoLZero,
+			""
+		);
+		Test_IntegerToHexImpl_OneTestCase<_Encoder, HexZero::SkipAll>(
+			input,
+			expectedNoLZero,
+			"0x"
+		);
+	}
+}
+
+} // namespace
+
+
+GTEST_TEST(TestCodecHex, Internal_IntegerToHexImpl_LowerCase)
+{
+	using _Alphabet = Internal::HexLowerCaseAlphabet<char>;
+
+	Test_IntegerToHexImpl<_Alphabet, uint8_t>({
+		std::make_tuple<uint8_t, std::string>(0x7FU, "7f"),
+		std::make_tuple<uint8_t, std::string>(0x0FU, "0f"),
+		std::make_tuple<uint8_t, std::string>(0x00U, "00"),
+	});
+
+	Test_IntegerToHexImpl<_Alphabet, uint16_t>({
+		std::make_tuple<uint16_t, std::string>(0x3E4BU, "3e4b"),
+		std::make_tuple<uint16_t, std::string>(0x004BU, "004b"),
+		std::make_tuple<uint16_t, std::string>(0x000BU, "000b"),
+		std::make_tuple<uint16_t, std::string>(0x0000U, "0000"),
+	});
+
+	Test_IntegerToHexImpl<_Alphabet, uint32_t>({
+		std::make_tuple<uint32_t, std::string>(0x3E4B239AU, "3e4b239a"),
+		std::make_tuple<uint32_t, std::string>(0x004B239AU, "004b239a"),
+		std::make_tuple<uint32_t, std::string>(0x000B239AU, "000b239a"),
+		std::make_tuple<uint32_t, std::string>(0x00000000U, "00000000"),
+	});
+
+	Test_IntegerToHexImpl<_Alphabet, uint64_t>({
+		std::make_tuple<uint64_t, std::string>(0x3E4B239A3F5C2D79ULL, "3e4b239a3f5c2d79"),
+		std::make_tuple<uint64_t, std::string>(0x000000003F5C2D79ULL, "000000003f5c2d79"),
+		std::make_tuple<uint64_t, std::string>(0x000000000F5C2D79ULL, "000000000f5c2d79"),
+		std::make_tuple<uint64_t, std::string>(0x0000000000000000ULL, "0000000000000000"),
+	});
+
+	// Signed integers
+
+	Test_IntegerToHexImpl<_Alphabet, int32_t>({
+		std::make_tuple<int32_t, std::string>(0x3E4B239A, "3e4b239a"),
+		std::make_tuple<int32_t, std::string>(0x004B239A, "004b239a"),
+		std::make_tuple<int32_t, std::string>(0x000B239A, "000b239a"),
+		std::make_tuple<int32_t, std::string>(0x00000000, "00000000"),
+		std::make_tuple<int32_t, std::string>(-0x3E4B239A, "3e4b239a"),
+		std::make_tuple<int32_t, std::string>(-0x000B239A, "000b239a"),
+	});
+
+	Test_IntegerToHexImpl<_Alphabet, int64_t>({
+		std::make_tuple<int64_t, std::string>(0x3E4B239A3F5C2D79LL, "3e4b239a3f5c2d79"),
+		std::make_tuple<int64_t, std::string>(0x000000003F5C2D79LL, "000000003f5c2d79"),
+		std::make_tuple<int64_t, std::string>(0x000000000F5C2D79LL, "000000000f5c2d79"),
+		std::make_tuple<int64_t, std::string>(0x0000000000000000LL, "0000000000000000"),
+		std::make_tuple<int64_t, std::string>(-0x3E4B239A3F5C2D79LL, "3e4b239a3f5c2d79"),
+		std::make_tuple<int64_t, std::string>(-0x000000000F5C2D79LL, "000000000f5c2d79"),
+	});
+}
+
+
+GTEST_TEST(TestCodecHex, Internal_IntegerToHexImpl_UpperCase)
+{
+	using _Alphabet = Internal::HexUpperCaseAlphabet<char>;
+
+	Test_IntegerToHexImpl<_Alphabet, uint8_t>({
+		std::make_tuple<uint8_t, std::string>(0x7FU, "7F"),
+		std::make_tuple<uint8_t, std::string>(0x0FU, "0F"),
+		std::make_tuple<uint8_t, std::string>(0x00U, "00"),
+	});
+
+	Test_IntegerToHexImpl<_Alphabet, uint16_t>({
+		std::make_tuple<uint16_t, std::string>(0x3E4BU, "3E4B"),
+		std::make_tuple<uint16_t, std::string>(0x004BU, "004B"),
+		std::make_tuple<uint16_t, std::string>(0x000BU, "000B"),
+		std::make_tuple<uint16_t, std::string>(0x0000U, "0000"),
+	});
+
+	Test_IntegerToHexImpl<_Alphabet, uint32_t>({
+		std::make_tuple<uint32_t, std::string>(0x3E4B239AU, "3E4B239A"),
+		std::make_tuple<uint32_t, std::string>(0x004B239AU, "004B239A"),
+		std::make_tuple<uint32_t, std::string>(0x000B239AU, "000B239A"),
+		std::make_tuple<uint32_t, std::string>(0x00000000U, "00000000"),
+	});
+
+	Test_IntegerToHexImpl<_Alphabet, uint64_t>({
+		std::make_tuple<uint64_t, std::string>(0x3E4B239A3F5C2D79ULL, "3E4B239A3F5C2D79"),
+		std::make_tuple<uint64_t, std::string>(0x000000003F5C2D79ULL, "000000003F5C2D79"),
+		std::make_tuple<uint64_t, std::string>(0x000000000F5C2D79ULL, "000000000F5C2D79"),
+		std::make_tuple<uint64_t, std::string>(0x0000000000000000ULL, "0000000000000000"),
+	});
+
+	// Signed integers
+
+	Test_IntegerToHexImpl<_Alphabet, int32_t>({
+		std::make_tuple<int32_t, std::string>(0x3E4B239A, "3E4B239A"),
+		std::make_tuple<int32_t, std::string>(0x004B239A, "004B239A"),
+		std::make_tuple<int32_t, std::string>(0x000B239A, "000B239A"),
+		std::make_tuple<int32_t, std::string>(0x00000000, "00000000"),
+		std::make_tuple<int32_t, std::string>(-0x3E4B239A, "3E4B239A"),
+		std::make_tuple<int32_t, std::string>(-0x000B239A, "000B239A"),
+	});
+
+	Test_IntegerToHexImpl<_Alphabet, int64_t>({
+		std::make_tuple<int64_t, std::string>(0x3E4B239A3F5C2D79LL, "3E4B239A3F5C2D79"),
+		std::make_tuple<int64_t, std::string>(0x000000003F5C2D79LL, "000000003F5C2D79"),
+		std::make_tuple<int64_t, std::string>(0x000000000F5C2D79LL, "000000000F5C2D79"),
+		std::make_tuple<int64_t, std::string>(0x0000000000000000LL, "0000000000000000"),
+		std::make_tuple<int64_t, std::string>(-0x3E4B239A3F5C2D79LL, "3E4B239A3F5C2D79"),
+		std::make_tuple<int64_t, std::string>(-0x000000000F5C2D79LL, "000000000F5C2D79"),
+	});
+}
+
+namespace {
+
+template<typename _EncoderSet, typename _IntegerType>
+static void Test_HexEncode_Integer_OneCase(
+	_IntegerType val,
+	const std::string& expectedDefault,
+	const std::string& expectedKeepT
+)
+{
+	std::string actual;
+
+	// integer --> container
+	actual = _EncoderSet::template Encode<std::string>(val);
+	EXPECT_EQ(actual, expectedDefault);
+	actual = _EncoderSet::template Encode<std::string, HexZero::Keep, true>(val);
+	EXPECT_EQ(actual, expectedKeepT);
+
+	auto endIt = actual.end();
+
+	// integer --> iterator
+	actual.clear();
+	_EncoderSet::Encode(std::back_inserter(actual), val);
+	ASSERT_EQ(actual, expectedDefault);
+	endIt = _EncoderSet::Encode(actual.begin(), val);
+	EXPECT_EQ(actual, expectedDefault);
+	EXPECT_EQ(endIt, actual.end());
+
+	actual.clear();
+	_EncoderSet::template Encode<HexZero::Keep, true>(std::back_inserter(actual), val);
+	ASSERT_EQ(actual, expectedKeepT);
+	endIt = _EncoderSet::template Encode<HexZero::Keep, true>(actual.begin(), val);
+	EXPECT_EQ(actual, expectedKeepT);
+	EXPECT_EQ(endIt, actual.end());
+}
+
+} // namespace
+
+
+GTEST_TEST(TestCodecHex, Hex_Encode_Integer)
+{
+	Test_HexEncode_Integer_OneCase<Hex, uint8_t>(0x0AU, "0xa", "0x0a");
+	Test_HexEncode_Integer_OneCase<Hex, uint16_t>(0x0E4BU, "0xe4b", "0x0e4b");
+	Test_HexEncode_Integer_OneCase<Hex, uint32_t>(0x0E4B239AU, "0xe4b239a", "0x0e4b239a");
+	Test_HexEncode_Integer_OneCase<Hex, uint64_t>(0x0E4B239A3F5C2D79ULL, "0xe4b239a3f5c2d79", "0x0e4b239a3f5c2d79");
+
+
+	Test_HexEncode_Integer_OneCase<Hex, int32_t>(-0x0E4B239A, "-0xe4b239a", "0x0e4b239a");
+	Test_HexEncode_Integer_OneCase<Hex, int64_t>(-0x0E4B239A3F5C2D79LL, "-0xe4b239a3f5c2d79", "0x0e4b239a3f5c2d79");
+
+
+	Test_HexEncode_Integer_OneCase<HEX, uint8_t>(0x0AU, "0xA", "0x0A");
+	Test_HexEncode_Integer_OneCase<HEX, uint16_t>(0x0E4BU, "0xE4B", "0x0E4B");
+	Test_HexEncode_Integer_OneCase<HEX, uint32_t>(0x0E4B239AU, "0xE4B239A", "0x0E4B239A");
+	Test_HexEncode_Integer_OneCase<HEX, uint64_t>(0x0E4B239A3F5C2D79ULL, "0xE4B239A3F5C2D79", "0x0E4B239A3F5C2D79");
+
+
+	Test_HexEncode_Integer_OneCase<HEX, int32_t>(-0x0E4B239A, "-0xE4B239A", "0x0E4B239A");
+	Test_HexEncode_Integer_OneCase<HEX, int64_t>(-0x0E4B239A3F5C2D79LL, "-0xE4B239A3F5C2D79", "0x0E4B239A3F5C2D79");
+}
+
+
+//==============================================================================
+//
+// Hex::Encode(bytes)
+//
+//==============================================================================
+
+
 namespace {
 
 static void Test_Hex_Encode(
@@ -501,6 +804,13 @@ GTEST_TEST(TestCodecHex, Hex_Encode)
 }
 
 
+//==============================================================================
+//
+// HexToBytesImpl
+//
+//==============================================================================
+
+
 GTEST_TEST(TestCodecHex, Internal_HexValueLut)
 {
 	using namespace Internal;
@@ -620,7 +930,8 @@ struct Test_HexToBytesImpl_ThrowIfPadDisabled<true>
 
 			size_t decodedSize = 0;
 			std::vector<uint8_t> actual;
-			auto prog = [&](){
+
+			auto prog1 = [&](){
 				_Decoder::template
 					Decode<_KeepLeadingZeroBytes, HexPad::Disabled, uint8_t>(
 						std::back_inserter(actual),
@@ -629,7 +940,18 @@ struct Test_HexToBytesImpl_ThrowIfPadDisabled<true>
 						decodedSize
 					);
 			};
-			EXPECT_THROW(prog(), std::invalid_argument);
+			EXPECT_THROW(prog1(), std::invalid_argument);
+
+			auto prog2 = [&](){
+				_Decoder::template
+					Decode<_KeepLeadingZeroBytes, HexPad::Disabled, uint8_t>(
+						actual.begin(),
+						input.cbegin(),
+						input.cend(),
+						decodedSize
+					);
+			};
+			EXPECT_THROW(prog2(), std::invalid_argument);
 		}
 	}
 }; // struct Test_HexToBytesImpl_ThrowIfPadDisabled<true>
@@ -733,7 +1055,7 @@ static void Test_HexToBytesImpl_Decode_InputIt(
 	}
 }
 
-}
+} // namespace
 
 
 GTEST_TEST(TestCodecHex, Internal_HexToBytesImpl_CanPadInPlace)
@@ -1016,6 +1338,13 @@ GTEST_TEST(TestCodecHex, BitWiseShiftBytesRight)
 		EXPECT_EQ(input, expected);
 	}
 }
+
+
+//==============================================================================
+//
+// Hex::Decode
+//
+//==============================================================================
 
 
 namespace
