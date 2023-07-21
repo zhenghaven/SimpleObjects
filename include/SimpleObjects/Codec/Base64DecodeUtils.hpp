@@ -299,18 +299,20 @@ struct Base64TrailingChecker<_ValType, true>
 {
 	using value_type = _ValType;
 
-	static constexpr void CheckLast2(value_type val)
+	static void CheckLast2(value_type val)
 	{
-		return (val & 0x03U) == 0 ?
-			(void)0 :
+		if ((val & 0x03U) != 0)
+		{
 			throw std::invalid_argument("Invalid base64 trailing");
+		}
 	}
 
-	static constexpr void CheckLast4(value_type val)
+	static void CheckLast4(value_type val)
 	{
-		return (val & 0x0FU) == 0 ?
-			(void)0 :
+		if ((val & 0x0FU) != 0)
+		{
 			throw std::invalid_argument("Invalid base64 trailing");
+		}
 	}
 
 }; // struct Base64TrailingChecker<_ValType, true>
@@ -320,12 +322,12 @@ struct Base64TrailingChecker<_ValType, false>
 {
 	using value_type = _ValType;
 
-	static constexpr void CheckLast2(value_type /* val */)
+	static void CheckLast2(value_type /* val */)
 	{
 		return;
 	}
 
-	static constexpr void CheckLast4(value_type /* val */)
+	static void CheckLast4(value_type /* val */)
 	{
 		return;
 	}
