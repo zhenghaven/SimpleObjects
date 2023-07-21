@@ -487,7 +487,7 @@ GTEST_TEST(TestCodecBase64, Base64Base64ValueLutThrow)
 
 	for (
 		size_t i = static_cast<size_t>('z' + 1);
-		i < static_cast<size_t>(std::numeric_limits<char>::max() + 1);
+		i < static_cast<size_t>((std::numeric_limits<char>::max)() + 1);
 		++i
 	)
 	{
@@ -595,7 +595,7 @@ GTEST_TEST(TestCodecBase64, Base64Base64ValueLutNonThrow)
 
 	for (
 		size_t i = static_cast<size_t>('z' + 1);
-		i < static_cast<size_t>(std::numeric_limits<char>::max() + 1);
+		i < static_cast<size_t>((std::numeric_limits<char>::max)() + 1);
 		++i
 	)
 	{
