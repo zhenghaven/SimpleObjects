@@ -104,7 +104,7 @@ struct Hex
 		typename _OutContainer,
 		bool     _KeepLeadingZero,
 		typename _InValueType,
-		size_t    _InSize,
+		size_t   _InSize,
 		typename std::enable_if<sizeof(_InValueType) == 1, int>::type = 0
 	>
 	static _OutContainer Encode(
@@ -132,7 +132,7 @@ struct Hex
 	template<
 		typename _OutContainer,
 		typename _InValueType,
-		size_t    _InSize,
+		size_t   _InSize,
 		typename std::enable_if<sizeof(_InValueType) == 1, int>::type = 0
 	>
 	static _OutContainer Encode(

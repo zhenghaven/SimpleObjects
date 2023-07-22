@@ -1634,6 +1634,24 @@ GTEST_TEST(TestCodecBase64, Base64EncodeContainer2Container)
 	EXPECT_EQ(output, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/");
 }
 
+GTEST_TEST(TestCodecBase64, Base64EncodeArray2Container)
+{
+	uint8_t input[48] = {
+		0x00U, 0x10U, 0x83U, 0x10U, 0x51U, 0x87U, 0x20U, 0x92U,
+		0x8BU, 0x30U, 0xD3U, 0x8FU, 0x41U, 0x14U, 0x93U, 0x51U,
+		0x55U, 0x97U, 0x61U, 0x96U, 0x9BU, 0x71U, 0xD7U, 0x9FU,
+		0x82U, 0x18U, 0xA3U, 0x92U, 0x59U, 0xA7U, 0xA2U, 0x9AU,
+		0xABU, 0xB2U, 0xDBU, 0xAFU, 0xC3U, 0x1CU, 0xB3U, 0xD3U,
+		0x5DU, 0xB7U, 0xE3U, 0x9EU, 0xBBU, 0xF3U, 0xDFU, 0xBFU,
+	};
+	std::string output;
+
+	output = Base64::Encode<std::string>(input);
+	EXPECT_EQ(output, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/");
+	output = Base64C<false>::Encode<std::string>(input);
+	EXPECT_EQ(output, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/");
+}
+
 GTEST_TEST(TestCodecBase64, Base64EncodeIt2Container)
 {
 	std::vector<uint8_t> input;
@@ -1792,6 +1810,35 @@ GTEST_TEST(TestCodecBase64, Base64DecodeContainer2Container)
 			0x5DU, 0xB7U, 0xE3U, 0x9EU, 0xBBU, 0xF3U, 0xDFU, 0xBFU,
 		})
 	);
+}
+
+GTEST_TEST(TestCodecBase64, Base64DecodeArray2Container)
+{
+	char input[64] = {
+		'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
+		'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
+		'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X',
+		'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f',
+		'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n',
+		'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
+		'w', 'x', 'y', 'z', '0', '1', '2', '3',
+		'4', '5', '6', '7', '8', '9', '+', '/',
+	};
+	std::vector<uint8_t> output;
+	std::vector<uint8_t> expOutput = {
+		0x00U, 0x10U, 0x83U, 0x10U, 0x51U, 0x87U, 0x20U, 0x92U,
+		0x8BU, 0x30U, 0xD3U, 0x8FU, 0x41U, 0x14U, 0x93U, 0x51U,
+		0x55U, 0x97U, 0x61U, 0x96U, 0x9BU, 0x71U, 0xD7U, 0x9FU,
+		0x82U, 0x18U, 0xA3U, 0x92U, 0x59U, 0xA7U, 0xA2U, 0x9AU,
+		0xABU, 0xB2U, 0xDBU, 0xAFU, 0xC3U, 0x1CU, 0xB3U, 0xD3U,
+		0x5DU, 0xB7U, 0xE3U, 0x9EU, 0xBBU, 0xF3U, 0xDFU, 0xBFU,
+	};
+
+	output = Base64::Decode<std::vector<uint8_t> >(input);
+	EXPECT_EQ(output, expOutput);
+
+	output = Base64C<false>::Decode<std::vector<uint8_t> >(input);
+	EXPECT_EQ(output, expOutput);
 }
 
 GTEST_TEST(TestCodecBase64, Base64DecodeIt2Container)

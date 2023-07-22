@@ -79,6 +79,27 @@ struct Base64
 
 	template<
 		typename _OutContainer,
+		typename _InValueType,
+		size_t   _InSize,
+		typename std::enable_if<sizeof(_InValueType) == 1, int>::type = 0
+	>
+	static _OutContainer Encode(const _InValueType (&src)[_InSize])
+	{
+		_OutContainer dest;
+		dest.reserve(Sizes::EstEncodedSize(_InSize));
+
+		Encoder::Encode(
+			std::back_inserter(dest),
+			std::begin(src),
+			std::end(src)
+		);
+
+		return dest;
+	}
+
+
+	template<
+		typename _OutContainer,
 		typename _InIt,
 		typename std::enable_if<
 			sizeof(typename std::iterator_traits<_InIt>::value_type) == 1,
@@ -140,6 +161,26 @@ struct Base64
 	{
 		_OutContainer dest;
 		dest.reserve(Sizes::EstDecodedSize(src.size()));
+
+		Decoder::Decode(
+			std::back_inserter(dest),
+			std::begin(src),
+			std::end(src)
+		);
+
+		return dest;
+	}
+
+	template<
+		typename _OutContainer,
+		typename _InValueType,
+		size_t   _InSize,
+		typename std::enable_if<sizeof(_InValueType) == 1, int>::type = 0
+	>
+	static _OutContainer Decode(const _InValueType (&src)[_InSize])
+	{
+		_OutContainer dest;
+		dest.reserve(Sizes::EstDecodedSize(_InSize));
 
 		Decoder::Decode(
 			std::back_inserter(dest),
