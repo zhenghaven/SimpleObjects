@@ -804,6 +804,19 @@ GTEST_TEST(TestCodecHex, Hex_Encode)
 }
 
 
+GTEST_TEST(TestCodecHex, Hex_Encode_C_Array)
+{
+	std::string output;
+	std::string expOutput;
+
+	uint8_t arrInput[] =
+		{ 0x12U, 0x34U, 0x56U, 0x78U, 0x9AU, 0xBCU, 0xDEU, 0xF0U, };
+	output = Hex::Encode<std::string>(arrInput);
+	expOutput = "123456789abcdef0";
+	EXPECT_EQ(output, expOutput);
+}
+
+
 //==============================================================================
 //
 // HexToBytesImpl
@@ -1443,7 +1456,7 @@ static void Test_Hex_Decode(
 			{
 				// odd number of characters - test throwing behavior
 				auto prog = [&](){
-					Hex::Decode<std::vector<uint8_t> >(input.cbegin(), input.cend());
+					Hex::Decode<std::vector<uint8_t> >(std::begin(input), std::end(input));
 				};
 				EXPECT_THROW(prog(), std::invalid_argument);
 			}
@@ -1451,14 +1464,14 @@ static void Test_Hex_Decode(
 			{
 				// even number of characters - test decoding
 				actual.clear();
-				actual = Hex::Decode<std::vector<uint8_t> >(input.cbegin(), input.cend());
+				actual = Hex::Decode<std::vector<uint8_t> >(std::begin(input), std::end(input));
 				EXPECT_EQ(actual, expected);
 			}
 
 			// padding front
 			actual.clear();
 			actual = Hex::template
-				Decode<std::vector<uint8_t>, true, HexPad::Front>(input.cbegin(), input.cend());
+				Decode<std::vector<uint8_t>, true, HexPad::Front>(std::begin(input), std::end(input));
 			EXPECT_EQ(actual, expected);
 		}
 
@@ -1472,7 +1485,7 @@ static void Test_Hex_Decode(
 				// odd number of characters - test throwing behavior
 				auto prog = [&](){
 					Hex::template
-						Decode<std::vector<uint8_t>, false, HexPad::Disabled>(input.cbegin(), input.cend());
+						Decode<std::vector<uint8_t>, false, HexPad::Disabled>(std::begin(input), std::end(input));
 				};
 				EXPECT_THROW(prog(), std::invalid_argument);
 			}
@@ -1481,14 +1494,14 @@ static void Test_Hex_Decode(
 				// even number of characters - test decoding
 				actual.clear();
 				actual = Hex::template
-					Decode<std::vector<uint8_t>, false, HexPad::Disabled>(input.cbegin(), input.cend());
+					Decode<std::vector<uint8_t>, false, HexPad::Disabled>(std::begin(input), std::end(input));
 				EXPECT_EQ(actual, expected);
 			}
 
 			// padding front
 			actual.clear();
 			actual = Hex::template
-				Decode<std::vector<uint8_t>, false, HexPad::Front>(input.cbegin(), input.cend());
+				Decode<std::vector<uint8_t>, false, HexPad::Front>(std::begin(input), std::end(input));
 			EXPECT_EQ(actual, expected);
 		}
 
@@ -1505,13 +1518,13 @@ static void Test_Hex_Decode(
 				actual.clear();
 
 				auto prog1 = [&](){
-					Hex::Decode(std::back_inserter(actual), input.cbegin(), input.cend());
+					Hex::Decode(std::back_inserter(actual), std::begin(input), std::end(input));
 				};
 				EXPECT_THROW(prog1(), std::invalid_argument);
 
 				auto prog2 = [&](){
 					Hex::template
-						Decode<true, HexPad::Front>(std::back_inserter(actual), input.cbegin(), input.cend());
+						Decode<true, HexPad::Front>(std::back_inserter(actual), std::begin(input), std::end(input));
 				};
 				EXPECT_THROW(prog2(), std::invalid_argument);
 			}
@@ -1519,19 +1532,19 @@ static void Test_Hex_Decode(
 			{
 				// even --> must not throw
 				actual.clear();
-				Hex::Decode(std::back_inserter(actual), input.cbegin(), input.cend());
+				Hex::Decode(std::back_inserter(actual), std::begin(input), std::end(input));
 				ASSERT_EQ(actual, expected);
-				endIt = Hex::Decode(actual.begin(), input.cbegin(), input.cend());
+				endIt = Hex::Decode(actual.begin(), std::begin(input), std::end(input));
 				EXPECT_EQ(actual, expected);
 				EXPECT_EQ(endIt, actual.end());
 
 				// padding front
 				actual.clear();
 				Hex::template
-					Decode<true, HexPad::Front>(std::back_inserter(actual), input.cbegin(), input.cend());
+					Decode<true, HexPad::Front>(std::back_inserter(actual), std::begin(input), std::end(input));
 				ASSERT_EQ(actual, expected);
 				endIt = Hex::template
-					Decode<true, HexPad::Front>(actual.begin(), input.cbegin(), input.cend());
+					Decode<true, HexPad::Front>(actual.begin(), std::begin(input), std::end(input));
 				EXPECT_EQ(actual, expected);
 				EXPECT_EQ(endIt, actual.end());
 			}
@@ -1542,17 +1555,17 @@ static void Test_Hex_Decode(
 				actual.clear();
 
 				auto prog1 = [&](){
-					Hex::Decode(std::back_inserter(actual), input.cbegin(), input.cend());
+					Hex::Decode(std::back_inserter(actual), std::begin(input), std::end(input));
 				};
 				EXPECT_THROW(prog1(), std::invalid_argument);
 
 				// padding front
 				actual.clear();
 				Hex::template
-					Decode<true, HexPad::Front>(std::back_inserter(actual), input.cbegin(), input.cend());
+					Decode<true, HexPad::Front>(std::back_inserter(actual), std::begin(input), std::end(input));
 				ASSERT_EQ(actual, expected);
 				endIt = Hex::template
-					Decode<true, HexPad::Front>(actual.begin(), input.cbegin(), input.cend());
+					Decode<true, HexPad::Front>(actual.begin(), std::begin(input), std::end(input));
 				EXPECT_EQ(actual, expected);
 				EXPECT_EQ(endIt, actual.end());
 			}
@@ -1570,13 +1583,13 @@ static void Test_Hex_Decode(
 
 				auto prog1 = [&](){
 					Hex::template
-						Decode<false, HexPad::Disabled>(std::back_inserter(actual), input.cbegin(), input.cend());
+						Decode<false, HexPad::Disabled>(std::back_inserter(actual), std::begin(input), std::end(input));
 				};
 				EXPECT_THROW(prog1(), std::invalid_argument);
 
 				auto prog2 = [&](){
 					Hex::template
-						Decode<false, HexPad::Front>(std::back_inserter(actual), input.cbegin(), input.cend());
+						Decode<false, HexPad::Front>(std::back_inserter(actual), std::begin(input), std::end(input));
 				};
 				EXPECT_THROW(prog2(), std::invalid_argument);
 			}
@@ -1585,20 +1598,20 @@ static void Test_Hex_Decode(
 				// even --> must not throw
 				actual.clear();
 				Hex::template
-					Decode<false, HexPad::Disabled>(std::back_inserter(actual), input.cbegin(), input.cend());
+					Decode<false, HexPad::Disabled>(std::back_inserter(actual), std::begin(input), std::end(input));
 				ASSERT_EQ(actual, expected);
 				endIt = Hex::template
-					Decode<false, HexPad::Disabled>(actual.begin(), input.cbegin(), input.cend());
+					Decode<false, HexPad::Disabled>(actual.begin(), std::begin(input), std::end(input));
 				EXPECT_EQ(actual, expected);
 				EXPECT_EQ(endIt, actual.end());
 
 				// padding front
 				actual.clear();
 				Hex::template
-					Decode<false, HexPad::Front>(std::back_inserter(actual), input.cbegin(), input.cend());
+					Decode<false, HexPad::Front>(std::back_inserter(actual), std::begin(input), std::end(input));
 				ASSERT_EQ(actual, expected);
 				endIt = Hex::template
-					Decode<false, HexPad::Front>(actual.begin(), input.cbegin(), input.cend());
+					Decode<false, HexPad::Front>(actual.begin(), std::begin(input), std::end(input));
 				EXPECT_EQ(actual, expected);
 				EXPECT_EQ(endIt, actual.end());
 			}
@@ -1610,17 +1623,17 @@ static void Test_Hex_Decode(
 
 				auto prog1 = [&](){
 					Hex::template
-						Decode<false, HexPad::Disabled>(std::back_inserter(actual), input.cbegin(), input.cend());
+						Decode<false, HexPad::Disabled>(std::back_inserter(actual), std::begin(input), std::end(input));
 				};
 				EXPECT_THROW(prog1(), std::invalid_argument);
 
 				// padding front
 				actual.clear();
 				Hex::template
-					Decode<false, HexPad::Front>(std::back_inserter(actual), input.cbegin(), input.cend());
+					Decode<false, HexPad::Front>(std::back_inserter(actual), std::begin(input), std::end(input));
 				ASSERT_EQ(actual, expected);
 				endIt = Hex::template
-					Decode<false, HexPad::Front>(actual.begin(), input.cbegin(), input.cend());
+					Decode<false, HexPad::Front>(actual.begin(), std::begin(input), std::end(input));
 				EXPECT_EQ(actual, expected);
 				EXPECT_EQ(endIt, actual.end());
 			}
@@ -1667,4 +1680,21 @@ GTEST_TEST(TestCodecHex, Hex_Decode)
 		),
 
 	});
+}
+
+
+GTEST_TEST(TestCodecHex, Hex_Decode_C_Array)
+{
+	std::vector<uint8_t> output;
+	std::vector<uint8_t> expOutput;
+
+	char arrInput[16] = {
+		'0', '0', '2', '3', '4', '5', '6', '7',
+		'8', '9', 'a', 'b', 'c', 'd', 'e', 'f',
+	};
+	output = Hex::Decode<std::vector<uint8_t> >(arrInput);
+	expOutput = {
+		0x00U, 0x23U, 0x45U, 0x67U, 0x89U, 0xABU, 0xCDU, 0xEFU,
+	};
+	EXPECT_EQ(output, expOutput);
 }

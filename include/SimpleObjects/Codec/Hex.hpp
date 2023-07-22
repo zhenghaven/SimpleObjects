@@ -81,6 +81,7 @@ struct Hex
 		return dest;
 	}
 
+
 	template<
 		typename _OutContainer,
 		typename _InContainer,
@@ -91,6 +92,51 @@ struct Hex
 	>
 	static _OutContainer Encode(
 		const _InContainer& src,
+		const PrefixType& prefix = PrefixType()
+	)
+	{
+		// default to keep leading zeros
+		return Encode<_OutContainer, true>(src, prefix);
+	}
+
+
+	template<
+		typename _OutContainer,
+		bool     _KeepLeadingZero,
+		typename _InValueType,
+		size_t    _InSize,
+		typename std::enable_if<sizeof(_InValueType) == 1, int>::type = 0
+	>
+	static _OutContainer Encode(
+		const _InValueType (&src)[_InSize],
+		const PrefixType& prefix = PrefixType()
+	)
+	{
+		static constexpr size_t sk_inValTypeSize = sizeof(_InValueType);
+
+		_OutContainer dest;
+		dest.reserve(_InSize * 2 + prefix.size());
+
+		BytesToHexImpl<Alphabet, sk_inValTypeSize>::
+			template Encode<_KeepLeadingZero>(
+				std::back_inserter(dest),
+				std::begin(src),
+				std::end(src),
+				prefix
+			);
+
+		return dest;
+	}
+
+
+	template<
+		typename _OutContainer,
+		typename _InValueType,
+		size_t    _InSize,
+		typename std::enable_if<sizeof(_InValueType) == 1, int>::type = 0
+	>
+	static _OutContainer Encode(
+		const _InValueType (&src)[_InSize],
 		const PrefixType& prefix = PrefixType()
 	)
 	{
@@ -354,6 +400,64 @@ struct Hex
 	>
 	static _OutContainer Decode(
 		const _InContainer& src
+	)
+	{
+		// default to keep leading zeros
+		return Decode<_OutContainer, true, HexPad::Disabled>(src);
+	}
+
+
+	template<
+		typename _OutContainer,
+		bool     _KeepLeadingZero,
+		HexPad   _PadOpt,
+		typename _InValueType,
+		size_t   _InSize,
+		typename std::enable_if<
+			(sizeof(typename _OutContainer::value_type) == 1) &&
+			(_PadOpt == HexPad::Disabled || _PadOpt == HexPad::Front),
+			int
+		>::type = 0
+	>
+	static _OutContainer Decode(
+		const _InValueType(&src)[_InSize]
+	)
+	{
+		using _OutputValType = typename _OutContainer::value_type;
+		static constexpr size_t sk_outputValSize = sizeof(_OutputValType);
+		static constexpr bool sk_canPadInPlace = true;
+
+		HexDecodeCheckPadImpl<_PadOpt>::ThrowIfOdd(_InSize);
+
+		_OutContainer dest;
+		dest.reserve((_InSize + 1) / 2);
+
+		size_t decodedSize = 0;
+		HexToBytesImpl<HexValueLut, sk_outputValSize>::
+			template Decode<_KeepLeadingZero, _PadOpt, _OutputValType>(
+				std::back_inserter(dest),
+				std::begin(src),
+				std::end(src),
+				decodedSize
+			);
+
+		HexDecodeCheckCanPadImpl<sk_canPadInPlace>::
+			ShiftIfOdd(decodedSize, dest.begin(), dest.end());
+
+		return dest;
+	}
+
+	template<
+		typename _OutContainer,
+		typename _InValueType,
+		size_t   _InSize,
+		typename std::enable_if<
+			sizeof(typename _OutContainer::value_type) == 1,
+			int
+		>::type = 0
+	>
+	static _OutContainer Decode(
+		const _InValueType(&src)[_InSize]
 	)
 	{
 		// default to keep leading zeros
