@@ -5,6 +5,10 @@
 
 #pragma once
 
+
+#include <cstddef>
+
+
 #ifndef SIMPLEOBJECTS_CUSTOMIZED_NAMESPACE
 namespace SimpleObjects
 #else
@@ -38,8 +42,8 @@ inline _OutputType ToString(_ItType begin, _ItType end)
 	return _OutputType(begin, end);
 }
 
-template<bool _Prefix, typename _CharType, typename _OutIt>
-inline void ByteToHEX(_OutIt destIt, uint8_t b)
+template<bool _Prefix, typename _CharType, typename _OutIt, typename _ByteType>
+inline void ByteToHEX(_OutIt destIt, const _ByteType& b)
 {
 	static constexpr char alphabet[] = "0123456789ABCDEF";
 
@@ -62,64 +66,6 @@ inline void ByteToHEX(_OutIt destIt, uint8_t b)
 		alphabet[(b & 0x0F)]);
 }
 
-template<
-	bool _Prefix,
-	typename _CharType,
-	typename _OutIt,
-	typename _InIt
->
-inline void BytesToHEX(_OutIt destIt, _InIt begin, _InIt end)
-{
-	if
-#if __cplusplus >= 201703L
-		constexpr
-#endif
-	(_Prefix)
-	{
-		*destIt++ = static_cast<_CharType>('0');
-		*destIt++ = static_cast<_CharType>('x');
-	}
-
-	for (; begin != end; ++begin)
-	{
-		ByteToHEX<false, _CharType, _OutIt>(destIt, *begin);
-	}
-}
-
-template<
-	bool _Prefix,
-	typename _CharType,
-	typename _OutIt,
-	typename _InValType
->
-inline void PrimitiveToHEX(_OutIt destIt, _InValType val)
-{
-	static constexpr _CharType alphabet[] = "0123456789ABCDEF";
-	static constexpr size_t errCodeValSize = sizeof(_InValType);
-	//static constexpr size_t errCodeValNibbleSize = errCodeValSize * 2;
-	static constexpr size_t errCodeValBitsSize = errCodeValSize * 8;
-	static constexpr size_t NibbleBitsSize = 4;
-
-	if
-#if __cplusplus >= 201703L
-		constexpr
-#endif
-	(_Prefix)
-	{
-		*destIt++ = static_cast<_CharType>('0');
-		*destIt++ = static_cast<_CharType>('x');
-	}
-
-	for (
-		size_t i = errCodeValBitsSize; // start from the MSB
-		i > 0; // stop at the LSB
-		i -= NibbleBitsSize // move to the next nibble
-	)
-	{
-		_CharType ch = alphabet[(val >> (i - NibbleBitsSize)) & 0x0F];
-		*destIt++ = ch;
-	}
-}
 
 } // Internal
 } // namespace SimpleObjects

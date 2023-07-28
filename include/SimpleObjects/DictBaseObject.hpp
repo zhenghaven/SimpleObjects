@@ -129,6 +129,8 @@ public:
 
 	virtual size_t size() const = 0;
 
+	virtual void clear() = 0;
+
 	// ========== Functions that involves value_type in prototype ==========
 
 	mapped_type& operator[](const key_type& key)
