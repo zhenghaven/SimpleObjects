@@ -6,6 +6,8 @@
 #pragma once
 
 
+#include <tuple>
+
 #include "Base64DecodeUtils.hpp"
 
 
