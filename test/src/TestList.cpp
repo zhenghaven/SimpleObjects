@@ -459,9 +459,13 @@ GTEST_TEST(TestList, Miscs)
 
 	static_assert(std::is_same<
 		decltype(*List().Move(List::Base::sk_null)),
-		ListBaseObj&>::value, "Failed to test Move virtual func");
+		ListBaseObj&
+	>::value, "Failed to test Move virtual func");
 	mList = List({String("Test")});
-	EXPECT_EQ(*mList.Move(List::Base::sk_null), List({String("Test")}));
+	EXPECT_EQ(
+		*mList.Move(List::Base::sk_null),
+		List({String("Test")}).AsList()
+	);
 	EXPECT_EQ(mList.size(), 0);
 
 	static_assert(std::is_same<
