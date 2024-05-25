@@ -438,22 +438,34 @@ GTEST_TEST(TestList, Miscs)
 	// Copy
 	static_assert(std::is_same<
 		decltype(*List().Copy(List::Base::sk_null)),
-		ListBaseObj&>::value, "Failed to test Copy virtual func");
-	EXPECT_EQ(*List({String("Test")}).Copy(List::Base::sk_null), List({String("Test")}));
+		ListBaseObj&
+	>::value, "Failed to test Copy virtual func");
+	EXPECT_EQ(
+		*List({String("Test")}).Copy(List::Base::sk_null),
+		List({String("Test")}).AsList()
+	);
 
 	static_assert(std::is_same<
 		decltype(*List().Copy(List::Base::Base::sk_null)),
-		BaseObj&>::value, "Failed to test Copy virtual func");
-	EXPECT_EQ(*List({String("Test")}).Copy(List::Base::Base::sk_null), List({String("Test")}));
+		BaseObj&
+	>::value, "Failed to test Copy virtual func");
+	EXPECT_EQ(
+		*List({String("Test")}).Copy(List::Base::Base::sk_null),
+		List({String("Test")})
+	);
 
 	// Move
 	auto mList = List({String("Test")});
 
 	static_assert(std::is_same<
 		decltype(*List().Move(List::Base::sk_null)),
-		ListBaseObj&>::value, "Failed to test Move virtual func");
+		ListBaseObj&
+	>::value, "Failed to test Move virtual func");
 	mList = List({String("Test")});
-	EXPECT_EQ(*mList.Move(List::Base::sk_null), List({String("Test")}));
+	EXPECT_EQ(
+		*mList.Move(List::Base::sk_null),
+		List({String("Test")}).AsList()
+	);
 	EXPECT_EQ(mList.size(), 0);
 
 	static_assert(std::is_same<
@@ -633,5 +645,23 @@ GTEST_TEST(TestList, BaseListPushBackAppend)
 		EXPECT_TRUE(testLs ==
 			List({ Null(), Int64(123), String("test"),
 				Bool(true), Double(0.0), }));
+	}
+}
+
+GTEST_TEST(TestList, BaseListClear)
+{
+	{
+		auto testLs = List({ Null(), Int64(123), String("test"), });
+
+		// Initial values
+		EXPECT_EQ(testLs.size(), 3);
+		EXPECT_NE(testLs.begin(), testLs.end());
+
+		// Clear
+		testLs.clear();
+
+		// After clear
+		EXPECT_EQ(testLs.size(), 0);
+		EXPECT_EQ(testLs.begin(), testLs.end());
 	}
 }

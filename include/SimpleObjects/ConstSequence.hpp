@@ -32,12 +32,30 @@ struct StripStrTailImpl;
 } // namespace Internal
 
 template<typename _DataType, _DataType... data>
+struct DataSeq;
+
+template<typename _DataType>
+struct DataSeq<_DataType>
+{
+	using ValType = _DataType;
+
+	template <ValType pre>
+	using Prepend = DataSeq<ValType, pre>;
+
+	template <ValType post>
+	using Append = DataSeq<ValType, post>;
+}; // struct DataSeq
+
+template<typename _DataType, _DataType... data>
 struct DataSeq
 {
 	using ValType = _DataType;
 
 	template <ValType pre>
 	using Prepend = DataSeq<ValType, pre, data...>;
+
+	template <ValType post>
+	using Append = DataSeq<ValType, data..., post>;
 
 	template<size_t Len>
 	using StripTail = typename Internal::StripDataTailImpl<Len, ValType, data...>::type;
@@ -106,6 +124,38 @@ struct StrSeq : public DataSeq<char, chars...>
 		return skStr;
 	}
 }; // struct StrSeq
+
+template<size_t ..._Sizes>
+struct SizeSeq : public DataSeq<size_t, _Sizes...>
+{
+	template <size_t _Pre>
+	using Prepend = SizeSeq<_Pre, _Sizes...>;
+
+	template <size_t _Post>
+	using Append = SizeSeq<_Sizes..., _Post>;
+}; // struct SizeSeq
+
+template<size_t _TotalSize>
+struct IncrSizeSeqImpl;
+
+template<>
+struct IncrSizeSeqImpl<0>
+{
+	using type = SizeSeq<>;
+}; // struct IncrSizeSeqImpl
+
+template<size_t _TotalSize>
+struct IncrSizeSeqImpl
+{
+	static_assert(_TotalSize > 0, "Size must be greater than 0");
+
+	using Prev = typename IncrSizeSeqImpl<_TotalSize - 1>::type;
+
+	using type = typename Prev::template Append<_TotalSize>;
+}; // struct IncrSizeSeqImpl
+
+template<size_t _TotalSize>
+using IncrSizeSeq = typename IncrSizeSeqImpl<_TotalSize>::type;
 
 namespace Internal
 {

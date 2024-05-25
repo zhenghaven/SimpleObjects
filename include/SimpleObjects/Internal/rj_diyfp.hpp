@@ -102,7 +102,7 @@ struct DiyFp {
 	}
 
 	DiyFp operator*(const DiyFp& rhs) const {
-#if defined(_MSC_VER) && defined(_M_AMD64)
+#if defined(_MSC_VER) && defined(_M_AMD64) && !defined(DECENT_ENCLAVE_TRUSTED)
 		uint64_t h;
 		uint64_t l = _umul128(f, rhs.f, &h);
 		if (l & (uint64_t(1) << 63)) // rounding

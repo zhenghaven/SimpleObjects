@@ -399,6 +399,13 @@ public:
 		return m_data.size();
 	}
 
+	// ========== removing values ==========
+
+	virtual void clear() override
+	{
+		m_data.clear();
+	}
+
 	// ========== iterators ==========
 
 	virtual base_key_iterator KeysBegin() const override

@@ -372,6 +372,11 @@ public:
 		m_data.erase(m_data.begin() + idx);
 	}
 
+	virtual void clear() override
+	{
+		m_data.clear();
+	}
+
 	// ========== Interface copy/Move ==========
 
 	using Base::Copy;

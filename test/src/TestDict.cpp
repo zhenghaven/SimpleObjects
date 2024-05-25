@@ -924,3 +924,25 @@ GTEST_TEST(TestDict, BaseDictRemove)
 		EXPECT_FALSE(testDcB.HasKey(HashableObject(String("key3"))));
 	}
 }
+
+GTEST_TEST(TestDict, BaseDictClear)
+{
+	{
+		auto testDc = Dict({
+			{ Null(),         Bool(false) },
+			{ Int64(123),     Int64(321) },
+			{ String("key3"), String("val3") },
+		});
+
+		// Initial values
+		EXPECT_EQ(testDc.size(), 3);
+		EXPECT_NE(testDc.begin(), testDc.end());
+
+		// Clear
+		testDc.clear();
+
+		// After clear
+		EXPECT_EQ(testDc.size(), 0);
+		EXPECT_EQ(testDc.begin(), testDc.end());
+	}
+}

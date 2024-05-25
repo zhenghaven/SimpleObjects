@@ -150,6 +150,49 @@ GTEST_TEST(TestConstSequence, StringArray)
 	>("test string");
 }
 
+GTEST_TEST(TestConstSequence, IncrSizeSeq)
+{
+	static_assert(
+		std::is_same<
+			IncrSizeSeq<0>,
+			SizeSeq<>
+		>::value,
+		"Implementation Error"
+	);
+
+	static_assert(
+		std::is_same<
+			IncrSizeSeq<1>,
+			SizeSeq<1>
+		>::value,
+		"Implementation Error"
+	);
+
+	static_assert(
+		std::is_same<
+			IncrSizeSeq<2>,
+			SizeSeq<1, 2>
+		>::value,
+		"Implementation Error"
+	);
+
+	static_assert(
+		std::is_same<
+			IncrSizeSeq<3>,
+			SizeSeq<1, 2, 3>
+		>::value,
+		"Implementation Error"
+	);
+
+	static_assert(
+		std::is_same<
+			IncrSizeSeq<10>,
+			SizeSeq<1, 2, 3, 4, 5, 6, 7, 8, 9, 10>
+		>::value,
+		"Implementation Error"
+	);
+}
+
 GTEST_TEST(TestConstSequence, Misc)
 {
 	static constexpr int testArray[] = {0, 1, 2, 3, 4, 5};
