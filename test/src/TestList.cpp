@@ -438,13 +438,21 @@ GTEST_TEST(TestList, Miscs)
 	// Copy
 	static_assert(std::is_same<
 		decltype(*List().Copy(List::Base::sk_null)),
-		ListBaseObj&>::value, "Failed to test Copy virtual func");
-	EXPECT_EQ(*List({String("Test")}).Copy(List::Base::sk_null), List({String("Test")}));
+		ListBaseObj&
+	>::value, "Failed to test Copy virtual func");
+	EXPECT_EQ(
+		*List({String("Test")}).Copy(List::Base::sk_null),
+		List({String("Test")}).AsList()
+	);
 
 	static_assert(std::is_same<
 		decltype(*List().Copy(List::Base::Base::sk_null)),
-		BaseObj&>::value, "Failed to test Copy virtual func");
-	EXPECT_EQ(*List({String("Test")}).Copy(List::Base::Base::sk_null), List({String("Test")}));
+		BaseObj&
+	>::value, "Failed to test Copy virtual func");
+	EXPECT_EQ(
+		*List({String("Test")}).Copy(List::Base::Base::sk_null),
+		List({String("Test")})
+	);
 
 	// Move
 	auto mList = List({String("Test")});
